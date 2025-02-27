@@ -1,4 +1,5 @@
 import { BrowserMultiFormatReader } from "@zxing/browser";
+import { NotFoundException } from "@zxing/library";
 
 const FORMAT_LIST = [
   "AZTEC",
@@ -22,16 +23,29 @@ const FORMAT_LIST = [
 
 export const readCodeByImage = async (image: string | HTMLImageElement) => {
   const reader = new BrowserMultiFormatReader();
-  if (image instanceof HTMLImageElement) {
+
+  try {
+    if (image instanceof HTMLImageElement) {
+      return await reader
+        .decodeFromImageElement(image)
+        .then((res) => extractData(res));
+    }
     return await reader
-      .decodeFromImageElement(image)
+      .decodeFromImageUrl(image)
       .then((res) => extractData(res));
+  } catch (err) {
+    if (err instanceof NotFoundException) {
+      return null;
+    }
+    console.error(err);
+    throw err;
   }
-  return await reader.decodeFromImageUrl(image).then((res) => extractData(res));
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const extractData = (data: any) => {
   const format = FORMAT_LIST[data.format];
-  return { format, value: data.text as string };
+  const returnObject = { format, value: data.text as string };
+  console.log(returnObject);
+  return returnObject;
 };
