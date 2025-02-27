@@ -21,14 +21,17 @@ type FormatType =
   | "Pharmacode"
   | "Codabar";
 
-interface BarcodeProps {
+interface DataProps {
   value: string;
   format: string; //FormatType;
 }
 
-export const generateBarcode = (id: string, data: BarcodeProps) => {
+export const generateBarcode = (id: string, data: DataProps) => {
   const canvas = document.getElementById(id);
   if (!canvas) throw Error("Error");
   const format = convertBarcodeFormat(data.format) as FormatType;
+  if (!format) return console.log("impossible");
   JsBarcode(canvas, data.value, { format });
 };
+
+// const generateQRCode = (data: DataProps) => {};
