@@ -25,7 +25,7 @@ const unmatched = [
 export const convertBarcodeFormat = (format: string) => {
   if (unmatched.includes(format)) {
     console.log(`${format}은 지원되지 않는 형식이에요.`);
-    return format;
+    return null;
   }
   return formatMapping[format];
 };
