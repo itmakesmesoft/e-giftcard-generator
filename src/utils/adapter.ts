@@ -6,6 +6,7 @@ const formatMapping: Record<string, string> = {
   EAN_13: "EAN13",
   ITF: "ITF",
   UPC_A: "UPC",
+  QR_CODE: "QR_CODE",
 };
 
 // ZXing에만 존재하는 형식
@@ -15,7 +16,6 @@ const unmatched = [
   "DATA_MATRIX",
   "MAXICODE",
   "PDF_417",
-  "QR_CODE",
   "RSS_14",
   "RSS_EXPANDED",
   "UPC_E",

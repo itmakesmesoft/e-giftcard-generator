@@ -1,0 +1,48 @@
+export type GeneratableFormatType =
+  | "CODE128"
+  | "CODE128A"
+  | "CODE128B"
+  | "CODE128C"
+  | "EAN13"
+  | "EAN8"
+  | "EAN5"
+  | "EAN2"
+  | "UPC"
+  | "CODE39"
+  | "ITF"
+  | "ITF14"
+  | "MSI10"
+  | "MSI11"
+  | "MSI1010"
+  | "MSI1110"
+  | "Pharmacode"
+  | "Codabar";
+
+export type ReadableFormatType =
+  | "AZTEC"
+  | "CODABAR"
+  | "CODE_39"
+  | "CODE_93"
+  | "CODE_128"
+  | "DATA_MATRIX"
+  | "EAN_8"
+  | "EAN_13"
+  | "ITF"
+  | "MAXICODE"
+  | "PDF_417"
+  | "QR_CODE"
+  | "RSS_14"
+  | "RSS_EXPANDED"
+  | "UPC_A"
+  | "UPC_E"
+  | "UPC_EAN_EXTENSION";
+
+export type AdaptableFormatType =
+  | "CODABAR"
+  | "CODE_39"
+  | "CODE_128"
+  | "EAN_8"
+  | "EAN_13"
+  | "ITF"
+  | "UPC_A"
+  | "QR_CODE";

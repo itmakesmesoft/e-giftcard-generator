@@ -1,8 +1,8 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { readCodeByImage } from "./utils/codeReader";
-import { generateBarcode } from "./utils/codeGenerator";
+import { readCodeByImage } from "../utils/reader";
+import { generateCode } from "../utils/generator";
 import Image from "next/image";
 
 export default function Home() {
@@ -11,13 +11,12 @@ export default function Home() {
 
   const clickDecodeButton = async () => {
     if (imgRef.current) {
-      const res = await readCodeByImage(imgRef.current as string);
-      if (!res) {
+      const data = await readCodeByImage(imgRef.current as string);
+      if (!data) {
         console.log("not found");
         return null;
       }
-      console.log(res);
-      generateBarcode("canvas", res);
+      generateCode({ id: "canvas", data: data });
     }
   };
 
