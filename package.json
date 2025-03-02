@@ -9,13 +9,18 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@radix-ui/react-toolbar": "^1.1.2",
     "@zxing/browser": "^0.1.5",
     "@zxing/library": "^0.21.3",
+    "canvas": "^3.0.0-rc3",
     "jsbarcode": "^3.11.6",
+    "konva": "^9.3.18",
+    "nanoid": "^5.1.2",
     "next": "15.2.0",
     "qrcode": "^1.5.4",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "react-konva": "^19.0.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

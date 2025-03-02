@@ -1,8 +1,8 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { readCodeByImage } from "../utils/reader";
-import { generateCode } from "../utils/generator";
+import { readCodeByImage } from "../utils/code/reader";
+import { generateCode } from "../utils/code/generator";
 import Image from "next/image";
 
 export default function Home() {
