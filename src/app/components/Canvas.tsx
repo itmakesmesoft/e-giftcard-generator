@@ -1,9 +1,9 @@
 "use client";
 
 import Konva from "konva";
-import { Vector2d } from "konva/lib/types";
 import { nanoid } from "nanoid";
 import { ChangeEvent, useRef, useState } from "react";
+import type { Vector2d } from "konva/lib/types";
 import {
   Arrow,
   Circle,
@@ -28,6 +28,8 @@ interface StagedNode extends Konva.ShapeConfig {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   attrs: any;
 }
+const CANVAS_WIDTH = 1000;
+const CANVAS_HEIGHT = 600;
 
 const Canvas = () => {
   const stageRef = useRef<Konva.Stage>(null);
@@ -39,16 +41,16 @@ const Canvas = () => {
   const [stagedNode, setStagedNode] = useState<StagedNode[]>([]);
   const [action, setAction] = useState(ACTIONS.SELECT);
   const [fillColor, setFillColor] = useState("#ff0000");
-  const [strokeColor, setStrokeColor] = useState<string>("#000");
+  const [strokeColor, setStrokeColor] = useState<string>("#000000");
 
   const isPaining = useRef(false);
   const currentShapeId = useRef("");
   const isDraggable = action === ACTIONS.SELECT;
 
-  function onPointerDown() {
+  function handlePointerDown() {
     if (transformer && transformer.getNodes().length > 0) return;
     if (!stage) return;
-    clearShapeClick();
+    deselectShape();
     const { x, y } = stage.getPointerPosition() as Vector2d;
     const id = nanoid();
     currentShapeId.current = id;
@@ -148,7 +150,7 @@ const Canvas = () => {
         break;
     }
   }
-  function onPointerMove() {
+  function handlePointerMove() {
     if (!isPaining.current) return;
     if (!stage) return;
     const { x, y } = stage.getPointerPosition() as Vector2d;
@@ -248,7 +250,7 @@ const Canvas = () => {
     }
   }
 
-  function onPointerUp() {
+  function handlePointerUp() {
     isPaining.current = false;
     const select = selectionRef.current;
     if (select && select.visible()) {
@@ -265,7 +267,7 @@ const Canvas = () => {
     }
   }
 
-  function handleExport() {
+  function exportCanvasAsImage() {
     if (!stage) return;
     const uri = stage.toDataURL();
     const link = document.createElement("a");
@@ -276,7 +278,7 @@ const Canvas = () => {
     document.body.removeChild(link);
   }
 
-  function handleShapeClick(e: Konva.KonvaPointerEvent) {
+  function selectShape(e: Konva.KonvaPointerEvent) {
     if (!transformer) return;
     const target = e.currentTarget;
     const selected = transformer.getNodes();
@@ -289,11 +291,22 @@ const Canvas = () => {
     transformer.nodes([target]);
   }
 
-  const clearShapeClick = () => {
+  const deselectShape = () => {
     transformer?.nodes([]);
   };
 
-  const handleChangeFillColor = (e: ChangeEvent<HTMLInputElement>) => {
+  const removeShape = () => {
+    const selected = transformer?.getNodes();
+    if (!selected) return;
+
+    const removeIds = selected.map((node) => node.attrs.id);
+    setStagedNode((nodes: StagedNode[]) =>
+      nodes.filter((node: StagedNode) => !removeIds.includes(node.attrs.id))
+    );
+    deselectShape();
+  };
+
+  const handleFillColorChange = (e: ChangeEvent<HTMLInputElement>) => {
     const selectedNode = transformer?.getNode() as StagedNode | undefined;
     if (selectedNode) {
       setStagedNode((stagedNode) =>
@@ -308,7 +321,7 @@ const Canvas = () => {
     setFillColor(e.target.value);
   };
 
-  const handleChangeStrokeColor = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleStrokeColorChange = (e: ChangeEvent<HTMLInputElement>) => {
     const selectedNode = transformer?.getNode() as StagedNode | undefined;
     if (selectedNode) {
       setStagedNode((stagedNode) =>
@@ -329,104 +342,63 @@ const Canvas = () => {
         {/* Controls */}
         <div className="absolute top-0 z-10 w-full py-2 ">
           <div className="flex justify-center items-center gap-3 py-2 px-3 w-fit mx-auto border shadow-lg rounded-lg">
-            <button
-              className={
-                action === ACTIONS.SELECT
-                  ? "bg-violet-300 p-1 rounded"
-                  : "p-1 hover:bg-violet-100 rounded"
-              }
+            <ActionButton
+              active={action === ACTIONS.SELECT}
               onClick={() => setAction(ACTIONS.SELECT)}
-            >
-              커서
-            </button>
-            <button
-              className={
-                action === ACTIONS.RECTANGLE
-                  ? "bg-violet-300 p-1 rounded"
-                  : "p-1 hover:bg-violet-100 rounded"
-              }
+              label="커서"
+            />
+            <ActionButton
+              active={action === ACTIONS.RECTANGLE}
               onClick={() => setAction(ACTIONS.RECTANGLE)}
-            >
-              사각형
-            </button>
-            <button
-              className={
-                action === ACTIONS.CIRCLE
-                  ? "bg-violet-300 p-1 rounded"
-                  : "p-1 hover:bg-violet-100 rounded"
-              }
+              label="사각형"
+            />
+            <ActionButton
+              active={action === ACTIONS.CIRCLE}
               onClick={() => setAction(ACTIONS.CIRCLE)}
-            >
-              원
-            </button>
-            <button
-              className={
-                action === ACTIONS.ARROW
-                  ? "bg-violet-300 p-1 rounded"
-                  : "p-1 hover:bg-violet-100 rounded"
-              }
+              label="원"
+            />
+            <ActionButton
+              active={action === ACTIONS.ARROW}
               onClick={() => setAction(ACTIONS.ARROW)}
-            >
-              화살표
-            </button>
-            <button
-              className={
-                action === ACTIONS.PENCIL
-                  ? "bg-violet-300 p-1 rounded"
-                  : "p-1 hover:bg-violet-100 rounded"
-              }
+              label="화살표"
+            />
+            <ActionButton
+              active={action === ACTIONS.PENCIL}
               onClick={() => setAction(ACTIONS.PENCIL)}
-            >
-              펜
-            </button>
-            <button
-              className={
-                action === ACTIONS.ERASER
-                  ? "bg-violet-300 p-1 rounded"
-                  : "p-1 hover:bg-violet-100 rounded"
-              }
+              label="펜"
+            />
+            <ActionButton
+              active={action === ACTIONS.ERASER}
               onClick={() => setAction(ACTIONS.ERASER)}
-            >
-              지우개
-            </button>
-            <button>
-              <input
-                className="w-6 h-6"
-                type="color"
-                value={fillColor}
-                onChange={handleChangeFillColor}
-              />
-            </button>
-            <button>
-              <input
-                className="w-6 h-6"
-                type="color"
-                value={strokeColor}
-                onChange={handleChangeStrokeColor}
-              />
-            </button>
-
-            <button onClick={handleExport}>다운로드</button>
+              label="지우개"
+            />
+            <ActionButton onClick={removeShape} label="샥제" />
+            <ColorPicker color={fillColor} onChange={handleFillColorChange} />
+            <ColorPicker
+              color={strokeColor}
+              onChange={handleStrokeColorChange}
+            />
+            <ActionButton onClick={exportCanvasAsImage} label="다운로드" />
           </div>
         </div>
         {/* Canvas */}
         <Stage
           ref={stageRef}
-          width={1000}
-          height={600}
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerUp}
+          width={CANVAS_WIDTH}
+          height={CANVAS_HEIGHT}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
         >
           <Layer>
             <Rect
               id="bg"
               x={0}
-              y={0}
-              height={600}
-              width={1000}
               fill="white"
-              onPointerDown={clearShapeClick}
+              y={0}
+              width={CANVAS_WIDTH}
+              height={CANVAS_HEIGHT}
+              onPointerDown={deselectShape}
             />
           </Layer>
           <Layer>
@@ -439,7 +411,7 @@ const Canvas = () => {
                       strokeWidth={2}
                       draggable={isDraggable}
                       strokeScaleEnabled={false}
-                      onPointerDown={handleShapeClick}
+                      onPointerDown={selectShape}
                       {...node.attrs}
                     />
                   );
@@ -449,7 +421,7 @@ const Canvas = () => {
                       key={index}
                       draggable={isDraggable}
                       strokeScaleEnabled={false}
-                      onPointerDown={handleShapeClick}
+                      onPointerDown={selectShape}
                       {...node.attrs}
                     />
                   );
@@ -460,7 +432,7 @@ const Canvas = () => {
                       strokeWidth={2}
                       draggable={isDraggable}
                       strokeScaleEnabled={false}
-                      onPointerDown={handleShapeClick}
+                      onPointerDown={selectShape}
                       {...node.attrs}
                     />
                   );
@@ -498,5 +470,38 @@ const Canvas = () => {
     </>
   );
 };
-
 export default Canvas;
+
+const ColorPicker = ({
+  color,
+  onChange,
+}: {
+  color: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}) => (
+  <button>
+    <input className="w-6 h-6" type="color" value={color} onChange={onChange} />
+  </button>
+);
+
+const ActionButton = ({
+  active,
+  label,
+  onClick,
+}: {
+  active?: boolean;
+  label: string;
+  onClick: () => void;
+}) => (
+  <button
+    className={`text-black
+      ${
+        active
+          ? "p-1 bg-blue-300 rounded"
+          : "p-1 hover:bg-blue-500 bg-blue-100 rounded"
+      }`}
+    onClick={onClick}
+  >
+    {label}
+  </button>
+);
