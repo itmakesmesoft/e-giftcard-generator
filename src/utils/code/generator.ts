@@ -1,40 +1,23 @@
-import QRCode from "qrcode";
-import JsBarcode from "jsbarcode";
-import { convertBarcodeFormat } from "./adapter";
-import { GeneratableFormatType, ReadableFormatType } from "./type";
+import bwipjs from "@bwip-js/browser";
+import type { GeneraterFormatType } from "./type";
+import type { RenderOptions as RenderOptionsFromBWIP } from "@bwip-js/browser";
 
-interface DataProps {
-  value: string;
-  format: ReadableFormatType | GeneratableFormatType;
+interface RenderOptions extends Omit<RenderOptionsFromBWIP, "bcid"> {
+  bcid: GeneraterFormatType;
 }
 
 interface GenerateCodeProps {
-  id: string;
-  data: DataProps;
+  canvas: string | HTMLCanvasElement;
+  options: RenderOptions;
 }
 
-export const generateCode = async (props: GenerateCodeProps) => {
-  const { data } = props;
-  if (data.format === "QR_CODE") {
-    return await generateQRCode(props);
-  } else {
-    return generateBarcode(props);
+export const generateCode = ({ canvas, options }: GenerateCodeProps) => {
+  try {
+    bwipjs.toCanvas(canvas, {
+      ...options,
+      includetext: true,
+    });
+  } catch (e) {
+    console.error(e);
   }
-};
-
-export const generateBarcode = (props: GenerateCodeProps) => {
-  const { id, data } = props;
-  const canvas = document.getElementById(id);
-  if (!canvas) throw Error("Error");
-
-  const format = convertBarcodeFormat(data.format) as GeneratableFormatType;
-  if (!format) return console.log("impossible");
-
-  JsBarcode(canvas, data.value, { format });
-};
-
-const generateQRCode = async (props: GenerateCodeProps) => {
-  const { id, data } = props;
-  const canvas = document.getElementById(id);
-  QRCode.toCanvas(canvas, data.value);
 };

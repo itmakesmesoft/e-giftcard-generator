@@ -1,24 +1,23 @@
-export type GeneratableFormatType =
-  | "CODE128"
-  | "CODE128A"
-  | "CODE128B"
-  | "CODE128C"
-  | "EAN13"
-  | "EAN8"
-  | "EAN5"
-  | "EAN2"
-  | "UPC"
-  | "CODE39"
-  | "ITF"
-  | "ITF14"
-  | "MSI10"
-  | "MSI11"
-  | "MSI1010"
-  | "MSI1110"
-  | "Pharmacode"
-  | "Codabar";
+export type GeneraterFormatType =
+  | "azteccode"
+  | "rationalizedCodabar"
+  | "code39"
+  | "code93"
+  | "code128"
+  | "datamatrix"
+  | "ean8"
+  | "ean13"
+  | "interleaved2of5"
+  | "maxicode"
+  | "pdf417"
+  | "qrcode"
+  | "databaromni"
+  | "databarexpanded"
+  | "upca"
+  | "upce"
+  | "ean2";
 
-export type ReadableFormatType =
+export type ReaderFormatType =
   | "AZTEC"
   | "CODABAR"
   | "CODE_39"
@@ -36,13 +35,3 @@ export type ReadableFormatType =
   | "UPC_A"
   | "UPC_E"
   | "UPC_EAN_EXTENSION";
-
-export type AdaptableFormatType =
-  | "CODABAR"
-  | "CODE_39"
-  | "CODE_128"
-  | "EAN_8"
-  | "EAN_13"
-  | "ITF"
-  | "UPC_A"
-  | "QR_CODE";

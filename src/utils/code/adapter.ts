@@ -1,31 +1,23 @@
-const formatMapping: Record<string, string> = {
-  CODABAR: "Codabar",
-  CODE_39: "CODE39",
-  CODE_128: "CODE128",
-  EAN_8: "EAN8",
-  EAN_13: "EAN13",
-  ITF: "ITF",
-  UPC_A: "UPC",
-  QR_CODE: "QR_CODE",
+const barcodeFormatMap: Record<string, string> = {
+  AZTEC: "azteccode",
+  CODABAR: "rationalizedCodabar",
+  CODE_39: "code39",
+  CODE_93: "code93",
+  CODE_128: "code128",
+  DATA_MATRIX: "datamatrix",
+  EAN_8: "ean8",
+  EAN_13: "ean13",
+  ITF: "interleaved2of5",
+  MAXICODE: "maxicode",
+  PDF_417: "pdf417",
+  QR_CODE: "qrcode",
+  RSS_14: "databaromni",
+  RSS_EXPANDED: "databarexpanded",
+  UPC_A: "upca",
+  UPC_E: "upce",
+  UPC_EAN_EXTENSION: "ean2",
 };
 
-// ZXing에만 존재하는 형식
-const unmatched = [
-  "AZTEC",
-  "CODE_93",
-  "DATA_MATRIX",
-  "MAXICODE",
-  "PDF_417",
-  "RSS_14",
-  "RSS_EXPANDED",
-  "UPC_E",
-  "UPC_EAN_EXTENSION",
-];
-
 export const convertBarcodeFormat = (format: string) => {
-  if (unmatched.includes(format)) {
-    console.log(`${format}은 지원되지 않는 형식이에요.`);
-    return null;
-  }
-  return formatMapping[format];
+  return barcodeFormatMap[format];
 };

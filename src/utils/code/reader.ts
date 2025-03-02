@@ -1,8 +1,8 @@
 import { BrowserMultiFormatReader } from "@zxing/browser";
 import { NotFoundException, Result } from "@zxing/library";
-import { ReadableFormatType } from "./type";
+import type { ReaderFormatType } from "./type";
 
-const FORMAT_LIST: ReadableFormatType[] = [
+const FORMAT_LIST: ReaderFormatType[] = [
   "AZTEC",
   "CODABAR",
   "CODE_39",
@@ -45,7 +45,7 @@ export const readCodeByImage = async (image: string | HTMLImageElement) => {
 
 const extractData = (
   data: Result
-): { format: ReadableFormatType; value: string } => {
+): { format: ReaderFormatType; value: string } => {
   const format = FORMAT_LIST[data.getBarcodeFormat()];
   const value = data.getText();
   const returnObject = { format, value };
