@@ -36,11 +36,5 @@ export const generateBarcode = (props: GenerateCodeProps) => {
 const generateQRCode = async (props: GenerateCodeProps) => {
   const { id, data } = props;
   const canvas = document.getElementById(id);
-
-  try {
-    // console.log(await QRCode.toDataURL(data.value));
-    QRCode.toCanvas(canvas, data.value);
-  } catch (err) {
-    console.error(err);
-  }
+  QRCode.toCanvas(canvas, data.value);
 };
