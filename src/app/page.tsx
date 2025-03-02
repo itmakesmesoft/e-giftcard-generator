@@ -1,20 +1,19 @@
 "use client";
 
 import Image from "next/image";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { readCodeByImage } from "../utils/code/reader";
 import { generateCode } from "../utils/code/generator";
 import { convertBarcodeFormat } from "@/utils/code/adapter";
 import type { GeneraterFormatType } from "@/utils/code/type";
 
 export default function Home() {
-  const imgRef = useRef<Base64URLString | null>(null);
   const [image, setImage] = useState<Base64URLString | null>(null);
 
   const decodeImage = async () => {
-    if (!imgRef.current) return;
+    if (!image) return;
 
-    const data = await readCodeByImage(imgRef.current);
+    const data = await readCodeByImage(image);
     if (!data) return;
 
     const format = convertBarcodeFormat(data.format) as GeneraterFormatType;
@@ -27,9 +26,7 @@ export default function Home() {
   const loadImage = (file: File) => {
     const reader = new FileReader();
     reader.onload = () => {
-      const result = reader.result as Base64URLString;
-      imgRef.current = result;
-      setImage(result);
+      setImage(reader.result as Base64URLString);
     };
     reader.readAsDataURL(file);
   };
@@ -40,7 +37,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="flex flex-col items-center gap-4 py-4">
       {image && (
         <Image src={image} alt="barcode preview" width={300} height={300} />
       )}
