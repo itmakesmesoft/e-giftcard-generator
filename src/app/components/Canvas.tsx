@@ -11,24 +11,22 @@ import {
   Line,
   Rect,
   Stage,
+  Image as ImageComponent,
   Transformer,
 } from "react-konva";
 import useSelect from "../hooks/useSelect";
+import useShapes from "../hooks/useShapes";
 
 const ACTIONS = {
-  SELECT: "SELECT",
-  RECTANGLE: "RECTANGLE",
-  CIRCLE: "CIRCLE",
-  PENCIL: "PENCIL",
-  ERASER: "ERASER",
-  ARROW: "ARROW",
+  SELECT: "select",
+  RECTANGLE: "rectangle",
+  CIRCLE: "circle",
+  PENCIL: "pencil",
+  ERASER: "eraser",
+  ARROW: "arrow",
+  IMAGE: "image",
 };
 
-interface StagedNode extends Konva.ShapeConfig {
-  type?: "rectangle" | "circle" | "pencil" | "eraser" | "arrow";
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  attrs: any;
-}
 const CANVAS_WIDTH = 1000;
 const CANVAS_HEIGHT = 600;
 
@@ -36,11 +34,9 @@ const Canvas = () => {
   const stageRef = useRef<Konva.Stage>(null);
   const transformerRef = useRef<Konva.Transformer>(null);
 
-  const stage = stageRef.current;
   const {
     selectNodeById,
     clearSelection,
-    getSingleSelectedNode,
     getAllSelectedNodes,
     startSelection,
     updateSelection,
@@ -51,194 +47,100 @@ const Canvas = () => {
   const [action, setAction] = useState(ACTIONS.SELECT);
   const [fillColor, setFillColor] = useState("#ff0000");
   const [strokeColor, setStrokeColor] = useState<string>("#000000");
-  const [stagedNode, setStagedNode] = useState<StagedNode[]>([]);
+  const { shapes, setShapes, createShape, updateShape } = useShapes();
 
   const isPointerDown = useRef(false);
   const currentShapeId = useRef<string | null>(null);
   const isDraggable = action === ACTIONS.SELECT;
 
   function handlePointerDown() {
-    if (!stage) return;
+    if (!stageRef.current) return;
 
-    const { x, y } = stage.getPointerPosition() as Vector2d;
+    const { x, y } = stageRef.current.getPointerPosition() as Vector2d;
     const id = nanoid();
     const name = "shape";
+
     currentShapeId.current = id;
     isPointerDown.current = true;
 
-    switch (action) {
-      case ACTIONS.RECTANGLE:
-        setStagedNode((rectangles) => [
-          ...rectangles,
-          {
-            type: "rectangle",
-            attrs: {
-              id,
-              name,
-              x,
-              y,
-              width: 0,
-              height: 0,
-              fill: fillColor,
-              stroke: strokeColor,
-            },
-          },
-        ]);
-        break;
-      case ACTIONS.CIRCLE:
-        setStagedNode((circles) => [
-          ...circles,
-          {
-            type: "circle",
-            attrs: {
-              id,
-              name,
-              x,
-              y,
-              width: 0,
-              height: 0,
-              fill: fillColor,
-              stroke: strokeColor,
-            },
-          },
-        ]);
-        break;
-      case ACTIONS.ARROW:
-        setStagedNode((arrows) => [
-          ...arrows,
-          {
-            type: "arrow",
-            attrs: {
-              id,
-              name,
-              points: [x, y],
-              fill: fillColor,
-              stroke: strokeColor,
-            },
-          },
-        ]);
-        break;
-      // TODO. PENCIL과 ERASER를 handlerPointerDown에서 분리해야함.
-      case ACTIONS.PENCIL:
-        setStagedNode((pencil) => [
-          ...pencil,
-          {
-            type: "pencil",
-            attrs: {
-              id,
-              points: [x, y],
-              fill: fillColor,
-              stroke: strokeColor,
-              globalCompositeOperation: "source-over",
-            },
-          },
-        ]);
-        break;
-      case ACTIONS.ERASER:
-        setStagedNode((eraser) => [
-          ...eraser,
-          {
-            type: "eraser",
-            attrs: {
-              id,
-              points: [x, y],
-              fill: fillColor,
-              stroke: strokeColor,
-              globalCompositeOperation: "destination-out",
-            },
-          },
-        ]);
-        break;
-    }
+    const hasPoints = ["pencil", "eraser", "arrow"].includes(action);
+    const isPencilOrEraser = action === "pencil" || action === "eraser";
+    const compositeOperation =
+      action === "pencil" ? "source-over" : "destination-out";
+
+    const shapeConfig: Konva.ShapeConfig = {
+      id,
+      type: action,
+      fill: fillColor,
+      stroke: strokeColor,
+      ...(hasPoints ? { points: [x, y] } : { x, y }),
+      ...(isPencilOrEraser
+        ? { globalCompositeOperation: compositeOperation }
+        : { name }),
+    };
+
+    createShape(shapeConfig);
   }
+
   function handlePointerMove() {
     if (!isPointerDown.current) return;
-    if (!stage) return;
-    const { x, y } = stage.getPointerPosition() as Vector2d;
+    if (!stageRef.current) return;
+    const { x, y } = stageRef.current.getPointerPosition() as Vector2d;
+    if (!currentShapeId.current) return;
 
     switch (action) {
+      case ACTIONS.IMAGE:
       case ACTIONS.RECTANGLE:
-        setStagedNode((node) =>
-          node.map((node) => {
-            if (node.attrs.id === currentShapeId.current) {
-              return {
-                ...node,
-                attrs: {
-                  ...node.attrs,
-                  width: x - node.attrs.x,
-                  height: y - node.attrs.y,
-                },
-              };
-            }
-            return node;
-          })
-        );
+        updateShape((shape) => {
+          if (shape.id === currentShapeId.current) {
+            const dx = shape.x ?? 0;
+            const dy = shape.y ?? 0;
+            return {
+              ...shape,
+              width: x - dx,
+              height: y - dy,
+            };
+          }
+          return shape;
+        });
         break;
       case ACTIONS.CIRCLE:
-        setStagedNode((circles) =>
-          circles.map((circle) => {
-            if (circle.attrs.id === currentShapeId.current) {
-              return {
-                ...circle,
-                attrs: {
-                  ...circle.attrs,
-                  radius:
-                    ((y - circle.attrs.y) ** 2 + (x - circle.attrs.x) ** 2) **
-                    0.5,
-                },
-              };
-            }
-            return circle;
-          })
-        );
+        updateShape((shape) => {
+          if (shape.id === currentShapeId.current) {
+            const dx = shape.x ?? 0;
+            const dy = shape.y ?? 0;
+            return {
+              ...shape,
+              radius: ((y - dy) ** 2 + (x - dx) ** 2) ** 0.5,
+            };
+          }
+          return shape;
+        });
         break;
       case ACTIONS.ARROW:
-        setStagedNode((nodes) =>
-          nodes.map((arrow) => {
-            if (arrow.attrs.id === currentShapeId.current) {
-              return {
-                ...arrow,
-                attrs: {
-                  ...arrow.attrs,
-                  points: [arrow.attrs.points[0], arrow.attrs.points[1], x, y],
-                },
-              };
-            }
-            return arrow;
-          })
-        );
-        break;
-      case ACTIONS.PENCIL:
-        setStagedNode((nodes) =>
-          nodes.map((line) => {
-            if (line.attrs.id === currentShapeId.current) {
-              return {
-                ...line,
-                attrs: {
-                  ...line.attrs,
-                  points: [...line.attrs.points, x, y],
-                },
-              };
-            }
-            return line;
-          })
-        );
+        updateShape((shape) => {
+          if (shape.id === currentShapeId.current) {
+            const initialPoints = shape.points.slice(0, 2) ?? [x, y];
+            return {
+              ...shape,
+              points: [...initialPoints, x, y],
+            };
+          }
+          return shape;
+        });
         break;
       case ACTIONS.ERASER:
-        setStagedNode((nodes) =>
-          nodes.map((line) => {
-            if (line.attrs.id === currentShapeId.current) {
-              return {
-                ...line,
-                attrs: {
-                  ...line.attrs,
-                  points: [...line.attrs.points, x, y],
-                },
-              };
-            }
-            return line;
-          })
-        );
+      case ACTIONS.PENCIL:
+        updateShape((shape) => {
+          if (shape.id === currentShapeId.current) {
+            const prevPoints = shape.points ?? [];
+            return {
+              ...shape,
+              points: [...prevPoints, x, y],
+            };
+          }
+          return shape;
+        });
         break;
     }
   }
@@ -258,8 +160,8 @@ const Canvas = () => {
   }
 
   function exportCanvasAsImage() {
-    if (!stage) return;
-    const uri = stage.toDataURL();
+    if (!stageRef.current) return;
+    const uri = stageRef.current.toDataURL();
     const link = document.createElement("a");
     link.download = "image.png";
     link.href = uri;
@@ -278,40 +180,39 @@ const Canvas = () => {
     if (!selected) return;
 
     const removeIds = selected.map((node) => node.attrs.id);
-    setStagedNode((nodes: StagedNode[]) =>
-      nodes.filter((node: StagedNode) => !removeIds.includes(node.attrs.id))
-    );
+    const filtered = shapes.filter((shape) => !removeIds.includes(shape.id));
+    setShapes(filtered);
     clearSelection();
   };
 
   const handleFillColorChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const selectedNode = getSingleSelectedNode() as Konva.Node;
-    if (selectedNode) {
-      setStagedNode((stagedNode) =>
-        stagedNode.map((node) => {
-          const id = node.attrs.id;
-          return id === selectedNode.attrs.id
-            ? { ...node, attrs: { ...node.attrs, fill: e.target.value } }
-            : node;
-        })
-      );
+    const selectedNodes = getAllSelectedNodes();
+    const ids = selectedNodes.map((node) => node.attrs.id);
+    if (selectedNodes.length > 0) {
+      updateShape((shape) => {
+        return ids.includes(shape.id)
+          ? { ...shape, fill: e.target.value }
+          : shape;
+      });
     }
     setFillColor(e.target.value);
   };
 
   const handleStrokeColorChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const selectedNode = getSingleSelectedNode() as Konva.Node;
-    if (selectedNode) {
-      setStagedNode((stagedNode) =>
-        stagedNode.map((node) => {
-          const id = node.attrs.id;
-          return id === selectedNode.attrs.id
-            ? { ...node, attrs: { ...node.attrs, stroke: e.target.value } }
-            : node;
-        })
-      );
+    const selectedNodes = getAllSelectedNodes();
+    const ids = selectedNodes.map((node) => node.attrs.id);
+    if (selectedNodes) {
+      updateShape((shape) => {
+        return ids.includes(shape.id)
+          ? { ...shape, stroke: e.target.value }
+          : shape;
+      });
     }
     setStrokeColor(e.target.value);
+  };
+
+  const addImage = () => {
+    setAction(ACTIONS.IMAGE);
   };
 
   return (
@@ -357,6 +258,11 @@ const Canvas = () => {
               onChange={handleStrokeColorChange}
             />
             <ActionButton onClick={exportCanvasAsImage} label="다운로드" />
+            <ActionButton
+              active={action === ACTIONS.IMAGE}
+              onClick={addImage}
+              label="사진 추가 "
+            />
           </div>
         </div>
         {/* Canvas */}
@@ -389,7 +295,7 @@ const Canvas = () => {
             />
           </Layer>
           <Layer>
-            {stagedNode.map((node, index) => {
+            {shapes.map((node, index) => {
               switch (node.type) {
                 case "rectangle":
                   return (
@@ -399,7 +305,7 @@ const Canvas = () => {
                       draggable={isDraggable}
                       strokeScaleEnabled={false}
                       onPointerDown={handleClickShape}
-                      {...node.attrs}
+                      {...node}
                     />
                   );
                 case "circle":
@@ -409,7 +315,7 @@ const Canvas = () => {
                       draggable={isDraggable}
                       strokeScaleEnabled={false}
                       onPointerDown={handleClickShape}
-                      {...node.attrs}
+                      {...node}
                     />
                   );
                 case "arrow":
@@ -420,7 +326,19 @@ const Canvas = () => {
                       draggable={isDraggable}
                       strokeScaleEnabled={false}
                       onPointerDown={handleClickShape}
-                      {...node.attrs}
+                      points={node.points}
+                      {...node}
+                    />
+                  );
+                case "image":
+                  return (
+                    <ImageComponent
+                      key={index}
+                      alt="이미지"
+                      image={node.image}
+                      draggable={isDraggable}
+                      onPointerDown={handleClickShape}
+                      {...node}
                     />
                   );
               }
@@ -429,7 +347,7 @@ const Canvas = () => {
             <Transformer ref={transformerRef} />
           </Layer>
           <Layer>
-            {stagedNode.map((node, index) => {
+            {shapes.map((node, index) => {
               switch (node.type) {
                 case "pencil":
                 case "eraser":
@@ -440,7 +358,7 @@ const Canvas = () => {
                       lineJoin="round"
                       strokeWidth={2}
                       tension={0.5}
-                      {...node.attrs}
+                      {...node}
                     />
                   );
               }

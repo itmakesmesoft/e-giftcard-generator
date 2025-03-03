@@ -86,9 +86,11 @@ const useSelect = (
     selectBox.visible(false);
   };
 
-  const getSingleSelectedNode = () => transformerRef.current?.getNode();
+  const getSingleSelectedNode = (): Konva.Node | undefined =>
+    transformerRef.current?.getNode();
 
-  const getAllSelectedNodes = () => transformerRef.current?.getNodes() ?? [];
+  const getAllSelectedNodes = (): Konva.Node[] =>
+    transformerRef.current?.getNodes() ?? [];
 
   const SelectionBox = () => (
     <Rect
