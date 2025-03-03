@@ -13,6 +13,7 @@ import {
   Stage,
   Transformer,
 } from "react-konva";
+import useSelect from "../hooks/useSelect";
 
 const ACTIONS = {
   SELECT: "SELECT",
@@ -33,40 +34,39 @@ const CANVAS_HEIGHT = 600;
 
 const Canvas = () => {
   const stageRef = useRef<Konva.Stage>(null);
-  const selectionRef = useRef<Konva.Rect>(null);
   const transformerRef = useRef<Konva.Transformer>(null);
-  const stage = stageRef.current;
-  const transformer = transformerRef.current;
 
-  const [stagedNode, setStagedNode] = useState<StagedNode[]>([]);
+  const stage = stageRef.current;
+  const {
+    selectNodeById,
+    clearSelection,
+    getSingleSelectedNode,
+    getAllSelectedNodes,
+    startSelection,
+    updateSelection,
+    endSelection,
+    SelectionBox,
+  } = useSelect(stageRef, transformerRef);
+
   const [action, setAction] = useState(ACTIONS.SELECT);
   const [fillColor, setFillColor] = useState("#ff0000");
   const [strokeColor, setStrokeColor] = useState<string>("#000000");
+  const [stagedNode, setStagedNode] = useState<StagedNode[]>([]);
 
-  const isPaining = useRef(false);
-  const currentShapeId = useRef("");
+  const isPointerDown = useRef(false);
+  const currentShapeId = useRef<string | null>(null);
   const isDraggable = action === ACTIONS.SELECT;
 
   function handlePointerDown() {
-    if (transformer && transformer.getNodes().length > 0) return;
     if (!stage) return;
-    deselectShape();
+
     const { x, y } = stage.getPointerPosition() as Vector2d;
     const id = nanoid();
-    currentShapeId.current = id;
-    isPaining.current = true;
     const name = "shape";
+    currentShapeId.current = id;
+    isPointerDown.current = true;
 
     switch (action) {
-      case ACTIONS.SELECT:
-        const select = selectionRef.current;
-        select?.setAttrs({
-          x,
-          y,
-          width: 0,
-          height: 0,
-        });
-        break;
       case ACTIONS.RECTANGLE:
         setStagedNode((rectangles) => [
           ...rectangles,
@@ -118,6 +118,7 @@ const Canvas = () => {
           },
         ]);
         break;
+      // TODO. PENCIL과 ERASER를 handlerPointerDown에서 분리해야함.
       case ACTIONS.PENCIL:
         setStagedNode((pencil) => [
           ...pencil,
@@ -151,19 +152,11 @@ const Canvas = () => {
     }
   }
   function handlePointerMove() {
-    if (!isPaining.current) return;
+    if (!isPointerDown.current) return;
     if (!stage) return;
     const { x, y } = stage.getPointerPosition() as Vector2d;
 
     switch (action) {
-      case ACTIONS.SELECT:
-        const select = selectionRef.current;
-        select?.setAttrs({
-          visible: true,
-          width: x - select.attrs.x,
-          height: y - select.attrs.y,
-        });
-        break;
       case ACTIONS.RECTANGLE:
         setStagedNode((node) =>
           node.map((node) => {
@@ -251,20 +244,17 @@ const Canvas = () => {
   }
 
   function handlePointerUp() {
-    isPaining.current = false;
-    const select = selectionRef.current;
-    if (select && select.visible()) {
-      select?.setAttrs({
-        visible: false,
-      });
-      const staged = stage?.find(".shape");
-      const draggedArea = select.getClientRect();
-      const selected =
-        staged?.filter((node) =>
-          Konva.Util.haveIntersection(draggedArea, node.getClientRect())
-        ) || [];
-      transformer?.nodes([...selected]);
+    isPointerDown.current = false;
+    if (!currentShapeId.current) return;
+    if (
+      action !== ACTIONS.SELECT &&
+      action !== ACTIONS.PENCIL &&
+      action !== ACTIONS.ERASER
+    ) {
+      selectNodeById(currentShapeId.current);
+      setAction(ACTIONS.SELECT);
     }
+    currentShapeId.current = null;
   }
 
   function exportCanvasAsImage() {
@@ -273,41 +263,29 @@ const Canvas = () => {
     const link = document.createElement("a");
     link.download = "image.png";
     link.href = uri;
-    document.body.appendChild(link);
     link.click();
+    document.body.appendChild(link);
     document.body.removeChild(link);
   }
 
-  function selectShape(e: Konva.KonvaPointerEvent) {
-    if (!transformer) return;
-    const target = e.currentTarget;
-    const selected = transformer.getNodes();
-    if (selected.includes(target)) return;
+  const handleClickShape = (e: Konva.KonvaPointerEvent) => {
     if (action === ACTIONS.PENCIL || action === ACTIONS.ERASER) return;
-    if (action !== ACTIONS.SELECT) {
-      setAction(ACTIONS.SELECT);
-      e.cancelBubble = true;
-    }
-    transformer.nodes([target]);
-  }
-
-  const deselectShape = () => {
-    transformer?.nodes([]);
+    selectNodeById(e.target.attrs.id);
   };
 
   const removeShape = () => {
-    const selected = transformer?.getNodes();
+    const selected = getAllSelectedNodes();
     if (!selected) return;
 
     const removeIds = selected.map((node) => node.attrs.id);
     setStagedNode((nodes: StagedNode[]) =>
       nodes.filter((node: StagedNode) => !removeIds.includes(node.attrs.id))
     );
-    deselectShape();
+    clearSelection();
   };
 
   const handleFillColorChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const selectedNode = transformer?.getNode() as StagedNode | undefined;
+    const selectedNode = getSingleSelectedNode() as Konva.Node;
     if (selectedNode) {
       setStagedNode((stagedNode) =>
         stagedNode.map((node) => {
@@ -322,7 +300,7 @@ const Canvas = () => {
   };
 
   const handleStrokeColorChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const selectedNode = transformer?.getNode() as StagedNode | undefined;
+    const selectedNode = getSingleSelectedNode() as Konva.Node;
     if (selectedNode) {
       setStagedNode((stagedNode) =>
         stagedNode.map((node) => {
@@ -386,9 +364,18 @@ const Canvas = () => {
           ref={stageRef}
           width={CANVAS_WIDTH}
           height={CANVAS_HEIGHT}
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
+          onPointerDown={() => {
+            if (action === ACTIONS.SELECT) startSelection();
+            else handlePointerDown();
+          }}
+          onPointerMove={() => {
+            if (action === ACTIONS.SELECT) updateSelection();
+            else handlePointerMove();
+          }}
+          onPointerUp={() => {
+            if (action === ACTIONS.SELECT) endSelection();
+            else handlePointerUp();
+          }}
         >
           <Layer>
             <Rect
@@ -398,7 +385,7 @@ const Canvas = () => {
               y={0}
               width={CANVAS_WIDTH}
               height={CANVAS_HEIGHT}
-              onPointerDown={deselectShape}
+              onPointerDown={clearSelection}
             />
           </Layer>
           <Layer>
@@ -411,7 +398,7 @@ const Canvas = () => {
                       strokeWidth={2}
                       draggable={isDraggable}
                       strokeScaleEnabled={false}
-                      onPointerDown={selectShape}
+                      onPointerDown={handleClickShape}
                       {...node.attrs}
                     />
                   );
@@ -421,7 +408,7 @@ const Canvas = () => {
                       key={index}
                       draggable={isDraggable}
                       strokeScaleEnabled={false}
-                      onPointerDown={selectShape}
+                      onPointerDown={handleClickShape}
                       {...node.attrs}
                     />
                   );
@@ -432,19 +419,13 @@ const Canvas = () => {
                       strokeWidth={2}
                       draggable={isDraggable}
                       strokeScaleEnabled={false}
-                      onPointerDown={selectShape}
+                      onPointerDown={handleClickShape}
                       {...node.attrs}
                     />
                   );
               }
             })}
-            {/* 드래그 선택을 위한 도형 */}
-            <Rect
-              ref={selectionRef}
-              fill="rgba(0,0,255,0.5)"
-              visible={false}
-              listening={false}
-            />
+            <SelectionBox />
             <Transformer ref={transformerRef} />
           </Layer>
           <Layer>
