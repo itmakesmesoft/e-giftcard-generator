@@ -4,16 +4,7 @@ import Konva from "konva";
 import { nanoid } from "nanoid";
 import { ChangeEvent, useRef, useState } from "react";
 import type { Vector2d } from "konva/lib/types";
-import {
-  Arrow,
-  Circle,
-  Layer,
-  Line,
-  Rect,
-  Stage,
-  Image as ImageComponent,
-  Transformer,
-} from "react-konva";
+import { Layer, Rect, Stage, Transformer } from "react-konva";
 import useSelect from "../hooks/useSelect";
 import useShapes from "../hooks/useShapes";
 
@@ -47,7 +38,14 @@ const Canvas = () => {
   const [action, setAction] = useState(ACTIONS.SELECT);
   const [fillColor, setFillColor] = useState("#ff0000");
   const [strokeColor, setStrokeColor] = useState<string>("#000000");
-  const { shapes, setShapes, createShape, updateShape } = useShapes();
+  const {
+    shapes,
+    setShapes,
+    createShape,
+    updateShape,
+    ShapesRenderer,
+    DrawingRenderer,
+  } = useShapes();
 
   const isPointerDown = useRef(false);
   const currentShapeId = useRef<string | null>(null);
@@ -83,16 +81,17 @@ const Canvas = () => {
   }
 
   function handlePointerMove() {
-    if (!isPointerDown.current) return;
-    if (!stageRef.current) return;
+    if (!isPointerDown.current || !stageRef.current || !currentShapeId.current)
+      return;
+
     const { x, y } = stageRef.current.getPointerPosition() as Vector2d;
-    if (!currentShapeId.current) return;
+    const currentId = currentShapeId.current;
 
     switch (action) {
       case ACTIONS.IMAGE:
       case ACTIONS.RECTANGLE:
         updateShape((shape) => {
-          if (shape.id === currentShapeId.current) {
+          if (shape.id === currentId) {
             const dx = shape.x ?? 0;
             const dy = shape.y ?? 0;
             return {
@@ -106,7 +105,7 @@ const Canvas = () => {
         break;
       case ACTIONS.CIRCLE:
         updateShape((shape) => {
-          if (shape.id === currentShapeId.current) {
+          if (shape.id === currentId) {
             const dx = shape.x ?? 0;
             const dy = shape.y ?? 0;
             return {
@@ -119,7 +118,7 @@ const Canvas = () => {
         break;
       case ACTIONS.ARROW:
         updateShape((shape) => {
-          if (shape.id === currentShapeId.current) {
+          if (shape.id === currentId) {
             const initialPoints = shape.points.slice(0, 2) ?? [x, y];
             return {
               ...shape,
@@ -132,7 +131,7 @@ const Canvas = () => {
       case ACTIONS.ERASER:
       case ACTIONS.PENCIL:
         updateShape((shape) => {
-          if (shape.id === currentShapeId.current) {
+          if (shape.id === currentId) {
             const prevPoints = shape.points ?? [];
             return {
               ...shape,
@@ -283,86 +282,17 @@ const Canvas = () => {
             else handlePointerUp();
           }}
         >
+          <BackgroundLayer onPointerDown={clearSelection} />
           <Layer>
-            <Rect
-              id="bg"
-              x={0}
-              fill="white"
-              y={0}
-              width={CANVAS_WIDTH}
-              height={CANVAS_HEIGHT}
-              onPointerDown={clearSelection}
-            />
-          </Layer>
-          <Layer>
-            {shapes.map((node, index) => {
-              switch (node.type) {
-                case "rectangle":
-                  return (
-                    <Rect
-                      key={index}
-                      strokeWidth={2}
-                      draggable={isDraggable}
-                      strokeScaleEnabled={false}
-                      onPointerDown={handleClickShape}
-                      {...node}
-                    />
-                  );
-                case "circle":
-                  return (
-                    <Circle
-                      key={index}
-                      draggable={isDraggable}
-                      strokeScaleEnabled={false}
-                      onPointerDown={handleClickShape}
-                      {...node}
-                    />
-                  );
-                case "arrow":
-                  return (
-                    <Arrow
-                      key={index}
-                      strokeWidth={2}
-                      draggable={isDraggable}
-                      strokeScaleEnabled={false}
-                      onPointerDown={handleClickShape}
-                      points={node.points}
-                      {...node}
-                    />
-                  );
-                case "image":
-                  return (
-                    <ImageComponent
-                      key={index}
-                      alt="이미지"
-                      image={node.image}
-                      draggable={isDraggable}
-                      onPointerDown={handleClickShape}
-                      {...node}
-                    />
-                  );
-              }
-            })}
             <SelectionBox />
+            <ShapesRenderer
+              isDraggable={isDraggable}
+              handleClickShape={handleClickShape}
+            />
             <Transformer ref={transformerRef} />
           </Layer>
           <Layer>
-            {shapes.map((node, index) => {
-              switch (node.type) {
-                case "pencil":
-                case "eraser":
-                  return (
-                    <Line
-                      key={index}
-                      lineCap="round"
-                      lineJoin="round"
-                      strokeWidth={2}
-                      tension={0.5}
-                      {...node}
-                    />
-                  );
-              }
-            })}
+            <DrawingRenderer />
           </Layer>
         </Stage>
       </div>
@@ -382,6 +312,25 @@ const ColorPicker = ({
     <input className="w-6 h-6" type="color" value={color} onChange={onChange} />
   </button>
 );
+
+const BackgroundLayer = (props: {
+  onPointerDown: (e: Konva.KonvaEventObject<PointerEvent>) => void;
+}) => {
+  const { onPointerDown } = props;
+  return (
+    <Layer>
+      <Rect
+        id="bg"
+        x={0}
+        fill="white"
+        y={0}
+        width={CANVAS_WIDTH}
+        height={CANVAS_HEIGHT}
+        onPointerDown={onPointerDown}
+      />
+    </Layer>
+  );
+};
 
 const ActionButton = ({
   active,
