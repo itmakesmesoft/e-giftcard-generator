@@ -51,7 +51,7 @@ const Canvas = () => {
   const currentShapeId = useRef<string | null>(null);
   const isDraggable = action === ACTIONS.SELECT;
 
-  function handlePointerDown() {
+  const handlePointerDown = () => {
     if (!stageRef.current) return;
 
     const { x, y } = stageRef.current.getPointerPosition() as Vector2d;
@@ -78,9 +78,9 @@ const Canvas = () => {
     };
 
     createShape(shapeConfig);
-  }
+  };
 
-  function handlePointerMove() {
+  const handlePointerMove = () => {
     if (!isPointerDown.current || !stageRef.current || !currentShapeId.current)
       return;
 
@@ -142,9 +142,9 @@ const Canvas = () => {
         });
         break;
     }
-  }
+  };
 
-  function handlePointerUp() {
+  const handlePointerUp = () => {
     isPointerDown.current = false;
     if (!currentShapeId.current) return;
     if (
@@ -156,9 +156,9 @@ const Canvas = () => {
       setAction(ACTIONS.SELECT);
     }
     currentShapeId.current = null;
-  }
+  };
 
-  function exportCanvasAsImage() {
+  const exportCanvasAsImage = () => {
     if (!stageRef.current) return;
     const uri = stageRef.current.toDataURL();
     const link = document.createElement("a");
@@ -167,13 +167,13 @@ const Canvas = () => {
     link.click();
     document.body.appendChild(link);
     document.body.removeChild(link);
-  }
+  };
 
-  function exportCanvasAsJSON() {
+  const exportCanvasAsJSON = () => {
     if (!stageRef.current) return;
     const json = stageRef.current.toJSON();
     console.log(json);
-  }
+  };
 
   const handleClickShape = (e: Konva.KonvaPointerEvent) => {
     if (action === ACTIONS.PENCIL || action === ACTIONS.ERASER) return;
