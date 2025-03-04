@@ -44,7 +44,6 @@ const Canvas = () => {
     DrawingRenderer,
   } = useShapes();
 
-  const isDraggable = action === "select";
   const isPointerDown = useRef(false);
   const currentShapeId = useRef<string | null>(null);
 
@@ -208,11 +207,6 @@ const Canvas = () => {
     selectLayer?.moveToTop();
   };
 
-  const handleClickShape = (e: Konva.KonvaPointerEvent) => {
-    if (action === "pencil" || action === "eraser") return;
-    selectNodeById(e.target.attrs.id);
-  };
-
   const removeShape = () => {
     const selected = getAllSelectedNodes();
     if (!selected) return;
@@ -311,7 +305,7 @@ const Canvas = () => {
             />
             <Slider
               min={1}
-              max={10}
+              max={50}
               value={strokeWidth}
               onChange={onStrokeWidthChange}
             />
@@ -322,9 +316,11 @@ const Canvas = () => {
           ref={stageRef}
           width={CANVAS_WIDTH}
           height={CANVAS_HEIGHT}
-          onPointerDown={() => {
-            if (action === "select") startSelection();
-            else handlePointerDown();
+          onPointerDown={(e) => {
+            if (action === "select") {
+              startSelection();
+              selectNodeById(e.target.attrs.id);
+            } else handlePointerDown();
           }}
           onPointerMove={() => {
             if (action === "select") updateSelection();
@@ -337,9 +333,10 @@ const Canvas = () => {
         >
           <BackgroundLayer id="_bgLayer" onPointerDown={clearSelection} />
           <Layer id="_shapeLayer">
-            {ShapesRenderer({ isDraggable, handleClickShape })}
+            {ShapesRenderer({
+              isDraggable: action === "select",
+            })}
           </Layer>
-          <Layer id="_drawLayer">{DrawingRenderer()}</Layer>
           <Layer id="_selectLayer">
             <SelectionBox />
             <Transformer
@@ -348,6 +345,7 @@ const Canvas = () => {
               }}
             />
           </Layer>
+          <Layer id="_drawLayer">{DrawingRenderer()}</Layer>
         </Stage>
       </div>
     </>

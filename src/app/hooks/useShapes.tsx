@@ -37,9 +37,10 @@ const useShapes = () => {
 
   const ShapesRenderer = (props: {
     isDraggable: boolean;
-    handleClickShape: (e: Konva.KonvaPointerEvent) => void;
+    handleClickShape?: (e: Konva.KonvaPointerEvent) => void;
   }) => {
     const { isDraggable, handleClickShape } = props;
+
     return shapes.map((node, index) => {
       switch (node.type) {
         case "rectangle":
@@ -101,6 +102,7 @@ const useShapes = () => {
               lineCap="round"
               lineJoin="round"
               tension={0.5}
+              listening={false}
               {...node}
             />
           );
