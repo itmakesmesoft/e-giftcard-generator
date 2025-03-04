@@ -2,21 +2,12 @@
 
 import Konva from "konva";
 import { nanoid } from "nanoid";
-import { ChangeEvent, useRef, useState } from "react";
+import { ChangeEvent, useRef } from "react";
 import type { Vector2d } from "konva/lib/types";
 import { Layer, Rect, Stage, Transformer } from "react-konva";
 import useSelect from "../hooks/useSelect";
 import useShapes from "../hooks/useShapes";
-
-const ACTIONS = {
-  SELECT: "select",
-  RECTANGLE: "rectangle",
-  CIRCLE: "circle",
-  PENCIL: "pencil",
-  ERASER: "eraser",
-  ARROW: "arrow",
-  IMAGE: "image",
-};
+import useControl from "../hooks/useControl";
 
 const CANVAS_WIDTH = 1000;
 const CANVAS_HEIGHT = 600;
@@ -34,10 +25,16 @@ const Canvas = () => {
     endSelection,
     SelectionBox,
   } = useSelect(stageRef, transformerRef);
-
-  const [action, setAction] = useState(ACTIONS.SELECT);
-  const [fillColor, setFillColor] = useState("#ff0000");
-  const [strokeColor, setStrokeColor] = useState<string>("#000000");
+  const {
+    action,
+    fill,
+    stroke,
+    strokeWidth,
+    setAction,
+    setFill,
+    setStroke,
+    setStrokeWidth,
+  } = useControl();
   const {
     shapes,
     setShapes,
@@ -47,9 +44,9 @@ const Canvas = () => {
     DrawingRenderer,
   } = useShapes();
 
+  const isDraggable = action === "select";
   const isPointerDown = useRef(false);
   const currentShapeId = useRef<string | null>(null);
-  const isDraggable = action === ACTIONS.SELECT;
 
   const handlePointerDown = () => {
     if (!stageRef.current) return;
@@ -69,8 +66,9 @@ const Canvas = () => {
     const shapeConfig: Konva.ShapeConfig = {
       id,
       type: action,
-      fill: fillColor,
-      stroke: strokeColor,
+      fill,
+      stroke,
+      strokeWidth,
       ...(hasPoints ? { points: [x, y] } : { x, y }),
       ...(isPencilOrEraser
         ? { globalCompositeOperation: compositeOperation }
@@ -88,8 +86,8 @@ const Canvas = () => {
     const currentId = currentShapeId.current;
 
     switch (action) {
-      case ACTIONS.IMAGE:
-      case ACTIONS.RECTANGLE:
+      case "image":
+      case "rectangle":
         updateShape((shape) => {
           if (shape.id === currentId) {
             const dx = shape.x ?? 0;
@@ -103,7 +101,7 @@ const Canvas = () => {
           return shape;
         });
         break;
-      case ACTIONS.CIRCLE:
+      case "circle":
         updateShape((shape) => {
           if (shape.id === currentId) {
             const dx = shape.x ?? 0;
@@ -116,7 +114,7 @@ const Canvas = () => {
           return shape;
         });
         break;
-      case ACTIONS.ARROW:
+      case "arrow":
         updateShape((shape) => {
           if (shape.id === currentId) {
             const initialPoints = shape.points.slice(0, 2) ?? [x, y];
@@ -128,8 +126,8 @@ const Canvas = () => {
           return shape;
         });
         break;
-      case ACTIONS.ERASER:
-      case ACTIONS.PENCIL:
+      case "eraser":
+      case "pencil":
         updateShape((shape) => {
           if (shape.id === currentId) {
             const prevPoints = shape.points ?? [];
@@ -147,13 +145,9 @@ const Canvas = () => {
   const handlePointerUp = () => {
     isPointerDown.current = false;
     if (!currentShapeId.current) return;
-    if (
-      action !== ACTIONS.SELECT &&
-      action !== ACTIONS.PENCIL &&
-      action !== ACTIONS.ERASER
-    ) {
+    if (action !== "select" && action !== "pencil" && action !== "eraser") {
       selectNodeById(currentShapeId.current);
-      setAction(ACTIONS.SELECT);
+      setAction("select");
     }
     currentShapeId.current = null;
   };
@@ -215,7 +209,7 @@ const Canvas = () => {
   };
 
   const handleClickShape = (e: Konva.KonvaPointerEvent) => {
-    if (action === ACTIONS.PENCIL || action === ACTIONS.ERASER) return;
+    if (action === "pencil" || action === "eraser") return;
     selectNodeById(e.target.attrs.id);
   };
 
@@ -229,34 +223,44 @@ const Canvas = () => {
     clearSelection();
   };
 
-  const handleFillColorChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const updateSelectedShapeAttributes = (newAttrs: Konva.ShapeConfig) => {
     const selectedNodes = getAllSelectedNodes();
     const ids = selectedNodes.map((node) => node.attrs.id);
-    if (selectedNodes.length > 0) {
-      updateShape((shape) => {
-        return ids.includes(shape.id)
-          ? { ...shape, fill: e.target.value }
-          : shape;
-      });
-    }
-    setFillColor(e.target.value);
+    updateShapeAttributes(ids, newAttrs);
   };
 
-  const handleStrokeColorChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const selectedNodes = getAllSelectedNodes();
-    const ids = selectedNodes.map((node) => node.attrs.id);
-    if (selectedNodes) {
+  const updateShapeAttributes = (
+    ids: string[],
+    newAttrs: Konva.ShapeConfig
+  ) => {
+    if (ids.length > 0) {
       updateShape((shape) => {
-        return ids.includes(shape.id)
-          ? { ...shape, stroke: e.target.value }
+        const shapeId = shape.id;
+        return shapeId && ids.includes(shapeId)
+          ? { ...shape, ...newAttrs }
           : shape;
       });
     }
-    setStrokeColor(e.target.value);
+  };
+
+  const onFillChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setFill(e.target.value);
+    updateSelectedShapeAttributes({ fill: e.target.value });
+  };
+
+  const onStrokeChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setStroke(e.target.value);
+    updateSelectedShapeAttributes({ stroke: e.target.value });
+  };
+
+  const onStrokeWidthChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const strokeWidth = Number(e.target.value);
+    setStrokeWidth(strokeWidth);
+    updateSelectedShapeAttributes({ strokeWidth });
   };
 
   const addImage = () => {
-    setAction(ACTIONS.IMAGE);
+    setAction("image");
   };
 
   return (
@@ -265,48 +269,51 @@ const Canvas = () => {
         {/* Controls */}
         <div className="absolute top-0 z-10 w-full py-2 ">
           <div className="flex justify-center items-center gap-3 py-2 px-3 w-fit mx-auto border shadow-lg rounded-lg">
-            <ActionButton
-              active={action === ACTIONS.SELECT}
-              onClick={() => setAction(ACTIONS.SELECT)}
+            <Button
+              active={action === "select"}
+              onClick={() => setAction("select")}
               label="커서"
             />
-            <ActionButton
-              active={action === ACTIONS.RECTANGLE}
-              onClick={() => setAction(ACTIONS.RECTANGLE)}
+            <Button
+              active={action === "rectangle"}
+              onClick={() => setAction("rectangle")}
               label="사각형"
             />
-            <ActionButton
-              active={action === ACTIONS.CIRCLE}
-              onClick={() => setAction(ACTIONS.CIRCLE)}
+            <Button
+              active={action === "circle"}
+              onClick={() => setAction("circle")}
               label="원"
             />
-            <ActionButton
-              active={action === ACTIONS.ARROW}
-              onClick={() => setAction(ACTIONS.ARROW)}
+            <Button
+              active={action === "arrow"}
+              onClick={() => setAction("arrow")}
               label="화살표"
             />
-            <ActionButton
-              active={action === ACTIONS.PENCIL}
-              onClick={() => setAction(ACTIONS.PENCIL)}
+            <Button
+              active={action === "pencil"}
+              onClick={() => setAction("pencil")}
               label="펜"
             />
-            <ActionButton
-              active={action === ACTIONS.ERASER}
-              onClick={() => setAction(ACTIONS.ERASER)}
+            <Button
+              active={action === "eraser"}
+              onClick={() => setAction("eraser")}
               label="지우개"
             />
-            <ActionButton onClick={removeShape} label="샥제" />
-            <ColorPicker color={fillColor} onChange={handleFillColorChange} />
-            <ColorPicker
-              color={strokeColor}
-              onChange={handleStrokeColorChange}
-            />
-            <ActionButton onClick={exportCanvasAsImage} label="다운로드" />
-            <ActionButton onClick={exportCanvasAsJSON} label="JSON" />
-            <ActionButton
-              active={action === ACTIONS.IMAGE}
+            <Button onClick={removeShape} label="샥제" />
+            <ColorPicker color={fill} onChange={onFillChange} />
+            <ColorPicker color={stroke} onChange={onStrokeChange} />
+            <Button onClick={exportCanvasAsImage} label="다운로드" />
+            <Button onClick={exportCanvasAsJSON} label="JSON" />
+            <Button
+              active={action === "image"}
               onClick={addImage}
               label="사진 추가 "
+            />
+            <Slider
+              min={1}
+              max={10}
+              value={strokeWidth}
+              onChange={onStrokeWidthChange}
             />
           </div>
         </div>
@@ -316,15 +323,15 @@ const Canvas = () => {
           width={CANVAS_WIDTH}
           height={CANVAS_HEIGHT}
           onPointerDown={() => {
-            if (action === ACTIONS.SELECT) startSelection();
+            if (action === "select") startSelection();
             else handlePointerDown();
           }}
           onPointerMove={() => {
-            if (action === ACTIONS.SELECT) updateSelection();
+            if (action === "select") updateSelection();
             else handlePointerMove();
           }}
           onPointerUp={() => {
-            if (action === ACTIONS.SELECT) endSelection();
+            if (action === "select") endSelection();
             else handlePointerUp();
           }}
         >
@@ -380,7 +387,7 @@ const BackgroundLayer = (props: {
   );
 };
 
-const ActionButton = ({
+const Button = ({
   active,
   label,
   onClick,
@@ -401,3 +408,13 @@ const ActionButton = ({
     {label}
   </button>
 );
+
+const Slider = (props: {
+  id?: string;
+  name?: string;
+  min?: number;
+  max?: number;
+  value?: number;
+  onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
+  [key: string]: unknown;
+}) => <input type="range" {...props} />;

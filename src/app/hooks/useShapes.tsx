@@ -100,7 +100,6 @@ const useShapes = () => {
               key={index}
               lineCap="round"
               lineJoin="round"
-              strokeWidth={2}
               tension={0.5}
               {...node}
             />
