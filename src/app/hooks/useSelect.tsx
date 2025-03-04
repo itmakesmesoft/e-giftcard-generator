@@ -97,6 +97,7 @@ const useSelect = (
       ref={(node) => {
         selectionRef.current = node;
       }}
+      id="selectBox"
       fill="rgba(0,0,255,0.5)"
       visible={false}
       listening={false}

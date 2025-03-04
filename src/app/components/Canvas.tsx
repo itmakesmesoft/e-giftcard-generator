@@ -169,10 +169,49 @@ const Canvas = () => {
     document.body.removeChild(link);
   };
 
+  // TODO. localStorage에 저장하도록 변경
+  // debounce를 이용한 자동 저장 필요
   const exportCanvasAsJSON = () => {
     if (!stageRef.current) return;
-    const json = stageRef.current.toJSON();
-    console.log(json);
+    const children = stageRef.current.getChildren();
+
+    const extractables = ["_shapeLayer", "_drawLayer"];
+    const json = children.filter((child) =>
+      extractables.includes(child.attrs.id)
+    );
+    return json;
+  };
+
+  // TODO. localStorage에서 가져오도록 변경
+  const loadCanvasByJSON = (data: string) => {
+    if (!stageRef.current) return;
+
+    const parsedLayers = JSON.parse(data) as Konva.NodeConfig[];
+
+    // NOTE.
+    // 불러온 도형들을 각각 id에 맞는 레이어에 추가해야 하나,
+    // 기존에 있는 레이어의 초기화 없이 도형을 추가하는 것이 까다로워, 별도의 레이어를 생성하고, stage에 추가하도록 함
+
+    // 추후 이전 내역 저장 후 볼러오는 방식으로 전환할 예정, 기존 레이어를 삭제하는 로직이 추가되어야 함
+
+    for (const nodeConfig of parsedLayers) {
+      const layer = Konva.Node.create(nodeConfig);
+      stageRef.current.add(layer);
+    }
+    sortStagedObject();
+  };
+
+  const sortStagedObject = () => {
+    if (!stageRef.current) return;
+
+    const stage = stageRef.current;
+    const shapeLayer = stage.find("#_shapeLayer");
+    const bgLayer = stage.findOne("#_bgLayer");
+    const selectLayer = stage.findOne("#_selectLayer");
+
+    shapeLayer?.map((item) => item.moveToBottom());
+    bgLayer?.moveToBottom();
+    selectLayer?.moveToTop();
   };
 
   const handleClickShape = (e: Konva.KonvaPointerEvent) => {
@@ -289,21 +328,18 @@ const Canvas = () => {
             else handlePointerUp();
           }}
         >
-          <BackgroundLayer onPointerDown={clearSelection} />
-          <Layer>
+          <BackgroundLayer id="_bgLayer" onPointerDown={clearSelection} />
+          <Layer id="_shapeLayer">
+            {ShapesRenderer({ isDraggable, handleClickShape })}
+          </Layer>
+          <Layer id="_drawLayer">{DrawingRenderer()}</Layer>
+          <Layer id="_selectLayer">
             <SelectionBox />
-            <ShapesRenderer
-              isDraggable={isDraggable}
-              handleClickShape={handleClickShape}
-            />
             <Transformer
               ref={(node) => {
                 transformerRef.current = node;
               }}
             />
-          </Layer>
-          <Layer>
-            <DrawingRenderer />
           </Layer>
         </Stage>
       </div>
@@ -326,10 +362,11 @@ const ColorPicker = ({
 
 const BackgroundLayer = (props: {
   onPointerDown: (e: Konva.KonvaEventObject<PointerEvent>) => void;
+  [key: string]: unknown;
 }) => {
-  const { onPointerDown } = props;
+  const { onPointerDown, ...restProps } = props;
   return (
-    <Layer>
+    <Layer {...restProps}>
       <Rect
         id="bg"
         x={0}
