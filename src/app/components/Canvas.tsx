@@ -43,7 +43,6 @@ const Canvas = () => {
 
   const handlePointerDown = () => {
     if (!stageRef.current) return;
-
     const { x, y } = stageRef.current.getPointerPosition() as Vector2d;
     const id = nanoid();
     const name = "shape";
@@ -74,7 +73,6 @@ const Canvas = () => {
   const handlePointerMove = () => {
     if (!isPointerDown.current || !stageRef.current || !currentShapeId.current)
       return;
-
     const { x, y } = stageRef.current.getPointerPosition() as Vector2d;
     const currentId = currentShapeId.current;
 

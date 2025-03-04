@@ -1,4 +1,6 @@
 import Konva from "konva";
+import { KonvaEventObject, NodeConfig, Node } from "konva/lib/Node";
+import { Vector2d } from "konva/lib/types";
 import { nanoid } from "nanoid";
 import { useState } from "react";
 import { Arrow, Circle, Rect, Image, Line } from "react-konva";
@@ -35,11 +37,23 @@ const useShapes = () => {
     return updated;
   };
 
-  const shapesRenderer = (props: {
-    isDraggable: boolean;
-    handleClickShape?: (e: Konva.KonvaPointerEvent) => void;
-  }) => {
-    const { isDraggable, handleClickShape } = props;
+  const onDragEnd = (e: KonvaEventObject<DragEvent, Node<NodeConfig>>) => {
+    const id = e.target.attrs.id;
+    const { x, y } = e.target.getPosition() as Vector2d;
+    updateShape((shape) => {
+      if (shape.id === id) {
+        return {
+          ...shape,
+          x,
+          y,
+        };
+      }
+      return shape;
+    });
+  };
+
+  const shapesRenderer = (props: { isDraggable: boolean }) => {
+    const { isDraggable } = props;
 
     return shapes.map((node, index) => {
       switch (node.type) {
@@ -50,7 +64,7 @@ const useShapes = () => {
               strokeWidth={2}
               draggable={isDraggable}
               strokeScaleEnabled={false}
-              onPointerDown={handleClickShape}
+              onDragEnd={onDragEnd}
               {...node}
             />
           );
@@ -60,7 +74,7 @@ const useShapes = () => {
               key={index}
               draggable={isDraggable}
               strokeScaleEnabled={false}
-              onPointerDown={handleClickShape}
+              onDragEnd={onDragEnd}
               {...node}
             />
           );
@@ -71,7 +85,7 @@ const useShapes = () => {
               strokeWidth={2}
               draggable={isDraggable}
               strokeScaleEnabled={false}
-              onPointerDown={handleClickShape}
+              onDragEnd={onDragEnd}
               points={node.points}
               {...node}
             />
@@ -83,7 +97,7 @@ const useShapes = () => {
               alt="이미지"
               image={node.image}
               draggable={isDraggable}
-              onPointerDown={handleClickShape}
+              onDragEnd={onDragEnd}
               {...node}
             />
           );
