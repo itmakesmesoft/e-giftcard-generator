@@ -35,7 +35,7 @@ const useShapes = () => {
     return updated;
   };
 
-  const ShapesRenderer = (props: {
+  const shapesRenderer = (props: {
     isDraggable: boolean;
     handleClickShape?: (e: Konva.KonvaPointerEvent) => void;
   }) => {
@@ -91,7 +91,7 @@ const useShapes = () => {
     });
   };
 
-  const DrawingRenderer = () => {
+  const drawingRenderer = () => {
     return shapes.map((node, index) => {
       switch (node.type) {
         case "pencil":
@@ -115,8 +115,10 @@ const useShapes = () => {
     setShapes,
     createShape,
     updateShape,
-    ShapesRenderer,
-    DrawingRenderer,
+    renderLayer: {
+      shapes: shapesRenderer,
+      drawing: drawingRenderer,
+    },
   };
 };
 

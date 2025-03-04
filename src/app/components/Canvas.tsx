@@ -35,14 +35,8 @@ const Canvas = () => {
     setStroke,
     setStrokeWidth,
   } = useControl();
-  const {
-    shapes,
-    setShapes,
-    createShape,
-    updateShape,
-    ShapesRenderer,
-    DrawingRenderer,
-  } = useShapes();
+  const { shapes, setShapes, createShape, updateShape, renderLayer } =
+    useShapes();
 
   const isPointerDown = useRef(false);
   const currentShapeId = useRef<string | null>(null);
@@ -333,7 +327,7 @@ const Canvas = () => {
         >
           <BackgroundLayer id="_bgLayer" onPointerDown={clearSelection} />
           <Layer id="_shapeLayer">
-            {ShapesRenderer({
+            {renderLayer.shapes({
               isDraggable: action === "select",
             })}
           </Layer>
@@ -345,7 +339,7 @@ const Canvas = () => {
               }}
             />
           </Layer>
-          <Layer id="_drawLayer">{DrawingRenderer()}</Layer>
+          <Layer id="_drawLayer">{renderLayer.drawing()}</Layer>
         </Stage>
       </div>
     </>
