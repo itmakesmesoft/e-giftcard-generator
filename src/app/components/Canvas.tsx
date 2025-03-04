@@ -169,6 +169,12 @@ const Canvas = () => {
     document.body.removeChild(link);
   }
 
+  function exportCanvasAsJSON() {
+    if (!stageRef.current) return;
+    const json = stageRef.current.toJSON();
+    console.log(json);
+  }
+
   const handleClickShape = (e: Konva.KonvaPointerEvent) => {
     if (action === ACTIONS.PENCIL || action === ACTIONS.ERASER) return;
     selectNodeById(e.target.attrs.id);
@@ -257,6 +263,7 @@ const Canvas = () => {
               onChange={handleStrokeColorChange}
             />
             <ActionButton onClick={exportCanvasAsImage} label="다운로드" />
+            <ActionButton onClick={exportCanvasAsJSON} label="JSON" />
             <ActionButton
               active={action === ACTIONS.IMAGE}
               onClick={addImage}
@@ -289,7 +296,11 @@ const Canvas = () => {
               isDraggable={isDraggable}
               handleClickShape={handleClickShape}
             />
-            <Transformer ref={transformerRef} />
+            <Transformer
+              ref={(node) => {
+                transformerRef.current = node;
+              }}
+            />
           </Layer>
           <Layer>
             <DrawingRenderer />

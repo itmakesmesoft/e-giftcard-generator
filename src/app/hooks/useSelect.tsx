@@ -94,7 +94,9 @@ const useSelect = (
 
   const SelectionBox = () => (
     <Rect
-      ref={selectionRef}
+      ref={(node) => {
+        selectionRef.current = node;
+      }}
       fill="rgba(0,0,255,0.5)"
       visible={false}
       listening={false}
