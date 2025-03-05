@@ -67,16 +67,22 @@ const useControl = (props?: ControlValues): Controls => {
 
   useEffect(() => {
     if (currentNodes.length === 1) {
-      setFill(currentNodes[0].attrs.fill);
-      setStroke(currentNodes[0].attrs.stroke);
-      setStrokeWidth(currentNodes[0].attrs.strokeWidth);
-      setOpacity(currentNodes[0].attrs.opacity);
-      setDraggable(currentNodes[0].attrs.draggable);
-      setLineJoin(currentNodes[0].attrs.lineJoin);
-      setLineCap(currentNodes[0].attrs.lineCap);
-      setRadius(currentNodes[0].attrs.radius);
+      setFill(currentNodes[0].attrs.fill ?? defaultValues.fill);
+      setStroke(currentNodes[0].attrs.stroke ?? defaultValues.stroke);
+      setStrokeWidth(
+        currentNodes[0].attrs.strokeWidth ?? defaultValues.strokeWidth
+      );
+      setOpacity(currentNodes[0].attrs.opacity ?? defaultValues.opacity);
+      setDraggable(
+        action === "select"
+          ? false
+          : currentNodes[0].attrs.draggable ?? defaultValues.draggable
+      );
+      setLineJoin(currentNodes[0].attrs.lineJoin ?? defaultValues.lineJoin);
+      setLineCap(currentNodes[0].attrs.lineCap ?? defaultValues.lineCap);
+      setRadius(currentNodes[0].attrs.radius ?? defaultValues.radius);
     }
-  }, [currentNodes]);
+  }, [action, currentNodes]);
 
   return {
     // for Shape
