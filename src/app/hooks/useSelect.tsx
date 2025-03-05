@@ -8,7 +8,7 @@ const useSelect = (
   transformerRef: RefObject<Konva.Transformer | null>
 ) => {
   const selectionRef = useRef<Konva.Rect>(null);
-  const isSelecting = useRef<boolean>(false);
+  const isSelectingRef = useRef<boolean>(false);
 
   const selectNodeById = (id: string) => {
     if (!transformerRef.current || !stageRef.current) return;
@@ -18,15 +18,20 @@ const useSelect = (
 
     const node = stage.find(".shape").find((node) => node.attrs.id === id);
     if (node && !selectedNodes.includes(node)) {
-      transformerRef.current.nodes([node]);
+      setSelectNodes([node]);
     }
   };
 
-  const clearSelection = () => {
+  const clearSelectNodes = () => {
     transformerRef.current?.nodes([]);
   };
 
-  const startSelection = () => {
+  const setSelectNodes = (nodes: Konva.Node[]) => {
+    if (!transformerRef.current) return;
+    transformerRef.current.nodes([...nodes]);
+  };
+
+  const startSelectionBox = () => {
     if (!stageRef.current) return;
 
     const pointerPos = stageRef.current.getPointerPosition();
@@ -35,7 +40,7 @@ const useSelect = (
     const selectBox = selectionRef.current;
     if (!selectBox) return;
 
-    isSelecting.current = true;
+    isSelectingRef.current = true;
 
     selectBox.setAttrs({
       x: pointerPos.x,
@@ -45,7 +50,7 @@ const useSelect = (
     });
   };
 
-  const updateSelection = () => {
+  const updateSelectionBox = () => {
     if (!stageRef.current || getSingleSelectedNode()) return;
 
     const pointerPos = stageRef.current.getPointerPosition();
@@ -54,7 +59,7 @@ const useSelect = (
     const selectBox = selectionRef.current;
     if (!selectBox) return;
 
-    if (!isSelecting.current) return;
+    if (!isSelectingRef.current) return;
 
     const { x, y } = selectBox.attrs as Vector2d;
 
@@ -65,8 +70,8 @@ const useSelect = (
     });
   };
 
-  const endSelection = () => {
-    isSelecting.current = false;
+  const endSelectionBox = () => {
+    isSelectingRef.current = false;
     if (!stageRef.current || !selectionRef.current || !transformerRef.current)
       return;
 
@@ -82,7 +87,7 @@ const useSelect = (
         )
       );
 
-    transformerRef.current.nodes(selectedNodes);
+    setSelectNodes(selectedNodes);
     selectBox.visible(false);
   };
 
@@ -106,12 +111,12 @@ const useSelect = (
 
   return {
     selectNodeById,
-    clearSelection,
+    clearSelectNodes,
     getSingleSelectedNode,
     getAllSelectedNodes,
-    startSelection,
-    updateSelection,
-    endSelection,
+    startSelectionBox,
+    updateSelectionBox,
+    endSelectionBox,
     SelectionBox,
   };
 };

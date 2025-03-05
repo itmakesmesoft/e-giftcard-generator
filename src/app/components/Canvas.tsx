@@ -1,10 +1,9 @@
 "use client";
 
 import Konva from "konva";
-import { nanoid } from "nanoid";
 import { ChangeEvent, useRef } from "react";
-import type { Vector2d } from "konva/lib/types";
 import { Layer, Rect, Stage, Transformer } from "react-konva";
+import type { Vector2d } from "konva/lib/types";
 import useSelect from "../hooks/useSelect";
 import useShapes from "../hooks/useShapes";
 import useControl from "../hooks/useControl";
@@ -18,11 +17,11 @@ const Canvas = () => {
 
   const {
     selectNodeById,
-    clearSelection,
+    clearSelectNodes,
     getAllSelectedNodes,
-    startSelection,
-    updateSelection,
-    endSelection,
+    startSelectionBox,
+    updateSelectionBox,
+    endSelectionBox,
     SelectionBox,
   } = useSelect(stageRef, transformerRef);
   const {
@@ -35,51 +34,42 @@ const Canvas = () => {
     setStroke,
     setStrokeWidth,
   } = useControl();
-  const { shapes, setShapes, createShape, updateShape, renderLayer } =
-    useShapes();
+  const {
+    shapes,
+    setShapes,
+    createShape,
+    updateShape,
+    updateCurrentShape,
+    endCreateShape,
+    renderLayer,
+  } = useShapes();
 
   const isPointerDown = useRef(false);
-  const currentShapeId = useRef<string | null>(null);
 
   const handlePointerDown = () => {
     if (!stageRef.current) return;
     const { x, y } = stageRef.current.getPointerPosition() as Vector2d;
-    const id = nanoid();
-    const name = "shape";
 
-    currentShapeId.current = id;
     isPointerDown.current = true;
-
     const hasPoints = ["pencil", "eraser", "arrow"].includes(action);
-    const isPencilOrEraser = action === "pencil" || action === "eraser";
-    const compositeOperation =
-      action === "pencil" ? "source-over" : "destination-out";
 
-    const shapeConfig: Konva.ShapeConfig = {
-      id,
+    createShape({
       type: action,
       fill,
       stroke,
       strokeWidth,
       ...(hasPoints ? { points: [x, y] } : { x, y }),
-      ...(isPencilOrEraser
-        ? { globalCompositeOperation: compositeOperation }
-        : { name }),
-    };
-
-    createShape(shapeConfig);
+    });
   };
 
   const handlePointerMove = () => {
-    if (!isPointerDown.current || !stageRef.current || !currentShapeId.current)
-      return;
+    if (!isPointerDown.current || !stageRef.current) return;
     const { x, y } = stageRef.current.getPointerPosition() as Vector2d;
-    const currentId = currentShapeId.current;
 
     switch (action) {
       case "image":
       case "rectangle":
-        updateShape((shape) => {
+        updateCurrentShape((shape, currentId) => {
           if (shape.id === currentId) {
             const dx = shape.x ?? 0;
             const dy = shape.y ?? 0;
@@ -93,7 +83,7 @@ const Canvas = () => {
         });
         break;
       case "circle":
-        updateShape((shape) => {
+        updateCurrentShape((shape, currentId) => {
           if (shape.id === currentId) {
             const dx = shape.x ?? 0;
             const dy = shape.y ?? 0;
@@ -106,7 +96,7 @@ const Canvas = () => {
         });
         break;
       case "arrow":
-        updateShape((shape) => {
+        updateCurrentShape((shape, currentId) => {
           if (shape.id === currentId) {
             const initialPoints = shape.points.slice(0, 2) ?? [x, y];
             return {
@@ -119,7 +109,7 @@ const Canvas = () => {
         break;
       case "eraser":
       case "pencil":
-        updateShape((shape) => {
+        updateCurrentShape((shape, currentId) => {
           if (shape.id === currentId) {
             const prevPoints = shape.points ?? [];
             return {
@@ -134,13 +124,12 @@ const Canvas = () => {
   };
 
   const handlePointerUp = () => {
-    isPointerDown.current = false;
-    if (!currentShapeId.current) return;
     if (action !== "select" && action !== "pencil" && action !== "eraser") {
-      selectNodeById(currentShapeId.current);
+      const id = endCreateShape();
+      selectNodeById(id);
       setAction("select");
     }
-    currentShapeId.current = null;
+    isPointerDown.current = false;
   };
 
   const exportCanvasAsImage = () => {
@@ -206,7 +195,7 @@ const Canvas = () => {
     const removeIds = selected.map((node) => node.attrs.id);
     const filtered = shapes.filter((shape) => !removeIds.includes(shape.id));
     setShapes(filtered);
-    clearSelection();
+    clearSelectNodes();
   };
 
   const updateSelectedShapeAttributes = (newAttrs: Konva.ShapeConfig) => {
@@ -310,20 +299,20 @@ const Canvas = () => {
           height={CANVAS_HEIGHT}
           onPointerDown={(e) => {
             if (action === "select") {
-              startSelection();
+              startSelectionBox();
               selectNodeById(e.target.attrs.id);
             } else handlePointerDown();
           }}
           onPointerMove={() => {
-            if (action === "select") updateSelection();
+            if (action === "select") updateSelectionBox();
             else handlePointerMove();
           }}
           onPointerUp={() => {
-            if (action === "select") endSelection();
+            if (action === "select") endSelectionBox();
             else handlePointerUp();
           }}
         >
-          <BackgroundLayer id="_bgLayer" onPointerDown={clearSelection} />
+          <BackgroundLayer id="_bgLayer" onPointerDown={clearSelectNodes} />
           <Layer id="_shapeLayer">
             {renderLayer.shapes({
               isDraggable: action === "select",

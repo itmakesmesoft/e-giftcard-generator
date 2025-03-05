@@ -2,17 +2,23 @@ import Konva from "konva";
 import { KonvaEventObject, NodeConfig, Node } from "konva/lib/Node";
 import { Vector2d } from "konva/lib/types";
 import { nanoid } from "nanoid";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Arrow, Circle, Rect, Image, Line } from "react-konva";
 
 const useShapes = () => {
   const [shapes, setShapes] = useState<Konva.ShapeConfig[]>([]);
+  const currentShapeIdRef = useRef<string>(undefined);
 
   const createShape = <T extends Konva.ShapeConfig>(shapeConfig: T) => {
     const id = nanoid();
     const { type, width = 0, height = 0, ...restConfig } = shapeConfig;
     const hasRadius = type === "circle";
     const hasPoints = type === "arrow";
+    const isShape = type !== "pencil" && type !== "eraser";
+    const compositeOperation =
+      type === "pencil" ? "source-over" : "destination-out";
+
+    currentShapeIdRef.current = id;
     const config: Konva.ShapeConfig = {
       id,
       type,
@@ -20,6 +26,9 @@ const useShapes = () => {
       height,
       ...(hasRadius && { radius: 0 }),
       ...(hasPoints && { points: [] }),
+      ...(isShape
+        ? { name: "shape" }
+        : { globalCompositeOperation: compositeOperation }),
       ...restConfig,
     };
 
@@ -27,6 +36,23 @@ const useShapes = () => {
       return [...prevShapes, config];
     });
     return config;
+  };
+
+  const updateCurrentShape = (
+    callback: (shape: Konva.ShapeConfig, currentId: string) => Konva.ShapeConfig
+  ) => {
+    const currentId = currentShapeIdRef.current;
+    if (!currentId) return;
+
+    const updated = shapes.map((shape) => callback(shape, currentId));
+    setShapes(updated);
+    return updated;
+  };
+
+  const endCreateShape = () => {
+    const id = currentShapeIdRef.current as string;
+    currentShapeIdRef.current = undefined;
+    return id;
   };
 
   const updateShape = (
@@ -128,6 +154,8 @@ const useShapes = () => {
     shapes,
     setShapes,
     createShape,
+    updateCurrentShape,
+    endCreateShape,
     updateShape,
     renderLayer: {
       shapes: shapesRenderer,
