@@ -78,55 +78,43 @@ const Canvas = () => {
     switch (action) {
       case "image":
       case "rectangle":
-        updateCurrentShape((shape, currentId) => {
-          if (shape.id === currentId) {
-            const dx = shape.x ?? 0;
-            const dy = shape.y ?? 0;
-            return {
-              ...shape,
-              width: x - dx,
-              height: y - dy,
-            };
-          }
-          return shape;
+        updateCurrentShape((shape) => {
+          const dx = shape.x ?? 0;
+          const dy = shape.y ?? 0;
+          return {
+            ...shape,
+            width: x - dx,
+            height: y - dy,
+          };
         });
         break;
       case "circle":
-        updateCurrentShape((shape, currentId) => {
-          if (shape.id === currentId) {
-            const dx = shape.x ?? 0;
-            const dy = shape.y ?? 0;
-            return {
-              ...shape,
-              radius: ((y - dy) ** 2 + (x - dx) ** 2) ** 0.5,
-            };
-          }
-          return shape;
+        updateCurrentShape((shape) => {
+          const dx = shape.x ?? 0;
+          const dy = shape.y ?? 0;
+          return {
+            ...shape,
+            radius: ((y - dy) ** 2 + (x - dx) ** 2) ** 0.5,
+          };
         });
         break;
       case "arrow":
-        updateCurrentShape((shape, currentId) => {
-          if (shape.id === currentId) {
-            const initialPoints = shape.points.slice(0, 2) ?? [x, y];
-            return {
-              ...shape,
-              points: [...initialPoints, x, y],
-            };
-          }
-          return shape;
+        updateCurrentShape((shape) => {
+          const initialPoints = shape.points.slice(0, 2) ?? [x, y];
+          return {
+            ...shape,
+            points: [...initialPoints, x, y],
+          };
         });
         break;
       case "eraser":
       case "pencil":
-        updateCurrentShape((shape, currentId) => {
-          if (shape.id === currentId) {
-            const prevPoints = shape.points ?? [];
-            return {
-              ...shape,
-              points: [...prevPoints, x, y],
-            };
-          }
-          return shape;
+        updateCurrentShape((shape) => {
+          const prevPoints = shape.points ?? [];
+          return {
+            ...shape,
+            points: [...prevPoints, x, y],
+          };
         });
         break;
     }
@@ -307,9 +295,8 @@ const Canvas = () => {
         width={CANVAS_WIDTH}
         height={CANVAS_HEIGHT}
         onPointerDown={(e) => {
-          if (action === "select") {
-            startSelectionBox(e);
-          } else handlePointerDown();
+          if (action === "select") startSelectionBox(e);
+          else handlePointerDown();
         }}
         onPointerMove={() => {
           if (action === "select") updateSelectionBox();
@@ -329,11 +316,7 @@ const Canvas = () => {
         <Layer id="_drawLayer">{renderLayer.drawing()}</Layer>
         <Layer id="_selectLayer">
           <SelectionBox />
-          <Transformer
-            ref={(node) => {
-              transformerRef.current = node;
-            }}
-          />
+          <Transformer ref={transformerRef} />
         </Layer>
       </Stage>
     </div>

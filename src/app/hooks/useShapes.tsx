@@ -39,12 +39,15 @@ const useShapes = () => {
   };
 
   const updateCurrentShape = (
-    callback: (shape: Konva.ShapeConfig, currentId: string) => Konva.ShapeConfig
+    callback: (shape: Konva.ShapeConfig) => Konva.ShapeConfig
   ) => {
     const currentId = currentShapeIdRef.current;
     if (!currentId) return;
 
-    const updated = shapes.map((shape) => callback(shape, currentId));
+    const updated = shapes.map((shape) => {
+      if (shape.id === currentId) return callback(shape);
+      return shape;
+    });
     setShapes(updated);
     return updated;
   };
