@@ -7,9 +7,17 @@ import type { Vector2d } from "konva/lib/types";
 import useSelect from "../hooks/useSelect";
 import useShapes from "../hooks/useShapes";
 import useControl from "../hooks/useControl";
+import { CanvasProvider } from "../context/canvas";
 
 const CANVAS_WIDTH = 1000;
 const CANVAS_HEIGHT = 600;
+
+const WrapperCanvas = () => (
+  <CanvasProvider>
+    <Canvas />
+  </CanvasProvider>
+);
+export default WrapperCanvas;
 
 const Canvas = () => {
   const stageRef = useRef<Konva.Stage>(null);
@@ -24,6 +32,7 @@ const Canvas = () => {
     endSelectionBox,
     SelectionBox,
   } = useSelect(stageRef, transformerRef);
+
   const {
     action,
     fill,
@@ -239,100 +248,97 @@ const Canvas = () => {
   };
 
   return (
-    <>
-      <div className="relative w-full h-screen overflow-hidden">
-        {/* Controls */}
-        <div className="absolute top-0 z-10 w-full py-2 ">
-          <div className="flex justify-center items-center gap-3 py-2 px-3 w-fit mx-auto border shadow-lg rounded-lg">
-            <Button
-              active={action === "select"}
-              onClick={() => setAction("select")}
-              label="커서"
-            />
-            <Button
-              active={action === "rectangle"}
-              onClick={() => setAction("rectangle")}
-              label="사각형"
-            />
-            <Button
-              active={action === "circle"}
-              onClick={() => setAction("circle")}
-              label="원"
-            />
-            <Button
-              active={action === "arrow"}
-              onClick={() => setAction("arrow")}
-              label="화살표"
-            />
-            <Button
-              active={action === "pencil"}
-              onClick={() => setAction("pencil")}
-              label="펜"
-            />
-            <Button
-              active={action === "eraser"}
-              onClick={() => setAction("eraser")}
-              label="지우개"
-            />
-            <Button onClick={removeShape} label="샥제" />
-            <ColorPicker color={fill} onChange={onFillChange} />
-            <ColorPicker color={stroke} onChange={onStrokeChange} />
-            <Button onClick={exportCanvasAsImage} label="다운로드" />
-            <Button onClick={saveToLocalStorage} label="저장" />
-            <Button onClick={loadFromLocalStorage} label="불러오기" />
-            <Button
-              active={action === "image"}
-              onClick={addImage}
-              label="사진 추가 "
-            />
-            <Slider
-              min={1}
-              max={50}
-              value={strokeWidth}
-              onChange={onStrokeWidthChange}
-            />
-          </div>
+    <div className="relative w-full h-screen overflow-hidden">
+      {/* Controls */}
+      <div className="absolute top-0 z-10 w-full py-2 ">
+        <div className="flex justify-center items-center gap-3 py-2 px-3 w-fit mx-auto border shadow-lg rounded-lg">
+          <Button
+            active={action === "select"}
+            onClick={() => setAction("select")}
+            label="커서"
+          />
+          <Button
+            active={action === "rectangle"}
+            onClick={() => setAction("rectangle")}
+            label="사각형"
+          />
+          <Button
+            active={action === "circle"}
+            onClick={() => setAction("circle")}
+            label="원"
+          />
+          <Button
+            active={action === "arrow"}
+            onClick={() => setAction("arrow")}
+            label="화살표"
+          />
+          <Button
+            active={action === "pencil"}
+            onClick={() => setAction("pencil")}
+            label="펜"
+          />
+          <Button
+            active={action === "eraser"}
+            onClick={() => setAction("eraser")}
+            label="지우개"
+          />
+          <Button onClick={removeShape} label="샥제" />
+          <ColorPicker color={fill} onChange={onFillChange} />
+          <ColorPicker color={stroke} onChange={onStrokeChange} />
+          <Button onClick={exportCanvasAsImage} label="다운로드" />
+          <Button onClick={saveToLocalStorage} label="저장" />
+          <Button onClick={loadFromLocalStorage} label="불러오기" />
+          <Button
+            active={action === "image"}
+            onClick={addImage}
+            label="사진 추가 "
+          />
+          <Slider
+            min={1}
+            max={50}
+            value={strokeWidth}
+            onChange={onStrokeWidthChange}
+          />
         </div>
-        {/* Canvas */}
-        <Stage
-          ref={stageRef}
-          width={CANVAS_WIDTH}
-          height={CANVAS_HEIGHT}
-          onPointerDown={(e) => {
-            if (action === "select") {
-              startSelectionBox(e);
-            } else handlePointerDown();
-          }}
-          onPointerMove={() => {
-            if (action === "select") updateSelectionBox();
-            else handlePointerMove();
-          }}
-          onPointerUp={() => {
-            if (action === "select") endSelectionBox();
-            else handlePointerUp();
-          }}
-        >
-          <BackgroundLayer id="_bgLayer" onPointerDown={clearSelectNodes} />
-          <Layer id="_shapeLayer">
-            {renderLayer.shapes({
-              isDraggable: action === "select",
-            })}
-          </Layer>
-          <Layer id="_drawLayer">{renderLayer.drawing()}</Layer>
-          <Layer id="_selectLayer">
-            <SelectionBox />
-            <Transformer
-              ref={(node) => {
-                transformerRef.current = node;
-              }}
-            />
-          </Layer>
-        </Stage>
       </div>
-    </>
+      {/* Canvas */}
+      <Stage
+        ref={stageRef}
+        width={CANVAS_WIDTH}
+        height={CANVAS_HEIGHT}
+        onPointerDown={(e) => {
+          if (action === "select") {
+            startSelectionBox(e);
+          } else handlePointerDown();
+        }}
+        onPointerMove={() => {
+          if (action === "select") updateSelectionBox();
+          else handlePointerMove();
+        }}
+        onPointerUp={() => {
+          if (action === "select") endSelectionBox();
+          else handlePointerUp();
+        }}
+      >
+        <BackgroundLayer id="_bgLayer" onPointerDown={clearSelectNodes} />
+        <Layer id="_shapeLayer">
+          {renderLayer.shapes({
+            isDraggable: action === "select",
+          })}
+        </Layer>
+        <Layer id="_drawLayer">{renderLayer.drawing()}</Layer>
+        <Layer id="_selectLayer">
+          <SelectionBox />
+          <Transformer
+            ref={(node) => {
+              transformerRef.current = node;
+            }}
+          />
+        </Layer>
+      </Stage>
+    </div>
   );
 };
-export default Canvas;
 
 const ColorPicker = ({
   color,

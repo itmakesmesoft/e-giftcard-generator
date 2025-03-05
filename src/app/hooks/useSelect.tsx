@@ -1,22 +1,29 @@
 import Konva from "konva";
 import { Vector2d } from "konva/lib/types";
-import { RefObject, useRef } from "react";
+import { RefObject, useContext, useRef } from "react";
 import { Rect } from "react-konva";
+import { CanvasContext } from "../context/canvas";
 
 const useSelect = (
   stageRef: RefObject<Konva.Stage | null>,
   transformerRef: RefObject<Konva.Transformer | null>
 ) => {
+  const { setCurrentNodes } = useContext(CanvasContext);
+
   const selectionRef = useRef<Konva.Rect>(null);
+  const selectBoxPositionRef = useRef<Konva.ShapeConfig>(null);
   const isSelectingRef = useRef<boolean>(false);
 
   const clearSelectNodes = () => {
     transformerRef.current?.nodes([]);
+    setCurrentNodes([]);
   };
 
   const setSelectNodes = (nodes: Konva.Node[]) => {
     if (!transformerRef.current) return;
+    const selectNodes = [...nodes];
     transformerRef.current.nodes([...nodes]);
+    setCurrentNodes(selectNodes);
   };
 
   const selectNodeById = (id: string) => {
@@ -46,15 +53,15 @@ const useSelect = (
     const selectBox = selectionRef.current;
     if (!selectBox) return;
 
-    isSelectingRef.current = true;
+    const position = {
+      x: Math.round(pointerPos.x),
+      y: Math.round(pointerPos.y),
+    };
 
+    selectBox.setAttrs(position);
+    selectBoxPositionRef.current = position;
     selectNodeById(e.target.attrs.id);
-    selectBox.setAttrs({
-      x: pointerPos.x,
-      y: pointerPos.y,
-      width: 0,
-      height: 0,
-    });
+    isSelectingRef.current = true;
   };
 
   const updateSelectionBox = () => {
@@ -64,15 +71,19 @@ const useSelect = (
     if (!pointerPos) return;
 
     const selectBox = selectionRef.current;
-    if (!selectBox) return;
+    const selectBoxPosition = selectBoxPositionRef.current;
+    if (!selectBox || !selectBoxPosition) return;
 
     if (!isSelectingRef.current) return;
 
-    const { x, y } = selectBox.attrs as Vector2d;
+    const { x, y } = selectBoxPosition as Vector2d;
+
     selectBox.setAttrs({
-      visible: true,
+      x,
+      y,
       width: Number(pointerPos.x - x),
       height: Number(pointerPos.y - y),
+      visible: true,
     });
   };
 
@@ -98,6 +109,7 @@ const useSelect = (
 
   const SelectionBox = () => (
     <Rect
+      // 추후 수정 필요
       ref={(node) => {
         selectionRef.current = node;
       }}

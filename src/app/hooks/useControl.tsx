@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useCanvasContext } from "../context/canvas";
 
 type ActionType =
   | "select"
@@ -61,6 +62,21 @@ const useControl = (props?: ControlValues): Controls => {
   const [lineCap, setLineCap] = useState<string>(config.lineCap);
   const [radius, setRadius] = useState<number>(config.radius);
   const [image, setImage] = useState<unknown>(config.image);
+
+  const { currentNodes } = useCanvasContext();
+
+  useEffect(() => {
+    if (currentNodes.length === 1) {
+      setFill(currentNodes[0].attrs.fill);
+      setStroke(currentNodes[0].attrs.stroke);
+      setStrokeWidth(currentNodes[0].attrs.strokeWidth);
+      setOpacity(currentNodes[0].attrs.opacity);
+      setDraggable(currentNodes[0].attrs.draggable);
+      setLineJoin(currentNodes[0].attrs.lineJoin);
+      setLineCap(currentNodes[0].attrs.lineCap);
+      setRadius(currentNodes[0].attrs.radius);
+    }
+  }, [currentNodes]);
 
   return {
     // for Shape
