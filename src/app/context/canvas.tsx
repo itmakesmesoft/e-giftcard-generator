@@ -5,11 +5,15 @@ interface CanvasContextValueProps {
   setCurrentNodes: (node: Konva.Node[]) => void;
   currentNodes: Konva.Node[];
 }
+
 const defaultValue: CanvasContextValueProps = {
   setCurrentNodes: () => {},
   currentNodes: [],
 };
-export const CanvasContext = createContext(defaultValue);
+
+const CanvasContext = createContext(defaultValue);
+
+export const useCanvasContext = () => useContext(CanvasContext);
 
 export const CanvasProvider = ({ children }: { children: ReactNode }) => {
   const [currentNodes, setCurrentNodes] = useState<Konva.Node[]>([]);
@@ -19,5 +23,3 @@ export const CanvasProvider = ({ children }: { children: ReactNode }) => {
     </CanvasContext.Provider>
   );
 };
-
-export const useCanvasContext = () => useContext(CanvasContext);

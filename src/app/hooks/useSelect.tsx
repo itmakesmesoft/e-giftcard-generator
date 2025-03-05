@@ -1,14 +1,14 @@
 import Konva from "konva";
-import { Vector2d } from "konva/lib/types";
-import { RefObject, useContext, useRef } from "react";
 import { Rect } from "react-konva";
-import { CanvasContext } from "../context/canvas";
+import { RefObject, useRef } from "react";
+import { Vector2d } from "konva/lib/types";
+import { useCanvasContext } from "../context/canvas";
 
 const useSelect = (
   stageRef: RefObject<Konva.Stage | null>,
   transformerRef: RefObject<Konva.Transformer | null>
 ) => {
-  const { setCurrentNodes } = useContext(CanvasContext);
+  const { setCurrentNodes } = useCanvasContext();
 
   const selectionRef = useRef<Konva.Rect>(null);
   const selectBoxPositionRef = useRef<Konva.ShapeConfig>(null);

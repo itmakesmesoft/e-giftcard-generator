@@ -1,9 +1,9 @@
 import Konva from "konva";
-import { KonvaEventObject, NodeConfig, Node } from "konva/lib/Node";
-import { Vector2d } from "konva/lib/types";
 import { nanoid } from "nanoid";
 import { useRef, useState } from "react";
-import { Arrow, Circle, Rect, Image, Line } from "react-konva";
+import { Vector2d } from "konva/lib/types";
+import { Arrow, Circle, Rect, Image, Line, Text } from "react-konva";
+import { KonvaEventObject, NodeConfig, Node } from "konva/lib/Node";
 
 const useShapes = () => {
   const [shapes, setShapes] = useState<Konva.ShapeConfig[]>([]);
@@ -130,6 +130,8 @@ const useShapes = () => {
               {...node}
             />
           );
+        case "text":
+          return <Text />;
       }
     });
   };
