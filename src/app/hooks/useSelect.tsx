@@ -10,6 +10,15 @@ const useSelect = (
   const selectionRef = useRef<Konva.Rect>(null);
   const isSelectingRef = useRef<boolean>(false);
 
+  const clearSelectNodes = () => {
+    transformerRef.current?.nodes([]);
+  };
+
+  const setSelectNodes = (nodes: Konva.Node[]) => {
+    if (!transformerRef.current) return;
+    transformerRef.current.nodes([...nodes]);
+  };
+
   const selectNodeById = (id: string) => {
     if (!transformerRef.current || !stageRef.current) return;
 
@@ -22,14 +31,11 @@ const useSelect = (
     }
   };
 
-  const clearSelectNodes = () => {
-    transformerRef.current?.nodes([]);
-  };
+  const getSingleSelectedNode = (): Konva.Node | undefined =>
+    transformerRef.current?.getNode();
 
-  const setSelectNodes = (nodes: Konva.Node[]) => {
-    if (!transformerRef.current) return;
-    transformerRef.current.nodes([...nodes]);
-  };
+  const getAllSelectedNodes = (): Konva.Node[] =>
+    transformerRef.current?.getNodes() ?? [];
 
   const startSelectionBox = (e: Konva.KonvaEventObject<PointerEvent>) => {
     if (!stageRef.current) return;
@@ -63,7 +69,6 @@ const useSelect = (
     if (!isSelectingRef.current) return;
 
     const { x, y } = selectBox.attrs as Vector2d;
-
     selectBox.setAttrs({
       visible: true,
       width: Number(pointerPos.x - x),
@@ -87,16 +92,9 @@ const useSelect = (
           node.getClientRect()
         )
       );
-
     setSelectNodes(selectedNodes);
     selectBox.visible(false);
   };
-
-  const getSingleSelectedNode = (): Konva.Node | undefined =>
-    transformerRef.current?.getNode();
-
-  const getAllSelectedNodes = (): Konva.Node[] =>
-    transformerRef.current?.getNodes() ?? [];
 
   const SelectionBox = () => (
     <Rect

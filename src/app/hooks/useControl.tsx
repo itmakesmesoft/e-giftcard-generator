@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useState } from "react";
+import { useState } from "react";
 
 type ActionType =
   | "select"
@@ -23,16 +23,16 @@ interface ControlValues {
 }
 
 interface Controls extends ControlValues {
-  setAction: Dispatch<SetStateAction<ActionType>>;
-  setFill: Dispatch<SetStateAction<string>>;
-  setStroke: Dispatch<SetStateAction<string>>;
-  setStrokeWidth: Dispatch<SetStateAction<number>>;
-  setOpacity: Dispatch<SetStateAction<number>>;
-  setDraggable: Dispatch<SetStateAction<boolean>>;
-  setLineJoin: Dispatch<SetStateAction<string>>;
-  setLineCap: Dispatch<SetStateAction<string>>;
-  setRadius: Dispatch<SetStateAction<number>>;
-  setImage: Dispatch<SetStateAction<unknown>>;
+  setAction: (prop: ActionType) => void;
+  setFill: (prop: string) => void;
+  setStroke: (prop: string) => void;
+  setStrokeWidth: (prop: number) => void;
+  setOpacity: (prop: number) => void;
+  setDraggable: (prop: boolean) => void;
+  setLineJoin: (prop: string) => void;
+  setLineCap: (prop: string) => void;
+  setRadius: (prop: number) => void;
+  setImage: (prop: unknown) => void;
 }
 
 const defaultValues: ControlValues = {
