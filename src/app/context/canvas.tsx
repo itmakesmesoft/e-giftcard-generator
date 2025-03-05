@@ -2,13 +2,13 @@ import Konva from "konva";
 import { createContext, ReactNode, useContext, useState } from "react";
 
 interface CanvasContextValueProps {
-  setCurrentNodes: (node: Konva.Node[]) => void;
-  currentNodes: Konva.Node[];
+  setSelectedNodes: (node: Konva.Node[]) => void;
+  selectedNodes: Konva.Node[];
 }
 
 const defaultValue: CanvasContextValueProps = {
-  setCurrentNodes: () => {},
-  currentNodes: [],
+  setSelectedNodes: () => {},
+  selectedNodes: [],
 };
 
 const CanvasContext = createContext(defaultValue);
@@ -16,9 +16,9 @@ const CanvasContext = createContext(defaultValue);
 export const useCanvasContext = () => useContext(CanvasContext);
 
 export const CanvasProvider = ({ children }: { children: ReactNode }) => {
-  const [currentNodes, setCurrentNodes] = useState<Konva.Node[]>([]);
+  const [selectedNodes, setSelectedNodes] = useState<Konva.Node[]>([]);
   return (
-    <CanvasContext.Provider value={{ currentNodes, setCurrentNodes }}>
+    <CanvasContext.Provider value={{ selectedNodes, setSelectedNodes }}>
       {children}
     </CanvasContext.Provider>
   );

@@ -10,7 +10,7 @@ const EditableText = (props: Konva.TextConfig) => {
   const textRef = useRef<Konva.Text>(null);
   const [value, setValue] = useState<string>(text);
   const [isFocus, setIsFocus] = useState<boolean>(true);
-  const { currentNodes } = useCanvasContext();
+  const { selectedNodes } = useCanvasContext();
 
   const node = textRef.current;
   const width = node?.width() ?? props.width;
@@ -18,11 +18,11 @@ const EditableText = (props: Konva.TextConfig) => {
 
   useEffect(() => {
     if (!textRef.current) return;
-    for (const node of currentNodes) {
+    for (const node of selectedNodes) {
       if (node === textRef.current) return;
     }
     return setIsFocus(false);
-  }, [currentNodes]);
+  }, [selectedNodes]);
 
   return (
     <>

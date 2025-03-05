@@ -8,7 +8,7 @@ const useSelect = (
   stageRef: RefObject<Konva.Stage | null>,
   transformerRef: RefObject<Konva.Transformer | null>
 ) => {
-  const { setCurrentNodes } = useCanvasContext();
+  const { setSelectedNodes } = useCanvasContext();
 
   const selectionRef = useRef<Konva.Rect>(null);
   const selectBoxPositionRef = useRef<Konva.ShapeConfig>(null);
@@ -16,14 +16,14 @@ const useSelect = (
 
   const clearSelectNodes = () => {
     transformerRef.current?.nodes([]);
-    setCurrentNodes([]);
+    setSelectedNodes([]);
   };
 
   const setSelectNodes = (nodes: Konva.Node[]) => {
     if (!transformerRef.current) return;
     const selectNodes = [...nodes];
     transformerRef.current.nodes([...nodes]);
-    setCurrentNodes(selectNodes);
+    setSelectedNodes(selectNodes);
   };
 
   const selectNodeById = (id: string) => {

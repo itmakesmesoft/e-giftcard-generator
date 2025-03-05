@@ -2,10 +2,10 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { readCodeByImage } from "../utils/code/reader";
-import { generateCode } from "../utils/code/generator";
-import { convertBarcodeFormat } from "@/utils/code/adapter";
-import type { GeneraterFormatType } from "@/utils/code/type";
+import { readCodeByImage } from "../utils/reader";
+import { generateCode } from "../utils/generator";
+import { convertBarcodeFormat } from "@/utils/adapter";
+import type { GeneraterFormatType } from "@/utils/type";
 
 export default function Home() {
   const [image, setImage] = useState<Base64URLString | null>(null);

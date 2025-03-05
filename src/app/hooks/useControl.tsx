@@ -83,34 +83,28 @@ const useControl = (props?: ControlValues): Controls => {
   const [fontFamily, setFontFamily] = useState<string>(config.fontFamily);
   const [fontStyle, setFontStyle] = useState<string>(config.fontStyle);
 
-  const { currentNodes } = useCanvasContext();
+  const { selectedNodes } = useCanvasContext();
 
   useEffect(() => {
-    if (currentNodes.length === 1) {
-      setFill(currentNodes[0].attrs.fill ?? defaultValues.fill);
-      setStroke(currentNodes[0].attrs.stroke ?? defaultValues.stroke);
-      setStrokeWidth(
-        currentNodes[0].attrs.strokeWidth ?? defaultValues.strokeWidth
-      );
-      setOpacity(currentNodes[0].attrs.opacity ?? defaultValues.opacity);
+    if (selectedNodes.length === 1) {
+      const attrs = selectedNodes[0].attrs;
+
+      setFill(attrs.fill ?? defaultValues.fill);
+      setStroke(attrs.stroke ?? defaultValues.stroke);
+      setStrokeWidth(attrs.strokeWidth ?? defaultValues.strokeWidth);
+      setOpacity(attrs.opacity ?? defaultValues.opacity);
       setDraggable(
-        action === "select"
-          ? false
-          : currentNodes[0].attrs.draggable ?? defaultValues.draggable
+        action === "select" ? false : attrs.draggable ?? defaultValues.draggable
       );
-      setLineJoin(currentNodes[0].attrs.lineJoin ?? defaultValues.lineJoin);
-      setLineCap(currentNodes[0].attrs.lineCap ?? defaultValues.lineCap);
-      setRadius(currentNodes[0].attrs.radius ?? defaultValues.radius);
-      setFontSize(currentNodes[0].attrs.fontSize ?? defaultValues.fontSize);
-      setFontWeight(
-        currentNodes[0].attrs.fontWeight ?? defaultValues.fontWeight
-      );
-      setFontFamily(
-        currentNodes[0].attrs.fontFamily ?? defaultValues.fontFamily
-      );
-      setFontStyle(currentNodes[0].attrs.fontStyle ?? defaultValues.fontStyle);
+      setLineJoin(attrs.lineJoin ?? defaultValues.lineJoin);
+      setLineCap(attrs.lineCap ?? defaultValues.lineCap);
+      setRadius(attrs.radius ?? defaultValues.radius);
+      setFontSize(attrs.fontSize ?? defaultValues.fontSize);
+      setFontWeight(attrs.fontWeight ?? defaultValues.fontWeight);
+      setFontFamily(attrs.fontFamily ?? defaultValues.fontFamily);
+      setFontStyle(attrs.fontStyle ?? defaultValues.fontStyle);
     }
-  }, [action, currentNodes]);
+  }, [action, selectedNodes]);
 
   return {
     // for Shape

@@ -7,6 +7,7 @@ import { CanvasProvider } from "@/app/context/canvas";
 import { Layer, Stage, Transformer } from "react-konva";
 import { useSelect, useControl, useShapes } from "@/app/hooks";
 import { Slider, Button, Select, ColorPicker, BackgroundLayer } from "./index";
+import { loadFromLocalStorage, saveToLocalStorage } from "@/utils/canvas";
 
 const CANVAS_WIDTH = 1000;
 const CANVAS_HEIGHT = 600;
@@ -111,45 +112,28 @@ const Canvas = () => {
     const extractIds = ["_shapeLayer", "_drawLayer"];
 
     const json = children
-      .filter((layer) => {
-        const layerId = layer.attrs.id;
-        return extractIds.includes(layerId);
-      })
+      .filter((layer) => extractIds.includes(layer.attrs.id))
       .map((layer) => layer.children)
       .flat();
-    return json;
+
+    return JSON.parse(JSON.stringify(json));
   };
 
-  const loadCanvasByJSON = (data: string) => {
+  const loadCanvasByJSON = (data: Konva.Layer[]) => {
     if (!stageRef.current) return;
-    const shapes = JSON.parse(data)?.map((item: string) =>
-      JSON.parse(item)
-    ) as Konva.Layer[];
 
-    setShapes(shapes.map(({ attrs }) => attrs));
+    setShapes(data.map(({ attrs }) => attrs));
   };
 
-  const saveToLocalStorage = () => {
-    try {
-      const dataAsjson = exportCanvasAsJSON();
-      window.localStorage.setItem("autoSaved", JSON.stringify(dataAsjson));
-      return true;
-    } catch (err) {
-      throw err;
-    }
+  const saveCanvas = () => {
+    const exportedData = exportCanvasAsJSON();
+    if (!exportedData) return;
+    saveToLocalStorage(exportedData);
   };
 
-  const loadFromLocalStorage = () => {
-    try {
-      const dataAsString = window.localStorage.getItem("autoSaved");
-      if (dataAsString) {
-        loadCanvasByJSON(dataAsString);
-        return true;
-      }
-      return false;
-    } catch (err) {
-      throw err;
-    }
+  const loadCanvas = () => {
+    const loadedData = loadFromLocalStorage();
+    loadCanvasByJSON(loadedData);
   };
 
   const startShapeCreation = () => {
@@ -303,8 +287,8 @@ const Canvas = () => {
           <ColorPicker color={fill} onChange={onFillChange} />
           <ColorPicker color={stroke} onChange={onStrokeChange} />
           <Button onClick={exportCanvasAsImage} label="다운로드" />
-          <Button onClick={saveToLocalStorage} label="저장" />
-          <Button onClick={loadFromLocalStorage} label="불러오기" />
+          <Button onClick={saveCanvas} label="저장" />
+          <Button onClick={loadCanvas} label="불러오기" />
           <Button
             active={action === "image"}
             onClick={addImage}
