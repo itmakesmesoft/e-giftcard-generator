@@ -143,8 +143,6 @@ const Canvas = () => {
     document.body.removeChild(link);
   };
 
-  // TODO. localStorage에 저장하도록 변경
-  // debounce를 이용한 자동 저장 필요
   const exportCanvasAsJSON = () => {
     if (!stageRef.current) return;
     const children = stageRef.current.getChildren();
@@ -156,36 +154,38 @@ const Canvas = () => {
     return json;
   };
 
-  // TODO. localStorage에서 가져오도록 변경
   const loadCanvasByJSON = (data: string) => {
     if (!stageRef.current) return;
 
-    const parsedLayers = JSON.parse(data) as Konva.NodeConfig[];
+    const parsedLayers = JSON.parse(data)?.map((item: string) =>
+      JSON.parse(item)
+    ) as Konva.Layer[];
 
-    // NOTE.
-    // 불러온 도형들을 각각 id에 맞는 레이어에 추가해야 하나,
-    // 기존에 있는 레이어의 초기화 없이 도형을 추가하는 것이 까다로워, 별도의 레이어를 생성하고, stage에 추가하도록 함
-
-    // 추후 이전 내역 저장 후 볼러오는 방식으로 전환할 예정, 기존 레이어를 삭제하는 로직이 추가되어야 함
-
-    for (const nodeConfig of parsedLayers) {
-      const layer = Konva.Node.create(nodeConfig);
-      stageRef.current.add(layer);
-    }
-    sortStagedObject();
+    const shapes = parsedLayers.map((layer) => layer.children).flat();
+    setShapes(shapes.map(({ attrs }) => attrs));
   };
 
-  const sortStagedObject = () => {
-    if (!stageRef.current) return;
+  const saveToLocalStorage = () => {
+    try {
+      const dataAsjson = exportCanvasAsJSON();
+      window.localStorage.setItem("autoSaved", JSON.stringify(dataAsjson));
+      return true;
+    } catch (err) {
+      throw err;
+    }
+  };
 
-    const stage = stageRef.current;
-    const shapeLayer = stage.find("#_shapeLayer");
-    const bgLayer = stage.findOne("#_bgLayer");
-    const selectLayer = stage.findOne("#_selectLayer");
-
-    shapeLayer?.map((item) => item.moveToBottom());
-    bgLayer?.moveToBottom();
-    selectLayer?.moveToTop();
+  const loadFromLocalStorage = () => {
+    try {
+      const dataAsString = window.localStorage.getItem("autoSaved");
+      if (dataAsString) {
+        loadCanvasByJSON(dataAsString);
+        return true;
+      }
+      return false;
+    } catch (err) {
+      throw err;
+    }
   };
 
   const removeShape = () => {
@@ -278,7 +278,8 @@ const Canvas = () => {
             <ColorPicker color={fill} onChange={onFillChange} />
             <ColorPicker color={stroke} onChange={onStrokeChange} />
             <Button onClick={exportCanvasAsImage} label="다운로드" />
-            <Button onClick={exportCanvasAsJSON} label="JSON" />
+            <Button onClick={saveToLocalStorage} label="저장" />
+            <Button onClick={loadFromLocalStorage} label="불러오기" />
             <Button
               active={action === "image"}
               onClick={addImage}
@@ -299,8 +300,7 @@ const Canvas = () => {
           height={CANVAS_HEIGHT}
           onPointerDown={(e) => {
             if (action === "select") {
-              startSelectionBox();
-              selectNodeById(e.target.attrs.id);
+              startSelectionBox(e);
             } else handlePointerDown();
           }}
           onPointerMove={() => {
@@ -318,6 +318,7 @@ const Canvas = () => {
               isDraggable: action === "select",
             })}
           </Layer>
+          <Layer id="_drawLayer">{renderLayer.drawing()}</Layer>
           <Layer id="_selectLayer">
             <SelectionBox />
             <Transformer
@@ -326,7 +327,6 @@ const Canvas = () => {
               }}
             />
           </Layer>
-          <Layer id="_drawLayer">{renderLayer.drawing()}</Layer>
         </Stage>
       </div>
     </>

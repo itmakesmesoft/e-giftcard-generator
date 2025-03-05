@@ -31,7 +31,7 @@ const useSelect = (
     transformerRef.current.nodes([...nodes]);
   };
 
-  const startSelectionBox = () => {
+  const startSelectionBox = (e: Konva.KonvaEventObject<PointerEvent>) => {
     if (!stageRef.current) return;
 
     const pointerPos = stageRef.current.getPointerPosition();
@@ -42,6 +42,7 @@ const useSelect = (
 
     isSelectingRef.current = true;
 
+    selectNodeById(e.target.attrs.id);
     selectBox.setAttrs({
       x: pointerPos.x,
       y: pointerPos.y,
