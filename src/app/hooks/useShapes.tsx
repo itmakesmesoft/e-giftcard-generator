@@ -5,6 +5,7 @@ import { Vector2d } from "konva/lib/types";
 import { EditableText } from "../canvas/components";
 import { Arrow, Circle, Rect, Image, Line } from "react-konva";
 import { KonvaEventObject, NodeConfig, Node } from "konva/lib/Node";
+import Barcode from "../canvas/components/Barcode";
 
 const useShapes = () => {
   const [shapes, setShapes] = useState<Konva.ShapeConfig[]>([]);
@@ -133,6 +134,17 @@ const useShapes = () => {
         case "text":
           return (
             <EditableText
+              key={index}
+              draggable={isDraggable}
+              onDragEnd={onDragEnd}
+              {...node}
+            />
+          );
+        case "barcode":
+          return (
+            <Barcode
+              text={node.text}
+              codeFormat={node.codeFormat}
               key={index}
               draggable={isDraggable}
               onDragEnd={onDragEnd}

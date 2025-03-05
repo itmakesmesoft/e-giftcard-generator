@@ -1,3 +1,5 @@
+import { GeneraterFormatType } from "./type";
+
 const barcodeFormatMap: Record<string, string> = {
   AZTEC: "azteccode",
   CODABAR: "rationalizedCodabar",
@@ -19,5 +21,5 @@ const barcodeFormatMap: Record<string, string> = {
 };
 
 export const convertBarcodeFormat = (format: string) => {
-  return barcodeFormatMap[format];
+  return barcodeFormatMap[format] as GeneraterFormatType;
 };

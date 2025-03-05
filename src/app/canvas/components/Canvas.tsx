@@ -8,6 +8,8 @@ import { Layer, Stage, Transformer } from "react-konva";
 import { useSelect, useControl, useShapes } from "@/app/hooks";
 import { Slider, Button, Select, ColorPicker, BackgroundLayer } from "./index";
 import { loadFromLocalStorage, saveToLocalStorage } from "@/utils/canvas";
+import { readCodeByImage } from "@/utils/reader";
+import { convertBarcodeFormat } from "@/utils/adapter";
 
 const CANVAS_WIDTH = 1000;
 const CANVAS_HEIGHT = 600;
@@ -93,8 +95,34 @@ const Canvas = () => {
     else completeShapeCreation();
   };
 
-  const addImage = () => {
-    setAction("image");
+  const addCodeToCanvas = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      decodeFromImage(reader.result);
+    };
+  };
+
+  const decodeFromImage = async (image: string | ArrayBuffer | null) => {
+    if (!image) return;
+
+    const data = await readCodeByImage(image as string);
+    if (!data) return;
+
+    const format = convertBarcodeFormat(data.format);
+
+    createShape({
+      type: "barcode",
+      text: data.value,
+      codeFormat: format,
+      fill,
+      width: 100,
+      height: 100,
+      x: 100,
+      y: 100,
+    });
   };
 
   const exportCanvasAsImage = () => {
@@ -289,11 +317,17 @@ const Canvas = () => {
           <Button onClick={exportCanvasAsImage} label="다운로드" />
           <Button onClick={saveCanvas} label="저장" />
           <Button onClick={loadCanvas} label="불러오기" />
-          <Button
-            active={action === "image"}
-            onClick={addImage}
-            label="사진 추가 "
-          />
+          <label className="cursor-pointer">
+            <input
+              type="file"
+              onChange={addCodeToCanvas}
+              accept="image/*"
+              className="hidden"
+            />
+            <span className="px-4 py-2 bg-blue-500 text-white rounded inline-block">
+              바코드/QR 추가
+            </span>
+          </label>
           <Slider
             min={1}
             max={50}
