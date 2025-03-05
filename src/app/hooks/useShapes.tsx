@@ -2,7 +2,8 @@ import Konva from "konva";
 import { nanoid } from "nanoid";
 import { useRef, useState } from "react";
 import { Vector2d } from "konva/lib/types";
-import { Arrow, Circle, Rect, Image, Line, Text } from "react-konva";
+import { EditableText } from "../canvas/components";
+import { Arrow, Circle, Rect, Image, Line } from "react-konva";
 import { KonvaEventObject, NodeConfig, Node } from "konva/lib/Node";
 
 const useShapes = () => {
@@ -111,7 +112,6 @@ const useShapes = () => {
           return (
             <Arrow
               key={index}
-              strokeWidth={2}
               draggable={isDraggable}
               strokeScaleEnabled={false}
               onDragEnd={onDragEnd}
@@ -131,7 +131,14 @@ const useShapes = () => {
             />
           );
         case "text":
-          return <Text />;
+          return (
+            <EditableText
+              key={index}
+              draggable={isDraggable}
+              onDragEnd={onDragEnd}
+              {...node}
+            />
+          );
       }
     });
   };

@@ -22,6 +22,12 @@ interface ControlValues {
   lineCap: string;
   radius: number;
   image: unknown;
+
+  // font
+  fontSize: number;
+  fontWeight: number;
+  fontFamily: string;
+  fontStyle: string;
 }
 
 interface Controls extends ControlValues {
@@ -35,6 +41,11 @@ interface Controls extends ControlValues {
   setLineCap: (prop: string) => void;
   setRadius: (prop: number) => void;
   setImage: (prop: unknown) => void;
+  // font
+  setFontSize: (prop: number) => void;
+  setFontWeight: (prop: number) => void;
+  setFontFamily: (prop: string) => void;
+  setFontStyle: (prop: string) => void;
 }
 
 const defaultValues: ControlValues = {
@@ -48,6 +59,10 @@ const defaultValues: ControlValues = {
   lineCap: "round",
   radius: 0,
   image: "",
+  fontSize: 16,
+  fontWeight: 500,
+  fontFamily: "Arial",
+  fontStyle: "italic",
 };
 
 const useControl = (props?: ControlValues): Controls => {
@@ -63,6 +78,10 @@ const useControl = (props?: ControlValues): Controls => {
   const [lineCap, setLineCap] = useState<string>(config.lineCap);
   const [radius, setRadius] = useState<number>(config.radius);
   const [image, setImage] = useState<unknown>(config.image);
+  const [fontSize, setFontSize] = useState<number>(config.fontSize);
+  const [fontWeight, setFontWeight] = useState<number>(config.fontWeight);
+  const [fontFamily, setFontFamily] = useState<string>(config.fontFamily);
+  const [fontStyle, setFontStyle] = useState<string>(config.fontStyle);
 
   const { currentNodes } = useCanvasContext();
 
@@ -82,6 +101,14 @@ const useControl = (props?: ControlValues): Controls => {
       setLineJoin(currentNodes[0].attrs.lineJoin ?? defaultValues.lineJoin);
       setLineCap(currentNodes[0].attrs.lineCap ?? defaultValues.lineCap);
       setRadius(currentNodes[0].attrs.radius ?? defaultValues.radius);
+      setFontSize(currentNodes[0].attrs.fontSize ?? defaultValues.fontSize);
+      setFontWeight(
+        currentNodes[0].attrs.fontWeight ?? defaultValues.fontWeight
+      );
+      setFontFamily(
+        currentNodes[0].attrs.fontFamily ?? defaultValues.fontFamily
+      );
+      setFontStyle(currentNodes[0].attrs.fontStyle ?? defaultValues.fontStyle);
     }
   }, [action, currentNodes]);
 
@@ -99,6 +126,7 @@ const useControl = (props?: ControlValues): Controls => {
     setStrokeWidth,
     setOpacity,
     setDraggable,
+    // line
     lineCap,
     lineJoin,
     setLineJoin,
@@ -111,6 +139,16 @@ const useControl = (props?: ControlValues): Controls => {
     // for image
     image,
     setImage,
+
+    // font
+    fontSize,
+    fontWeight,
+    fontFamily,
+    fontStyle,
+    setFontSize,
+    setFontWeight,
+    setFontFamily,
+    setFontStyle,
   };
 };
 

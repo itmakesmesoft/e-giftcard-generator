@@ -6,7 +6,7 @@ import type { Vector2d } from "konva/lib/types";
 import { CanvasProvider } from "@/app/context/canvas";
 import { Layer, Stage, Transformer } from "react-konva";
 import { useSelect, useControl, useShapes } from "@/app/hooks";
-import { Slider, Button, ColorPicker, BackgroundLayer } from "./index";
+import { Slider, Button, Select, ColorPicker, BackgroundLayer } from "./index";
 
 const CANVAS_WIDTH = 1000;
 const CANVAS_HEIGHT = 600;
@@ -23,7 +23,6 @@ const Canvas = () => {
   const stageRef = useRef<Konva.Stage>(null);
   const transformerRef = useRef<Konva.Transformer>(null);
   const isPointerDown = useRef(false);
-  const stage = stageRef.current;
 
   const {
     selectNodeById,
@@ -39,10 +38,12 @@ const Canvas = () => {
     fill,
     stroke,
     strokeWidth,
+    fontSize,
     setAction,
     setFill,
     setStroke,
     setStrokeWidth,
+    setFontSize,
   } = useControl();
   const {
     shapes,
@@ -70,6 +71,12 @@ const Canvas = () => {
     updateSelectedShapeAttributes({ strokeWidth });
   };
 
+  const onFontSizeChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    const size = Number(e.target.value);
+    setFontSize(size);
+    updateSelectedShapeAttributes({ fontSize: size });
+  };
+
   const onPointerDown = (e: Konva.KonvaEventObject<PointerEvent>) => {
     if (action === "select") startSelectionBox(e);
     else startShapeCreation();
@@ -90,8 +97,8 @@ const Canvas = () => {
   };
 
   const exportCanvasAsImage = () => {
-    if (!stage) return;
-    const uri = stage.toDataURL();
+    if (!stageRef.current) return;
+    const uri = stageRef.current.toDataURL();
     const link = document.createElement("a");
     link.download = "image.png";
     link.href = uri;
@@ -99,14 +106,14 @@ const Canvas = () => {
   };
 
   const exportCanvasAsJSON = () => {
-    if (!stage) return;
-    const children = stage.getChildren();
+    if (!stageRef.current) return;
+    const children = stageRef.current.getChildren();
     const extractIds = ["_shapeLayer", "_drawLayer"];
 
     const json = children
       .filter((layer) => {
-        const id = layer.attrs.id;
-        extractIds.includes(id);
+        const layerId = layer.attrs.id;
+        return extractIds.includes(layerId);
       })
       .map((layer) => layer.children)
       .flat();
@@ -114,7 +121,7 @@ const Canvas = () => {
   };
 
   const loadCanvasByJSON = (data: string) => {
-    if (!stage) return;
+    if (!stageRef.current) return;
     const shapes = JSON.parse(data)?.map((item: string) =>
       JSON.parse(item)
     ) as Konva.Layer[];
@@ -145,29 +152,9 @@ const Canvas = () => {
     }
   };
 
-  const updateSelectedShapeAttributes = (newAttrs: Konva.ShapeConfig) => {
-    const selectedNodes = getAllSelectedNodes();
-    const ids = selectedNodes.map((node) => node.attrs.id);
-    updateShapeAttributes(ids, newAttrs);
-  };
-
-  const updateShapeAttributes = (
-    ids: string[],
-    newAttrs: Konva.ShapeConfig
-  ) => {
-    if (ids.length > 0) {
-      updateShape((shape) => {
-        const shapeId = shape.id;
-        return shapeId && ids.includes(shapeId)
-          ? { ...shape, ...newAttrs }
-          : shape;
-      });
-    }
-  };
-
   const startShapeCreation = () => {
-    if (!stage) return;
-    const { x, y } = stage.getPointerPosition() as Vector2d;
+    if (!stageRef.current) return;
+    const { x, y } = stageRef.current.getPointerPosition() as Vector2d;
 
     isPointerDown.current = true;
     const hasPoints = ["pencil", "eraser", "arrow"].includes(action);
@@ -177,16 +164,18 @@ const Canvas = () => {
       fill,
       stroke,
       strokeWidth,
+      fontSize,
       ...(hasPoints ? { points: [x, y] } : { x, y }),
     });
   };
 
   const updateShapeCreation = () => {
-    if (!isPointerDown.current || !stage) return;
+    if (!isPointerDown.current || !stageRef.current) return;
 
-    const { x, y } = stage.getPointerPosition() as Vector2d;
+    const { x, y } = stageRef.current.getPointerPosition() as Vector2d;
 
     switch (action) {
+      case "text":
       case "image":
       case "rectangle":
         updateCurrentShape((shape) => {
@@ -250,6 +239,26 @@ const Canvas = () => {
     clearSelectNodes();
   };
 
+  const updateSelectedShapeAttributes = (newAttrs: Konva.ShapeConfig) => {
+    const selectedNodes = getAllSelectedNodes();
+    const ids = selectedNodes.map((node) => node.attrs.id);
+    updateShapeAttributes(ids, newAttrs);
+  };
+
+  const updateShapeAttributes = (
+    ids: string[],
+    newAttrs: Konva.ShapeConfig
+  ) => {
+    if (ids.length > 0) {
+      updateShape((shape) => {
+        const shapeId = shape.id;
+        return shapeId && ids.includes(shapeId)
+          ? { ...shape, ...newAttrs }
+          : shape;
+      });
+    }
+  };
+
   return (
     <div className="relative w-full h-screen overflow-hidden">
       {/* Controls */}
@@ -285,6 +294,11 @@ const Canvas = () => {
             onClick={() => setAction("eraser")}
             label="지우개"
           />
+          <Button
+            active={action === "text"}
+            onClick={() => setAction("text")}
+            label="글자"
+          />
           <Button onClick={removeShapeOnCanvas} label="샥제" />
           <ColorPicker color={fill} onChange={onFillChange} />
           <ColorPicker color={stroke} onChange={onStrokeChange} />
@@ -301,6 +315,15 @@ const Canvas = () => {
             max={50}
             value={strokeWidth}
             onChange={onStrokeWidthChange}
+          />
+          <Select
+            options={[
+              { label: "16", value: "16" },
+              { label: "20", value: "20" },
+            ]}
+            label="폰트 사이즈"
+            value={String(fontSize)}
+            onChange={onFontSizeChange}
           />
         </div>
       </div>
