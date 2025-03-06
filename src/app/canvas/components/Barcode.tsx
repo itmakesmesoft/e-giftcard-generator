@@ -1,7 +1,7 @@
 import { generateCode } from "@/utils/generator";
 import { GeneraterFormatType } from "@/utils/type";
 import Konva from "konva";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Image as ImageComponent } from "react-konva";
 
 interface BarcodeProps extends Konva.ShapeConfig {
@@ -31,8 +31,8 @@ const Barcode = (props: BarcodeProps) => {
   const [image, setImage] = useState<HTMLImageElement>(new Image());
   const [imageSize, setImageSize] = useState<ImageSize>({ width, height });
 
-  useEffect(() => {
-    const getDataURL = (props: GetDataURLProps) => {
+  const getDataURL = useCallback(
+    (props: GetDataURLProps) => {
       const canvas = document.createElement("canvas");
       generateCode({
         canvas,
@@ -44,15 +44,18 @@ const Barcode = (props: BarcodeProps) => {
       });
       setImageSize({ width: canvas.width, height: canvas.height });
       return canvas.toDataURL();
-    };
+    },
+    [text]
+  );
 
+  useEffect(() => {
     const url =
       dataURL !== undefined
         ? dataURL
         : getDataURL({ codeFormat, barColor: stroke as string });
     image.src = url;
     setImage(image);
-  }, [codeFormat, stroke, text, dataURL, image]);
+  }, [codeFormat, stroke, text, dataURL, image, getDataURL]);
 
   return (
     <ImageComponent
@@ -65,8 +68,8 @@ const Barcode = (props: BarcodeProps) => {
       name="shape"
       {...imageSize}
       {...restProps}
-      fill={"transparent"}
       strokeEnabled={false}
+      fill="transparent"
     />
   );
 };

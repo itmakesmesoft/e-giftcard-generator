@@ -1,6 +1,6 @@
 import Konva from "konva";
 import { nanoid } from "nanoid";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Vector2d } from "konva/lib/types";
 import { EditableText, Barcode, ShapeHelper } from "../canvas/components";
 import type { ShapeHelperConfig } from "../canvas/components";
@@ -10,27 +10,29 @@ import { ShapeConfig } from "konva/lib/Shape";
 import { useCanvasContext } from "../context/canvas";
 
 const useShapes = () => {
-  const { transformerRef } = useCanvasContext();
   const currentShapeRef = useRef<Konva.ShapeConfig>(null);
   const [shapes, setShapes] = useState<Konva.ShapeConfig[]>([]);
   const [helperConfig, setHelperConfig] = useState<ShapeHelperConfig>();
+  const { transformerRef } = useCanvasContext();
 
   useEffect(() => {
     if (!transformerRef.current) return;
-    transformerRef.current.on("transform", () => {
+
+    // Transformer 컴포넌트에 의해 스케일이 변경되는 경우, 변경사항을 shapes에 반영해주기 위함.
+    const onTransform = () => {
       const target = transformerRef.current?.getNode();
       if (!target) return;
-
       setShapes((shapes) =>
         shapes.map((shape: Konva.ShapeConfig) =>
           shape.id === target.attrs.id ? { ...shape, ...target.attrs } : shape
         )
       );
-    });
+    };
+    transformerRef.current.on("transform", onTransform);
   }, [transformerRef]);
 
   const createShape = <T extends Konva.ShapeConfig>(shapeConfig: T) => {
-    const { type, width = 0, height = 0, ...restConfig } = shapeConfig;
+    const { type, ...restConfig } = shapeConfig;
 
     const id = nanoid();
     const hasRadius = type === "circle";
@@ -39,11 +41,9 @@ const useShapes = () => {
     const compositeOperation =
       type === "pencil" ? "source-over" : "destination-out";
 
-    const config: Konva.ShapeConfig = {
+    const shape: Konva.ShapeConfig = {
       id,
       type,
-      width,
-      height,
       ...(hasRadius && { radius: 0 }),
       ...(hasPoints && { points: [] }),
       ...(isShape
@@ -51,34 +51,45 @@ const useShapes = () => {
         : { globalCompositeOperation: compositeOperation }),
       ...restConfig,
     };
-
-    setShapes((shapes) => [...shapes, { ...config }]);
-    currentShapeRef.current = { ...config };
-    return config;
+    setShapes((shapes) => [...shapes, shape]);
+    return shape;
   };
 
-  const updateCurrentShape = (
+  const updateShape = useCallback(
+    (callback: (shape: Konva.ShapeConfig) => Konva.ShapeConfig) => {
+      const updated = shapes.map(callback);
+      setShapes([...updated]);
+      return updated;
+    },
+    [shapes]
+  );
+
+  const startShapeCreation = <T extends Konva.ShapeConfig>(shapeConfig: T) => {
+    const shape = createShape(shapeConfig);
+    currentShapeRef.current = shape;
+    return shape;
+  };
+
+  const updateShapeCreation = (
     callback: (shape: Konva.ShapeConfig) => Konva.ShapeConfig
   ) => {
     const currentId = currentShapeRef.current?.id;
     if (!currentId || !currentShapeRef.current) return;
 
     const updated = callback(currentShapeRef.current);
-    currentShapeRef.current = { ...updated };
-    handleShapeHelper({ node: updated, visible: true });
-    setShapes((shapes) =>
-      shapes.map((shape) => (shape.id === currentId ? { ...updated } : shape))
-    );
+    currentShapeRef.current = updated;
+    updateTextHelper({ node: updated, visible: true });
+    updateShape((shape) => (shape.id === currentId ? updated : shape));
   };
 
-  const endCreateShape = () => {
-    handleShapeHelper({ visible: false });
+  const completeShapeCreation = () => {
+    updateTextHelper({ visible: false });
     const id = currentShapeRef.current?.id;
     currentShapeRef.current = null;
     return id as string;
   };
 
-  const handleShapeHelper = ({
+  const updateTextHelper = ({
     node,
     visible,
   }: {
@@ -90,24 +101,14 @@ const useShapes = () => {
     setHelperConfig({ visible, x, y, width, height });
   };
 
-  const updateShape = (
-    callback: (shape: Konva.ShapeConfig) => Konva.ShapeConfig
-  ) => {
-    const updated = shapes.map(callback);
-    setShapes([...updated]);
-    console.log(updated);
-    return updated;
-  };
-
   const onDragEnd = (e: KonvaEventObject<DragEvent, Node<NodeConfig>>) => {
-    const id = e.target.attrs.id;
-    const { x, y } = e.target.getPosition() as Vector2d;
+    const position = e.target.getPosition() as Vector2d;
+
     updateShape((shape) => {
-      if (shape.id === id) {
+      if (shape.id === e.target.attrs.id) {
         return {
           ...shape,
-          x,
-          y,
+          ...position,
         };
       }
       return shape;
@@ -115,10 +116,11 @@ const useShapes = () => {
   };
 
   const updateTextValueChange = (id: string | undefined, text: string) => {
-    if (!id) return;
-    setShapes((shapes) =>
-      shapes.map((shape) => (shape.id === id ? { ...shape, text } : shape))
-    );
+    if (id) {
+      setShapes((shapes) =>
+        shapes.map((shape) => (shape.id === id ? { ...shape, text } : shape))
+      );
+    }
   };
 
   const shapesRenderer = (props: { isDraggable: boolean }) => {
@@ -222,8 +224,9 @@ const useShapes = () => {
     shapes,
     setShapes,
     createShape,
-    updateCurrentShape,
-    endCreateShape,
+    startShapeCreation,
+    updateShapeCreation,
+    completeShapeCreation,
     updateShape,
     renderLayer: {
       shapes: shapesRenderer,

@@ -51,9 +51,10 @@ const Canvas = () => {
     shapes,
     setShapes,
     createShape,
+    startShapeCreation,
     updateShape,
-    updateCurrentShape,
-    endCreateShape,
+    updateShapeCreation,
+    completeShapeCreation,
     renderLayer,
   } = useShapes();
 
@@ -81,17 +82,17 @@ const Canvas = () => {
 
   const onPointerDown = (e: Konva.KonvaEventObject<PointerEvent>) => {
     if (action === "select") startSelectionBox(e);
-    else startShapeCreation();
+    else handleCreateShapeStart();
   };
 
   const onPointerMove = () => {
     if (action === "select") updateSelectionBox();
-    else updateShapeCreation();
+    else handleCreateShapeUpdate();
   };
 
   const onPointerUp = () => {
     if (action === "select") endSelectionBox();
-    else completeShapeCreation();
+    else handleCreateShapeComplete();
   };
 
   const addCodeToCanvas = (e: ChangeEvent<HTMLInputElement>) => {
@@ -161,14 +162,14 @@ const Canvas = () => {
     loadCanvasByJSON(loadedData);
   };
 
-  const startShapeCreation = () => {
+  const handleCreateShapeStart = () => {
     if (!stageRef.current) return;
     const { x, y } = stageRef.current.getPointerPosition() as Vector2d;
 
     isPointerDown.current = true;
     const hasPoints = ["pencil", "eraser", "arrow"].includes(action);
 
-    createShape({
+    startShapeCreation({
       type: action,
       fill,
       stroke,
@@ -178,7 +179,7 @@ const Canvas = () => {
     });
   };
 
-  const updateShapeCreation = () => {
+  const handleCreateShapeUpdate = () => {
     if (!isPointerDown.current || !stageRef.current) return;
 
     const { x, y } = stageRef.current.getPointerPosition() as Vector2d;
@@ -187,30 +188,28 @@ const Canvas = () => {
       case "text":
       case "image":
       case "rectangle":
-        updateCurrentShape((shape) => {
+        updateShapeCreation((shape) => {
           const dx = shape.x ?? 0;
           const dy = shape.y ?? 0;
           return {
             ...shape,
-            width: Math.round(x - dx),
-            height: Math.round(y - dy),
+            width: Math.floor(x - dx),
+            height: Math.floor(y - dy),
           };
         });
         break;
       case "circle":
-        updateCurrentShape((shape) => {
+        updateShapeCreation((shape) => {
           const dx = shape.x ?? 0;
           const dy = shape.y ?? 0;
           return {
             ...shape,
-            radius: Math.round(((y - dy) ** 2 + (x - dx) ** 2) ** 0.5),
-            width: Math.round(x - dx),
-            height: Math.round(y - dy),
+            radius: Math.floor((y - dy) ** 2 + (x - dx) ** 2) ** 0.5,
           };
         });
         break;
       case "arrow":
-        updateCurrentShape((shape) => {
+        updateShapeCreation((shape) => {
           const initialPoints = shape.points.slice(0, 2) ?? [x, y];
           return {
             ...shape,
@@ -220,7 +219,7 @@ const Canvas = () => {
         break;
       case "eraser":
       case "pencil":
-        updateCurrentShape((shape) => {
+        updateShapeCreation((shape) => {
           const prevPoints = shape.points ?? [];
           return {
             ...shape,
@@ -231,9 +230,9 @@ const Canvas = () => {
     }
   };
 
-  const completeShapeCreation = () => {
+  const handleCreateShapeComplete = () => {
     if (action !== "select" && action !== "pencil" && action !== "eraser") {
-      const id = endCreateShape();
+      const id = completeShapeCreation();
       selectNodeById(id);
       setAction("select");
     }
