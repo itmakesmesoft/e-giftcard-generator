@@ -3,7 +3,7 @@
 import Konva from "konva";
 import { ChangeEvent, useRef } from "react";
 import type { Vector2d } from "konva/lib/types";
-import { CanvasProvider } from "@/app/context/canvas";
+import { CanvasProvider, useCanvasContext } from "@/app/context/canvas";
 import { Layer, Stage, Transformer } from "react-konva";
 import { useSelect, useControl, useShapes } from "@/app/hooks";
 import { Slider, Button, Select, ColorPicker, BackgroundLayer } from "./index";
@@ -23,8 +23,7 @@ const WrapperCanvas = () => (
 export default WrapperCanvas;
 
 const Canvas = () => {
-  const stageRef = useRef<Konva.Stage>(null);
-  const transformerRef = useRef<Konva.Transformer>(null);
+  const { stageRef, transformerRef } = useCanvasContext();
   const isPointerDown = useRef(false);
 
   const {
@@ -35,7 +34,7 @@ const Canvas = () => {
     updateSelectionBox,
     endSelectionBox,
     SelectionBox,
-  } = useSelect(stageRef, transformerRef);
+  } = useSelect();
   const {
     action,
     fill,

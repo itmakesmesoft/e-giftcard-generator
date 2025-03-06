@@ -2,13 +2,20 @@ import Konva from "konva";
 import { nanoid } from "nanoid";
 import { useRef, useState } from "react";
 import { Vector2d } from "konva/lib/types";
-import { EditableText } from "../canvas/components";
+import { EditableText, Barcode, ShapeHelper } from "../canvas/components";
+import type { ShapeHelperConfig } from "../canvas/components";
 import { Arrow, Circle, Rect, Image, Line } from "react-konva";
 import { KonvaEventObject, NodeConfig, Node } from "konva/lib/Node";
-import Barcode from "../canvas/components/Barcode";
+import { ShapeConfig } from "konva/lib/Shape";
 
 const useShapes = () => {
   const [shapes, setShapes] = useState<Konva.ShapeConfig[]>([]);
+  const [newShape, setNewShape] = useState<Konva.ShapeConfig | null>(null);
+  const [shapeHelperConfig, setShapeHelperConfig] = useState<ShapeHelperConfig>(
+    {
+      visible: false,
+    }
+  );
   const currentShapeIdRef = useRef<string>(undefined);
 
   const createShape = <T extends Konva.ShapeConfig>(shapeConfig: T) => {
@@ -20,7 +27,6 @@ const useShapes = () => {
     const compositeOperation =
       type === "pencil" ? "source-over" : "destination-out";
 
-    currentShapeIdRef.current = id;
     const config: Konva.ShapeConfig = {
       id,
       type,
@@ -34,9 +40,8 @@ const useShapes = () => {
       ...restConfig,
     };
 
-    setShapes((prevShapes) => {
-      return [...prevShapes, config];
-    });
+    setNewShape(config);
+    currentShapeIdRef.current = id;
     return config;
   };
 
@@ -45,19 +50,29 @@ const useShapes = () => {
   ) => {
     const currentId = currentShapeIdRef.current;
     if (!currentId) return;
-
-    const updated = shapes.map((shape) => {
-      if (shape.id === currentId) return callback(shape);
-      return shape;
-    });
-    setShapes(updated);
-    return updated;
+    setNewShape(callback);
+    handleShapeHelper({ newShape, visible: true });
   };
 
   const endCreateShape = () => {
     const id = currentShapeIdRef.current as string;
     currentShapeIdRef.current = undefined;
+    setShapes((shapes) => [...shapes, { ...newShape }]);
+    setNewShape(null);
+    setShapeHelperConfig({ visible: false });
     return id;
+  };
+
+  const handleShapeHelper = ({
+    newShape,
+    visible,
+  }: {
+    newShape?: ShapeConfig | null;
+    visible: boolean;
+  }) => {
+    if (!newShape || newShape.type !== "text") return;
+    const { x, y, width, height } = newShape;
+    setShapeHelperConfig({ visible, x, y, width, height });
   };
 
   const updateShape = (
@@ -83,77 +98,97 @@ const useShapes = () => {
     });
   };
 
+  const renderShapes = ({
+    node,
+    index,
+    isDraggable,
+    onDragEnd,
+  }: {
+    node: Konva.ShapeConfig;
+    index?: number;
+    isDraggable: boolean;
+    onDragEnd: (e: Konva.KonvaEventObject<DragEvent>) => void;
+  }) => {
+    switch (node.type) {
+      case "rectangle":
+        return (
+          <Rect
+            key={index}
+            strokeWidth={2}
+            draggable={isDraggable}
+            strokeScaleEnabled={false}
+            onDragEnd={onDragEnd}
+            {...node}
+          />
+        );
+      case "circle":
+        return (
+          <Circle
+            key={index}
+            draggable={isDraggable}
+            strokeScaleEnabled={false}
+            onDragEnd={onDragEnd}
+            {...node}
+          />
+        );
+      case "arrow":
+        return (
+          <Arrow
+            key={index}
+            draggable={isDraggable}
+            strokeScaleEnabled={false}
+            onDragEnd={onDragEnd}
+            points={node.points}
+            {...node}
+          />
+        );
+      case "image":
+        return (
+          <Image
+            key={index}
+            alt="이미지"
+            image={node.image}
+            draggable={isDraggable}
+            onDragEnd={onDragEnd}
+            {...node}
+          />
+        );
+      case "text":
+        return (
+          <EditableText
+            key={index}
+            draggable={isDraggable}
+            onDragEnd={onDragEnd}
+            {...node}
+          />
+        );
+      case "barcode":
+        const { text, codeFormat, ...restProps } = node;
+        return (
+          <Barcode
+            key={index}
+            text={text}
+            codeFormat={codeFormat}
+            draggable={isDraggable}
+            onDragEnd={onDragEnd}
+            {...restProps}
+          />
+        );
+    }
+  };
+
   const shapesRenderer = (props: { isDraggable: boolean }) => {
     const { isDraggable } = props;
 
-    return shapes.map((node, index) => {
-      switch (node.type) {
-        case "rectangle":
-          return (
-            <Rect
-              key={index}
-              strokeWidth={2}
-              draggable={isDraggable}
-              strokeScaleEnabled={false}
-              onDragEnd={onDragEnd}
-              {...node}
-            />
-          );
-        case "circle":
-          return (
-            <Circle
-              key={index}
-              draggable={isDraggable}
-              strokeScaleEnabled={false}
-              onDragEnd={onDragEnd}
-              {...node}
-            />
-          );
-        case "arrow":
-          return (
-            <Arrow
-              key={index}
-              draggable={isDraggable}
-              strokeScaleEnabled={false}
-              onDragEnd={onDragEnd}
-              points={node.points}
-              {...node}
-            />
-          );
-        case "image":
-          return (
-            <Image
-              key={index}
-              alt="이미지"
-              image={node.image}
-              draggable={isDraggable}
-              onDragEnd={onDragEnd}
-              {...node}
-            />
-          );
-        case "text":
-          return (
-            <EditableText
-              key={index}
-              draggable={isDraggable}
-              onDragEnd={onDragEnd}
-              {...node}
-            />
-          );
-        case "barcode":
-          const { text, codeFormat, ...restProps } = node;
-          return (
-            <Barcode
-              key={index}
-              text={text}
-              codeFormat={codeFormat}
-              draggable={isDraggable}
-              onDragEnd={onDragEnd}
-              {...restProps}
-            />
-          );
-      }
-    });
+    return (
+      <>
+        {shapes.map((node, index) =>
+          renderShapes({ node, index, isDraggable, onDragEnd })
+        )}
+        {newShape && renderShapes({ node: newShape, isDraggable, onDragEnd })}
+        <ShapeHelper config={shapeHelperConfig} />
+      </>
+    );
   };
 
   const drawingRenderer = () => {
