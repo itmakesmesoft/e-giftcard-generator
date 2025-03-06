@@ -141,14 +141,15 @@ const useShapes = () => {
             />
           );
         case "barcode":
+          const { text, codeFormat, ...restProps } = node;
           return (
             <Barcode
-              text={node.text}
-              codeFormat={node.codeFormat}
               key={index}
+              text={text}
+              codeFormat={codeFormat}
               draggable={isDraggable}
               onDragEnd={onDragEnd}
-              {...node}
+              {...restProps}
             />
           );
       }

@@ -5,8 +5,13 @@ import { useEffect, useState } from "react";
 import { Image as ImageComponent } from "react-konva";
 
 interface BarcodeProps extends Konva.RectConfig {
-  codeFormat: GeneraterFormatType;
   text: string;
+  codeFormat: GeneraterFormatType;
+  dataURL?: string;
+}
+interface ImageSize {
+  width: number;
+  height: number;
 }
 
 const Barcode = (props: BarcodeProps) => {
@@ -14,43 +19,51 @@ const Barcode = (props: BarcodeProps) => {
     codeFormat,
     text,
     stroke,
-    width: widthFromProps,
-    height: heightFromProps,
+    width = 100,
+    height = 100,
+    dataURL,
     ...restProps
   } = props;
-  const [image, setImage] = useState<HTMLImageElement>();
-  const [width, setWidth] = useState<number>(widthFromProps ?? 100);
-  const [height, setHeight] = useState<number>(heightFromProps ?? 100);
+  const [image, setImage] = useState<HTMLImageElement>(new Image());
+  const [imageSize, setImageSize] = useState<ImageSize>({ width, height });
 
   useEffect(() => {
-    // TODO. 저장된 캔버스에서 바코드를 불러오는 경우, 오류가 발생함.
-    // generateCode를 Barcode 컴포넌트가 아닌, useShapes나 Canvas로 옮겨야 함 => shapeConfig에 저장 필요
+    const getDataURL = (props: {
+      codeFormat: GeneraterFormatType;
+      barColor: string;
+    }) => {
+      const canvas = document.createElement("canvas");
+      generateCode({
+        canvas,
+        options: {
+          text,
+          bcid: props.codeFormat,
+          barcolor: props.barColor ?? "#000000",
+        },
+      });
+      setImageSize({ width: canvas.width, height: canvas.height });
+      return canvas.toDataURL();
+    };
 
-    const canvas = document.createElement("canvas");
-    const barColor = (stroke as string) ?? "#000000";
-    generateCode({
-      canvas,
-      options: {
-        text,
-        bcid: codeFormat,
-        barcolor: barColor,
-      },
-    });
-    const url = canvas.toDataURL();
-    const image = new Image();
+    const url =
+      dataURL !== undefined
+        ? dataURL
+        : getDataURL({ codeFormat, barColor: stroke as string });
+
     image.src = url;
 
     setImage(image);
-    setWidth(canvas.width);
-    setHeight(canvas.height);
-  }, [codeFormat, stroke, text]);
+  }, [codeFormat, stroke, text, dataURL, image]);
 
   return (
     <ImageComponent
       image={image}
+      dataURL={dataURL}
+      codeFormat={codeFormat}
+      stroke={stroke}
+      text={text}
       alt="barcode"
-      width={width}
-      height={height}
+      {...imageSize}
       {...restProps}
     />
   );

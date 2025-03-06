@@ -118,8 +118,6 @@ const Canvas = () => {
       text: data.value,
       codeFormat: format,
       fill,
-      width: 100,
-      height: 100,
       x: 100,
       y: 100,
     });
