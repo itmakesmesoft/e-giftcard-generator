@@ -116,7 +116,7 @@ const Canvas = () => {
       type: "barcode",
       text: data.value,
       codeFormat: format,
-      fill,
+      stroke,
       x: 100,
       y: 100,
     });
@@ -192,8 +192,8 @@ const Canvas = () => {
           const dy = shape.y ?? 0;
           return {
             ...shape,
-            width: x - dx,
-            height: y - dy,
+            width: Math.round(x - dx),
+            height: Math.round(y - dy),
           };
         });
         break;
@@ -203,7 +203,9 @@ const Canvas = () => {
           const dy = shape.y ?? 0;
           return {
             ...shape,
-            radius: ((y - dy) ** 2 + (x - dx) ** 2) ** 0.5,
+            radius: Math.round(((y - dy) ** 2 + (x - dx) ** 2) ** 0.5),
+            width: Math.round(x - dx),
+            height: Math.round(y - dy),
           };
         });
         break;

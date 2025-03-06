@@ -4,7 +4,7 @@ import Konva from "konva";
 import { useEffect, useState } from "react";
 import { Image as ImageComponent } from "react-konva";
 
-interface BarcodeProps extends Konva.RectConfig {
+interface BarcodeProps extends Konva.ShapeConfig {
   text: string;
   codeFormat: GeneraterFormatType;
   dataURL?: string;
@@ -12,6 +12,10 @@ interface BarcodeProps extends Konva.RectConfig {
 interface ImageSize {
   width: number;
   height: number;
+}
+interface GetDataURLProps {
+  codeFormat: GeneraterFormatType;
+  barColor: string;
 }
 
 const Barcode = (props: BarcodeProps) => {
@@ -28,10 +32,7 @@ const Barcode = (props: BarcodeProps) => {
   const [imageSize, setImageSize] = useState<ImageSize>({ width, height });
 
   useEffect(() => {
-    const getDataURL = (props: {
-      codeFormat: GeneraterFormatType;
-      barColor: string;
-    }) => {
+    const getDataURL = (props: GetDataURLProps) => {
       const canvas = document.createElement("canvas");
       generateCode({
         canvas,
@@ -49,9 +50,7 @@ const Barcode = (props: BarcodeProps) => {
       dataURL !== undefined
         ? dataURL
         : getDataURL({ codeFormat, barColor: stroke as string });
-
     image.src = url;
-
     setImage(image);
   }, [codeFormat, stroke, text, dataURL, image]);
 
@@ -63,8 +62,11 @@ const Barcode = (props: BarcodeProps) => {
       stroke={stroke}
       text={text}
       alt="barcode"
+      name="shape"
       {...imageSize}
       {...restProps}
+      fill={"transparent"}
+      strokeEnabled={false}
     />
   );
 };
