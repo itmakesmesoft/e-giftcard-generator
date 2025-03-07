@@ -1,8 +1,8 @@
-import { useCanvasContext } from "@/app/context/canvas";
 import Konva from "konva";
-import { useEffect, useRef, useState } from "react";
 import { Text } from "react-konva";
 import { Html } from "react-konva-utils";
+import { useEffect, useRef, useState } from "react";
+import { useCanvasContext } from "@/app/context/canvas";
 
 interface EditableTextProps extends Konva.TextConfig {
   onValueChange: (id: string | undefined, text: string) => void;

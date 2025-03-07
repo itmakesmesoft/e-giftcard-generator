@@ -1,5 +1,3 @@
-import { generateCode } from "@/utils/generator";
-import { GeneraterFormatType } from "@/utils/type";
 import Konva from "konva";
 import { useCallback, useEffect, useState } from "react";
 import { Image as ImageComponent } from "react-konva";

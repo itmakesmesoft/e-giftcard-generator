@@ -7,9 +7,12 @@ import { CanvasProvider, useCanvasContext } from "@/app/context/canvas";
 import { Layer, Stage, Transformer } from "react-konva";
 import { useSelect, useControl, useShapes } from "@/app/hooks";
 import { Slider, Button, Select, ColorPicker, BackgroundLayer } from "./index";
-import { loadFromLocalStorage, saveToLocalStorage } from "@/utils/canvas";
-import { readCodeByImage } from "@/utils/reader";
-import { convertBarcodeFormat } from "@/utils/adapter";
+import {
+  loadFromLocalStorage,
+  saveToLocalStorage,
+  readCodeByImage,
+  convertBarcodeFormat,
+} from "@/utils";
 
 const CANVAS_WIDTH = 1000;
 const CANVAS_HEIGHT = 600;
