@@ -89,8 +89,8 @@ const useControl = (props?: ControlValues): Controls => {
     if (selectedNodes.length === 1) {
       const attrs = selectedNodes[0].attrs;
 
-      setFill(attrs.fill ?? defaultValues.fill);
-      setStroke(attrs.stroke ?? defaultValues.stroke);
+      setFill(attrs.barColor ?? attrs.fill ?? defaultValues.fill);
+      setStroke(attrs.textColor ?? attrs.stroke ?? defaultValues.stroke);
       setStrokeWidth(attrs.strokeWidth ?? defaultValues.strokeWidth);
       setOpacity(attrs.opacity ?? defaultValues.opacity);
       setDraggable(

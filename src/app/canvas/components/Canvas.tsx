@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import Konva from "konva";
@@ -98,41 +99,71 @@ const Canvas = () => {
     else handleCreateShapeComplete();
   };
 
-  const addCodeToCanvas = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleAddBarcode = (e: ChangeEvent<HTMLInputElement>) => {
+    loadFileFromLocal(e, (file) => decodeFromImage(file));
+  };
+
+  const handleAddImage = (e: ChangeEvent<HTMLInputElement>) => {
+    loadFileFromLocal(e, (file) => {
+      if (!file) return;
+      const image = new Image();
+      image.src = file;
+      image.onload = () => {
+        createShape({
+          type: "image",
+          image: image,
+          width: image.width,
+          height: image.height,
+          x: Math.floor((CANVAS_WIDTH - image.width) / 2),
+          y: Math.floor((CANVAS_HEIGHT - image.height) / 2),
+        });
+      };
+    });
+  };
+
+  const loadFileFromLocal = (
+    e: ChangeEvent<HTMLInputElement>,
+    callback: (result: string | null) => any
+  ) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
     const reader = new FileReader();
     reader.readAsDataURL(file);
-    reader.onload = () => {
-      decodeFromImage(reader.result);
-    };
+    reader.onload = () => callback(reader.result as string | null);
   };
 
   const decodeFromImage = async (image: string | ArrayBuffer | null) => {
     if (!image) return;
-
     const data = await readCodeByImage(image as string);
     if (!data) return;
 
     const format = convertBarcodeFormat(data.format);
-
+    console.log("들렸다감");
     createShape({
       type: "barcode",
       text: data.value,
       codeFormat: format,
+      fill,
       stroke,
-      x: 100,
-      y: 100,
+      x: Math.floor(CANVAS_WIDTH / 2),
+      y: Math.floor(CANVAS_HEIGHT / 2),
     });
   };
 
-  const exportCanvasAsImage = () => {
+  const handleExportAsImage = () => {
     if (!stageRef.current) return;
     const uri = stageRef.current.toDataURL();
     const link = document.createElement("a");
     link.download = "image.png";
     link.href = uri;
     link.click();
+  };
+
+  const handleSaveCanvas = () => {
+    const exportedData = exportCanvasAsJSON();
+    if (!exportedData) return;
+    saveToLocalStorage(exportedData);
   };
 
   const exportCanvasAsJSON = () => {
@@ -148,21 +179,15 @@ const Canvas = () => {
     return JSON.parse(JSON.stringify(json));
   };
 
+  const handleLoadCanvas = () => {
+    const loadedData = loadFromLocalStorage();
+    loadCanvasByJSON(loadedData);
+  };
+
   const loadCanvasByJSON = (data: Konva.Layer[]) => {
     if (!stageRef.current) return;
 
     setShapes(data.map(({ attrs }) => attrs));
-  };
-
-  const saveCanvas = () => {
-    const exportedData = exportCanvasAsJSON();
-    if (!exportedData) return;
-    saveToLocalStorage(exportedData);
-  };
-
-  const loadCanvas = () => {
-    const loadedData = loadFromLocalStorage();
-    loadCanvasByJSON(loadedData);
   };
 
   const handleCreateShapeStart = () => {
@@ -234,18 +259,17 @@ const Canvas = () => {
   };
 
   const handleCreateShapeComplete = () => {
-    if (action !== "select" && action !== "pencil" && action !== "eraser") {
-      const id = completeShapeCreation();
-      selectNodeById(id);
-      setAction("select");
-    }
     isPointerDown.current = false;
+    if (action === "select" || action === "pencil" || action === "eraser")
+      return;
+
+    const id = completeShapeCreation();
+    selectNodeById(id);
+    setAction("select");
   };
 
   const removeShapeOnCanvas = () => {
     const selected = getAllSelectedNodes();
-    if (!selected) return;
-
     const removeIds = selected.map((node) => node.attrs.id);
     const filtered = shapes.filter((shape) => !removeIds.includes(shape.id));
     setShapes(filtered);
@@ -315,18 +339,29 @@ const Canvas = () => {
           <Button onClick={removeShapeOnCanvas} label="샥제" />
           <ColorPicker color={fill} onChange={onFillChange} />
           <ColorPicker color={stroke} onChange={onStrokeChange} />
-          <Button onClick={exportCanvasAsImage} label="다운로드" />
-          <Button onClick={saveCanvas} label="저장" />
-          <Button onClick={loadCanvas} label="불러오기" />
+          <Button onClick={handleExportAsImage} label="다운로드" />
+          <Button onClick={handleSaveCanvas} label="저장" />
+          <Button onClick={handleLoadCanvas} label="불러오기" />
           <label className="cursor-pointer">
             <input
               type="file"
-              onChange={addCodeToCanvas}
+              onChange={handleAddBarcode}
               accept="image/*"
               className="hidden"
             />
             <span className="px-4 py-2 bg-blue-500 text-white rounded inline-block">
               바코드/QR 추가
+            </span>
+          </label>
+          <label className="cursor-pointer">
+            <input
+              type="file"
+              onChange={handleAddImage}
+              accept="image/*"
+              className="hidden"
+            />
+            <span className="px-4 py-2 bg-blue-500 text-white rounded inline-block">
+              사진 추가
             </span>
           </label>
           <Slider

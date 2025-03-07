@@ -6,7 +6,6 @@ import { useCanvasContext } from "../context/canvas";
 
 const useSelect = () => {
   const { stageRef, transformerRef, setSelectedNodes } = useCanvasContext();
-
   const selectionRef = useRef<Konva.Rect>(null);
   const selectBoxPositionRef = useRef<Konva.ShapeConfig>(null);
   const isSelectingRef = useRef<boolean>(false);
@@ -28,7 +27,6 @@ const useSelect = () => {
 
     const selectedNodes = getAllSelectedNodes();
     const stage = stageRef.current;
-
     const node = stage.find(".shape").find((node) => node.attrs.id === id);
     if (node && !selectedNodes.includes(node)) {
       setSelectNodes([node]);
