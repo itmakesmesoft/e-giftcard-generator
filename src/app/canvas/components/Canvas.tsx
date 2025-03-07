@@ -2,7 +2,7 @@
 "use client";
 
 import Konva from "konva";
-import { ChangeEvent, useRef } from "react";
+import { ChangeEvent, useEffect, useRef } from "react";
 import type { Vector2d } from "konva/lib/types";
 import { CanvasProvider, useCanvasContext } from "@/app/context/canvas";
 import { Layer, Stage, Transformer } from "react-konva";
@@ -15,9 +15,6 @@ import {
   convertBarcodeFormat,
 } from "@/utils";
 
-const CANVAS_WIDTH = 1000;
-const CANVAS_HEIGHT = 600;
-
 const WrapperCanvas = () => (
   <CanvasProvider>
     <Canvas />
@@ -27,7 +24,7 @@ const WrapperCanvas = () => (
 export default WrapperCanvas;
 
 const Canvas = () => {
-  const { stageRef, transformerRef } = useCanvasContext();
+  const { stageRef, transformerRef, canvasSize } = useCanvasContext();
   const isPointerDown = useRef(false);
 
   const {
@@ -61,6 +58,17 @@ const Canvas = () => {
     completeShapeCreation,
     renderLayer,
   } = useShapes();
+
+  useEffect(() => {
+    if (!stageRef.current) return;
+    if (action === "select") {
+      stageRef.current.container().style.cursor = "default";
+    } else if (action === "pencil" || action === "eraser") {
+      stageRef.current.container().style.cursor = "default";
+    } else {
+      stageRef.current.container().style.cursor = "crosshair";
+    }
+  }, [action, stageRef]);
 
   const onFillChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFill(e.target.value);
@@ -106,18 +114,10 @@ const Canvas = () => {
   const handleAddImage = (e: ChangeEvent<HTMLInputElement>) => {
     loadFileFromLocal(e, (file) => {
       if (!file) return;
-      const image = new Image();
-      image.src = file;
-      image.onload = () => {
-        createShape({
-          type: "image",
-          image: image,
-          width: image.width,
-          height: image.height,
-          x: Math.floor((CANVAS_WIDTH - image.width) / 2),
-          y: Math.floor((CANVAS_HEIGHT - image.height) / 2),
-        });
-      };
+      createShape({
+        type: "image",
+        dataURL: file,
+      });
     });
   };
 
@@ -139,15 +139,12 @@ const Canvas = () => {
     if (!data) return;
 
     const format = convertBarcodeFormat(data.format);
-    console.log("들렸다감");
     createShape({
       type: "barcode",
       text: data.value,
       codeFormat: format,
       fill,
       stroke,
-      x: Math.floor(CANVAS_WIDTH / 2),
-      y: Math.floor(CANVAS_HEIGHT / 2),
     });
   };
 
@@ -214,7 +211,6 @@ const Canvas = () => {
 
     switch (action) {
       case "text":
-      case "image":
       case "rectangle":
         updateShapeCreation((shape) => {
           const dx = shape.x ?? 0;
@@ -384,8 +380,8 @@ const Canvas = () => {
       {/* Canvas */}
       <Stage
         ref={stageRef}
-        width={CANVAS_WIDTH}
-        height={CANVAS_HEIGHT}
+        width={canvasSize.width}
+        height={canvasSize.height}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
@@ -393,8 +389,8 @@ const Canvas = () => {
         <BackgroundLayer
           id="_bgLayer"
           onPointerDown={clearSelectNodes}
-          width={CANVAS_WIDTH}
-          height={CANVAS_HEIGHT}
+          width={canvasSize.width}
+          height={canvasSize.height}
         />
         <Layer id="_shapeLayer">
           {renderLayer.shapes({

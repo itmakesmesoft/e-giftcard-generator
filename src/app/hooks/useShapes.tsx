@@ -1,13 +1,18 @@
 import Konva from "konva";
 import { nanoid } from "nanoid";
-import { useCallback, useEffect, useRef, useState } from "react";
 import { Vector2d } from "konva/lib/types";
-import { EditableText, Barcode, ShapeHelper } from "../canvas/components";
-import type { ShapeHelperConfig } from "../canvas/components";
-import { Arrow, Circle, Rect, Image, Line } from "react-konva";
-import { KonvaEventObject, NodeConfig, Node } from "konva/lib/Node";
 import { ShapeConfig } from "konva/lib/Shape";
 import { useCanvasContext } from "../context/canvas";
+import { Arrow, Circle, Rect, Line } from "react-konva";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { KonvaEventObject, NodeConfig, Node } from "konva/lib/Node";
+import {
+  CanvasImage,
+  EditableText,
+  Barcode,
+  ShapeHelper,
+  type ShapeHelperConfig,
+} from "../canvas/components";
 
 const useShapes = () => {
   const currentShapeRef = useRef<Konva.ShapeConfig>(null);
@@ -163,12 +168,12 @@ const useShapes = () => {
               );
             case "image":
               return (
-                <Image
+                <CanvasImage
                   key={index}
                   alt="이미지"
-                  image={node.image}
                   draggable={isDraggable}
                   onDragEnd={onDragEnd}
+                  dataURL={node.dataURL}
                   {...node}
                 />
               );

@@ -24,17 +24,14 @@ const EditableText = (props: EditableTextProps) => {
 
   useEffect(() => {
     if (!textRef.current) return;
-    for (const node of selectedNodes) {
-      if (node === textRef.current) return;
-    }
+    if (selectedNodes.includes(textRef.current)) return;
     return setIsFocus(false);
   }, [selectedNodes]);
 
   useEffect(() => {
-    if (!isFocus && value !== backupTextRef.current) {
-      backupTextRef.current = value;
-      onValueChange(id, value);
-    }
+    if (isFocus || value === backupTextRef.current) return;
+    backupTextRef.current = value;
+    onValueChange(id, value);
   }, [isFocus, value, id, onValueChange]);
 
   return (
@@ -48,8 +45,8 @@ const EditableText = (props: EditableTextProps) => {
         strokeEnabled={false}
         onDragEnd={onDragEnd}
         onDblClick={() => setIsFocus(true)}
-        visible={!isFocus}
         {...restProps}
+        visible={!isFocus}
         scaleX={1}
         scaleY={1}
         onTransform={() => {
@@ -62,8 +59,9 @@ const EditableText = (props: EditableTextProps) => {
           });
         }}
       />
-      {isFocus && (
-        <Html>
+
+      <Html>
+        {isFocus && (
           <textarea
             className=""
             value={value}
@@ -72,7 +70,7 @@ const EditableText = (props: EditableTextProps) => {
               position: "absolute",
               top: props.y,
               left: props.x,
-              marginTop: -5,
+              lineHeight: props.lineHeight ?? 1,
               width: width,
               height: height,
               color: props.fill as string,
@@ -86,8 +84,8 @@ const EditableText = (props: EditableTextProps) => {
               overflow: "hidden",
             }}
           />
-        </Html>
-      )}
+        )}
+      </Html>
     </>
   );
 };

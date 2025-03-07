@@ -8,7 +8,6 @@ type ActionType =
   | "pencil"
   | "eraser"
   | "arrow"
-  | "image"
   | "text";
 
 interface ControlValues {
