@@ -5,14 +5,15 @@ import { Image as KonvaImage } from "react-konva";
 import { useCanvasContext } from "@/app/context/canvas";
 
 interface BarcodeProps extends Konva.ShapeConfig {
-  text: string;
-  codeFormat: GeneraterFormatType;
+  text?: string;
+  codeFormat?: GeneraterFormatType;
 }
 interface ImageSize {
   width: number;
   height: number;
 }
 interface GetDataURLProps {
+  text: string;
   codeFormat: GeneraterFormatType;
   barColor?: string;
   textColor?: string;
@@ -41,30 +42,24 @@ const Barcode = (props: BarcodeProps) => {
   const [barColor, setBarColor] = useState<string>(barColorFromProps);
   // props에 textColor와 barColor가 존재할 경우, 해당 값으로 초기화
 
-  const getDataURL = useCallback(
-    (props: GetDataURLProps) => {
-      const canvas = document.createElement("canvas");
-      generateCode({
-        canvas,
-        options: {
-          text,
-          bcid: props.codeFormat,
-          barcolor: props.barColor ?? "#000000",
-          textcolor: props.textColor ?? "#000000",
-        },
-      });
-      setImageSize({ width: canvas.width, height: canvas.height });
-      return canvas.toDataURL();
-    },
-    [text]
-  );
+  const getDataURL = useCallback((props: GetDataURLProps) => {
+    const canvas = document.createElement("canvas");
+    generateCode({
+      canvas,
+      options: {
+        text: props.text,
+        bcid: props.codeFormat,
+        barcolor: props.barColor ?? "#000000",
+        textcolor: props.textColor ?? "#000000",
+      },
+    });
+    setImageSize({ width: canvas.width, height: canvas.height });
+    return canvas.toDataURL();
+  }, []);
 
   useEffect(() => {
-    const url = getDataURL({
-      codeFormat,
-      barColor,
-      textColor,
-    });
+    if (!text || !codeFormat) return;
+    const url = getDataURL({ text, codeFormat, barColor, textColor });
     const img = new Image();
     img.src = url;
     img.onload = () => setImage(img);
