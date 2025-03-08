@@ -4,16 +4,10 @@ import { Html } from "react-konva-utils";
 import { useEffect, useRef, useState } from "react";
 import { useCanvasContext } from "@/app/context/canvas";
 
-interface EditableTextProps extends Konva.TextConfig {
-  onValueChange: (id: string | undefined, text: string) => void;
-}
-
-const EditableText = (props: EditableTextProps) => {
-  const { id, text = "텍스트", onDragEnd, onValueChange, ...restProps } = props;
+const EditableText = (props: Konva.TextConfig) => {
+  const { id, text = "텍스트", onDragEnd, ...restProps } = props;
 
   const textRef = useRef<Konva.Text>(null);
-  const backupTextRef = useRef<string>("");
-
   const { selectedNodes } = useCanvasContext();
   const [value, setValue] = useState<string>(text);
   const [isFocus, setIsFocus] = useState<boolean>(true);
@@ -27,12 +21,6 @@ const EditableText = (props: EditableTextProps) => {
     if (selectedNodes.includes(textRef.current)) return;
     return setIsFocus(false);
   }, [selectedNodes]);
-
-  useEffect(() => {
-    if (isFocus || value === backupTextRef.current) return;
-    backupTextRef.current = value;
-    onValueChange(id, value);
-  }, [isFocus, value, id, onValueChange]);
 
   return (
     <>

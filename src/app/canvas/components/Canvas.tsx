@@ -57,6 +57,8 @@ const Canvas = () => {
     updateShapeCreation,
     completeShapeCreation,
     renderLayer,
+    redo,
+    undo,
   } = useShapes();
 
   useEffect(() => {
@@ -184,7 +186,7 @@ const Canvas = () => {
   const loadCanvasByJSON = (data: Konva.Layer[]) => {
     if (!stageRef.current) return;
 
-    setShapes(data.map(({ attrs }) => attrs));
+    setShapes({ type: "save", shapes: data.map(({ attrs }) => attrs) });
   };
 
   const handleCreateShapeStart = () => {
@@ -256,10 +258,10 @@ const Canvas = () => {
 
   const handleCreateShapeComplete = () => {
     isPointerDown.current = false;
-    if (action === "select" || action === "pencil" || action === "eraser")
-      return;
+    if (action === "select") return;
 
     const id = completeShapeCreation();
+    if (action === "pencil" || action === "eraser") return;
     selectNodeById(id);
     setAction("select");
   };
@@ -268,7 +270,7 @@ const Canvas = () => {
     const selected = getAllSelectedNodes();
     const removeIds = selected.map((node) => node.attrs.id);
     const filtered = shapes.filter((shape) => !removeIds.includes(shape.id));
-    setShapes(filtered);
+    setShapes({ type: "save", shapes: filtered });
     clearSelectNodes();
   };
 
@@ -338,6 +340,8 @@ const Canvas = () => {
           <Button onClick={handleExportAsImage} label="다운로드" />
           <Button onClick={handleSaveCanvas} label="저장" />
           <Button onClick={handleLoadCanvas} label="불러오기" />
+          <Button onClick={redo} label="이후으로" />
+          <Button onClick={undo} label="이전으로" />
           <label className="cursor-pointer">
             <input
               type="file"

@@ -31,7 +31,6 @@ const Barcode = (props: BarcodeProps) => {
     barColor: barColorFromProps, // 불러온 객체 내부에 barColor가 존재하는 경우를 대비
     width = 100,
     height = 100,
-    dataURL,
     ...restProps
   } = props;
 
@@ -58,12 +57,12 @@ const Barcode = (props: BarcodeProps) => {
   }, []);
 
   useEffect(() => {
-    if (!text || !codeFormat) return;
-    const url = getDataURL({ text, codeFormat, barColor, textColor });
     const img = new Image();
+    if (!text || !codeFormat) return setImage(img);
+    const url = getDataURL({ text, codeFormat, barColor, textColor });
     img.src = url;
     img.onload = () => setImage(img);
-  }, [codeFormat, text, dataURL, image, getDataURL, barColor, textColor]);
+  }, [codeFormat, text, image, getDataURL, barColor, textColor]);
 
   useEffect(() => {
     if (stroke) setTextColor(stroke as string);
