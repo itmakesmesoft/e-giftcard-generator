@@ -21,8 +21,8 @@ const useShapes = () => {
   const { transformerRef } = useCanvasContext();
   const { state, dispatch: setShapes, redo, undo } = useHistoryState();
 
-  // Transformer 컴포넌트에 의해 스케일이 변경되는 경우, 변경사항을 shapes에 반영해주기 위함.
   const onTransform = useCallback(() => {
+    // Transformer 컴포넌트에 의해 스케일이 변경되는 경우, 변경사항을 shapes에 반영해주기 위함.
     const target = transformerRef.current?.getNode();
     if (!target) return;
     setShapes({
@@ -35,29 +35,11 @@ const useShapes = () => {
 
   useEffect(() => {
     if (!transformerRef.current) return;
-
     transformerRef.current.on("transformend", onTransform);
   }, [onTransform, transformerRef]);
 
   const createShape = <T extends Konva.ShapeConfig>(shapeConfig: T) => {
-    const { type, ...restConfig } = shapeConfig;
-    const id = nanoid();
-    const hasRadius = type === "circle";
-    const hasPoints = type === "arrow";
-    const isShape = type !== "pencil" && type !== "eraser";
-    const compositeOperation =
-      type === "pencil" ? "source-over" : "destination-out";
-
-    const shape: Konva.ShapeConfig = {
-      id,
-      type,
-      ...(hasRadius && { radius: 0 }),
-      ...(hasPoints && { points: [] }),
-      ...(isShape
-        ? { name: "shape" }
-        : { globalCompositeOperation: compositeOperation }),
-      ...restConfig,
-    };
+    const shape = generateShapeConfig(shapeConfig);
     setShapes({ shapes: [...state.shapes, shape] });
     return shape;
   };
@@ -72,6 +54,15 @@ const useShapes = () => {
   );
 
   const startShapeCreation = <T extends Konva.ShapeConfig>(shapeConfig: T) => {
+    const shape = generateShapeConfig(shapeConfig);
+    setShapes({ logHistory: false, shapes: (shapes) => [...shapes, shape] });
+    currentShapeRef.current = shape;
+    return shape;
+  };
+
+  const generateShapeConfig = (
+    shapeConfig: Konva.ShapeConfig
+  ): Konva.ShapeConfig => {
     const { type, ...restConfig } = shapeConfig;
     const id = nanoid();
     const hasRadius = type === "circle";
@@ -80,7 +71,7 @@ const useShapes = () => {
     const compositeOperation =
       type === "pencil" ? "source-over" : "destination-out";
 
-    const shape: Konva.ShapeConfig = {
+    return {
       id,
       type,
       ...(hasRadius && { radius: 0 }),
@@ -90,10 +81,6 @@ const useShapes = () => {
         : { globalCompositeOperation: compositeOperation }),
       ...restConfig,
     };
-
-    setShapes({ logHistory: false, shapes: (shapes) => [...shapes, shape] });
-    currentShapeRef.current = shape;
-    return shape;
   };
 
   const updateShapeCreation = (
