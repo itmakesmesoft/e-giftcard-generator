@@ -46,7 +46,7 @@ const reducer = (
   };
 };
 
-export const useHistoryState = () => {
+const useHistoryState = () => {
   const [state, dispatch] = useReducer(reducer, {
     history: [],
     shapes: [],
@@ -78,3 +78,5 @@ export const useHistoryState = () => {
 
   return { state, dispatch, undo, redo, canUndo, canRedo };
 };
+
+export default useHistoryState;

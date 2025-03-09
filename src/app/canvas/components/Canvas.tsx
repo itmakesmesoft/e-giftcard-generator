@@ -186,7 +186,7 @@ const Canvas = () => {
   const loadCanvasByJSON = (data: Konva.Layer[]) => {
     if (!stageRef.current) return;
 
-    setShapes({ type: "save", shapes: data.map(({ attrs }) => attrs) });
+    setShapes({ shapes: data.map(({ attrs }) => attrs) });
   };
 
   const handleCreateShapeStart = () => {
@@ -270,7 +270,7 @@ const Canvas = () => {
     const selected = getAllSelectedNodes();
     const removeIds = selected.map((node) => node.attrs.id);
     const filtered = shapes.filter((shape) => !removeIds.includes(shape.id));
-    setShapes({ type: "save", shapes: filtered });
+    setShapes({ shapes: filtered });
     clearSelectNodes();
   };
 

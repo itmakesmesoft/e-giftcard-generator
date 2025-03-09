@@ -13,7 +13,7 @@ import {
   ShapeHelper,
   type ShapeHelperConfig,
 } from "../canvas/components";
-import { useHistoryState } from "./useHistoryState";
+import useHistoryState from "./useHistoryState";
 
 const useShapes = () => {
   const currentShapeRef = useRef<Konva.ShapeConfig>(null);
