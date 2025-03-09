@@ -91,7 +91,7 @@ const useShapes = () => {
       ...restConfig,
     };
 
-    setShapes({ type: "unsave", shapes: (shapes) => [...shapes, shape] });
+    setShapes({ logHistory: false, shapes: (shapes) => [...shapes, shape] });
     currentShapeRef.current = shape;
     return shape;
   };
@@ -105,7 +105,7 @@ const useShapes = () => {
     const updated = callback(currentShapeRef.current);
     currentShapeRef.current = updated;
     setShapes({
-      type: "unsave",
+      logHistory: false,
       shapes: (shapes) =>
         shapes.map((shape) => (shape.id === currentId ? updated : shape)),
     });

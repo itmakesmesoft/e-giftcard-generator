@@ -1,62 +1,49 @@
 import Konva from "konva";
 import { useReducer } from "react";
 
-type ShapesConfig = Konva.ShapeConfig[];
+type StateConfig = Konva.ShapeConfig[];
 
 interface State {
-  history: ShapesConfig[];
+  history: StateConfig[];
   historyIndex: number;
-  shapes: ShapesConfig;
+  shapes: StateConfig;
 }
 
-type FunctionableShapes =
-  | ShapesConfig
-  | ((prevShapes: ShapesConfig) => ShapesConfig);
+type FunctionableState =
+  | StateConfig
+  | ((prevState: StateConfig) => StateConfig);
 
 interface Action {
-  type?: "save" | "unsave";
-  shapes: FunctionableShapes;
+  logHistory?: boolean;
+  shapes: FunctionableState;
 }
 
-const updateShapes = (
-  newShapes: FunctionableShapes,
-  prevShapes: ShapesConfig
-): ShapesConfig => {
-  if (typeof newShapes === "function") {
-    return (newShapes as (prevShapes: ShapesConfig) => ShapesConfig)(
-      prevShapes
-    );
+const updatestate = (
+  newState: FunctionableState,
+  prevState: StateConfig
+): StateConfig => {
+  if (typeof newState === "function") {
+    return (newState as (prevState: StateConfig) => StateConfig)(prevState);
   }
-  return newShapes;
+  return newState;
 };
 
 const reducer = (
   prevState: State,
-  { type = "save", shapes }: Action
+  { logHistory = true, shapes }: Action
 ): State => {
-  switch (type) {
-    case "save":
-    case "unsave": {
-      const newShapes = updateShapes(shapes, prevState.shapes);
-      const newHistory =
-        type === "save"
-          ? [
-              ...prevState.history.slice(0, prevState.historyIndex + 1),
-              newShapes,
-            ]
-          : prevState.history;
-      return {
-        ...prevState,
-        shapes: newShapes,
-        history: newHistory,
-        historyIndex:
-          type === "save" ? prevState.historyIndex + 1 : prevState.historyIndex,
-      };
-    }
-
-    default:
-      return prevState;
-  }
+  const newState = updatestate(shapes, prevState.shapes);
+  const newHistory = logHistory
+    ? [...prevState.history.slice(0, prevState.historyIndex + 1), newState]
+    : prevState.history;
+  return {
+    ...prevState,
+    shapes: newState,
+    history: newHistory,
+    historyIndex: logHistory
+      ? prevState.historyIndex + 1
+      : prevState.historyIndex,
+  };
 };
 
 export const useHistoryState = () => {
@@ -69,10 +56,10 @@ export const useHistoryState = () => {
   const undo = () => {
     if (state.historyIndex >= 0) {
       state.historyIndex -= 1;
-      const prevShapes = state.history[state.historyIndex];
+      const prevState = state.history[state.historyIndex];
       dispatch({
-        type: "unsave",
-        shapes: state.historyIndex >= 0 ? prevShapes : [],
+        logHistory: false,
+        shapes: state.historyIndex >= 0 ? prevState : [],
       });
     }
   };
@@ -80,8 +67,8 @@ export const useHistoryState = () => {
   const redo = () => {
     if (state.historyIndex < state.history.length - 1) {
       state.historyIndex += 1;
-      const nextShapes = state.history[state.historyIndex];
-      dispatch({ type: "unsave", shapes: nextShapes });
+      const nextstate = state.history[state.historyIndex];
+      dispatch({ logHistory: false, shapes: nextstate });
     }
   };
 
