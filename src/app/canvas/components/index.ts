@@ -1,13 +1,13 @@
-import Canvas from "./Canvas";
-import Slider from "./Slider";
-import Select from "./Select";
-import Button from "./Button";
-import Barcode from "./Barcode";
-import CanvasImage from "./CanvasImage";
-import EditableText from "./EditableText";
-import ColorPicker from "./ColorPicker";
-import BackgroundLayer from "./BackgroundLayer";
-import { ShapeHelper, ShapeHelperConfig } from "./ShapeHelper";
+import Canvas from "./CanvasContainer";
+import Slider from "./primitives/Slider";
+import Select from "./primitives/Select";
+import Button from "./primitives/Button";
+import Barcode from "./konva/Barcode";
+import CanvasImage from "./konva/CanvasImage";
+import EditableText from "./konva/EditableText";
+import ColorPicker from "./primitives/ColorPicker";
+import BackgroundLayer from "./konva/BackgroundLayer";
+import { ShapeHelper, ShapeHelperConfig } from "./konva/ShapeHelper";
 
 export {
   Canvas,

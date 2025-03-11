@@ -2,7 +2,7 @@ import Konva from "konva";
 import { Layer, Rect } from "react-konva";
 
 const BackgroundLayer = (props: {
-  onPointerDown: (e: Konva.KonvaEventObject<PointerEvent>) => void;
+  onPointerDown?: (e: Konva.KonvaEventObject<PointerEvent>) => void;
   width: number;
   height: number;
   [key: string]: unknown;

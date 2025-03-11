@@ -3,23 +3,33 @@ import { Text } from "react-konva";
 import { Html } from "react-konva-utils";
 import { useEffect, useRef, useState } from "react";
 import { useCanvasContext } from "@/app/context/canvas";
+import { ShapeHelper, ShapeHelperConfig } from "./ShapeHelper";
 
 const EditableText = (props: Konva.TextConfig) => {
-  const { id, text = "텍스트", onDragEnd, ...restProps } = props;
+  const { id, text = "텍스트", onDragEnd, isDrawing, ...restProps } = props;
+  const { selectedNodes } = useCanvasContext();
 
   const textRef = useRef<Konva.Text>(null);
-  const { selectedNodes } = useCanvasContext();
   const [value, setValue] = useState<string>(text);
   const [isFocus, setIsFocus] = useState<boolean>(true);
+  const [helperConfig, setHelperConfig] = useState<ShapeHelperConfig>();
+
+  useEffect(() => {
+    if (!props || !props.isDrawing || props.type !== "text")
+      return setHelperConfig({});
+
+    const { x, y, width, height, isDrawing } = props;
+    setHelperConfig({ x, y, width, height, visible: isDrawing });
+  }, [props]);
 
   const node = textRef.current;
   const width = node?.width() ?? props.width;
   const height = node?.height() ?? props.height;
 
   useEffect(() => {
-    if (!textRef.current) return;
-    if (selectedNodes.includes(textRef.current)) return;
-    return setIsFocus(false);
+    if (!textRef.current || selectedNodes.includes(textRef.current)) return;
+
+    setIsFocus(false);
   }, [selectedNodes]);
 
   return (
@@ -47,7 +57,7 @@ const EditableText = (props: Konva.TextConfig) => {
           });
         }}
       />
-
+      {isDrawing && <ShapeHelper config={helperConfig} />}
       <Html>
         {isFocus && (
           <textarea

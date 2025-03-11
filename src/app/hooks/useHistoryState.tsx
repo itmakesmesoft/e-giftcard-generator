@@ -1,5 +1,6 @@
 import Konva from "konva";
-import { useReducer } from "react";
+import { useCallback, useReducer } from "react";
+import { useShapeStore } from "../store/canvas";
 
 type StateConfig = Konva.ShapeConfig[];
 
@@ -28,25 +29,28 @@ const updatestate = (
   return newState;
 };
 
-const reducer = (
-  prevState: State,
-  { logHistory = true, shapes }: Action
-): State => {
-  const newState = updatestate(shapes, prevState.shapes);
-  const newHistory = logHistory
-    ? [...prevState.history.slice(0, prevState.historyIndex + 1), newState]
-    : prevState.history;
-  return {
-    ...prevState,
-    shapes: newState,
-    history: newHistory,
-    historyIndex: logHistory
-      ? prevState.historyIndex + 1
-      : prevState.historyIndex,
-  };
-};
-
 const useHistoryState = () => {
+  const setShapes = useShapeStore((state) => state.setShapes);
+
+  const reducer = useCallback(
+    (prevState: State, { logHistory = true, shapes }: Action): State => {
+      const newShapes = updatestate(shapes, prevState.shapes);
+      const newHistory = logHistory
+        ? [...prevState.history.slice(0, prevState.historyIndex + 1), newShapes]
+        : prevState.history;
+      setShapes(newShapes);
+      return {
+        ...prevState,
+        shapes: newShapes,
+        history: newHistory,
+        historyIndex: logHistory
+          ? prevState.historyIndex + 1
+          : prevState.historyIndex,
+      };
+    },
+    [setShapes]
+  );
+
   const [state, dispatch] = useReducer(reducer, {
     history: [],
     shapes: [],

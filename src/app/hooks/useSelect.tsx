@@ -1,14 +1,39 @@
 import Konva from "konva";
 import { Rect } from "react-konva";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Vector2d } from "konva/lib/types";
 import { useCanvasContext } from "../context/canvas";
+import { useControlStore } from "../store/canvas";
 
 const useSelect = () => {
-  const { stageRef, transformerRef, setSelectedNodes } = useCanvasContext();
   const selectionRef = useRef<Konva.Rect>(null);
   const selectBoxPositionRef = useRef<Konva.ShapeConfig>(null);
   const isSelectingRef = useRef<boolean>(false);
+
+  const action = useControlStore((state) => state.action);
+  const {
+    stageRef,
+    transformerRef,
+    setSelectedNodes,
+    getSingleSelectedNode,
+    selectNodeById,
+  } = useCanvasContext();
+
+  useEffect(() => {
+    if (!stageRef.current) return;
+    const stage = stageRef.current;
+    switch (action) {
+      case "select":
+        stage.container().style.cursor = "default";
+        break;
+      case "pencil":
+      case "eraser":
+        stage.container().style.cursor = "default";
+        break;
+      default:
+        stage.container().style.cursor = "crosshair";
+    }
+  }, [action, stageRef]);
 
   const clearSelectNodes = () => {
     transformerRef.current?.nodes([]);
@@ -21,23 +46,6 @@ const useSelect = () => {
     transformerRef.current.nodes([...nodes]);
     setSelectedNodes(selectNodes);
   };
-
-  const selectNodeById = (id: string) => {
-    if (!transformerRef.current || !stageRef.current) return;
-
-    const selectedNodes = getAllSelectedNodes();
-    const stage = stageRef.current;
-    const node = stage.find(".shape").find((node) => node.attrs.id === id);
-    if (node && !selectedNodes.includes(node)) {
-      setSelectNodes([node]);
-    }
-  };
-
-  const getSingleSelectedNode = (): Konva.Node | undefined =>
-    transformerRef.current?.getNode();
-
-  const getAllSelectedNodes = (): Konva.Node[] =>
-    transformerRef.current?.getNodes() ?? [];
 
   const startSelectionBox = (e: Konva.KonvaEventObject<PointerEvent>) => {
     if (!stageRef.current) return;
@@ -52,11 +60,10 @@ const useSelect = () => {
       x: Math.round(pointerPos.x),
       y: Math.round(pointerPos.y),
     };
-
     selectBox.setAttrs(position);
     selectBoxPositionRef.current = position;
-    selectNodeById(e.target.attrs.id);
     isSelectingRef.current = true;
+    selectNodeById(e.target.attrs.id);
   };
 
   const updateSelectionBox = () => {
@@ -104,7 +111,6 @@ const useSelect = () => {
 
   const SelectionBox = () => (
     <Rect
-      // 추후 수정 필요
       ref={(node) => {
         selectionRef.current = node;
       }}
@@ -118,8 +124,6 @@ const useSelect = () => {
   return {
     selectNodeById,
     clearSelectNodes,
-    getSingleSelectedNode,
-    getAllSelectedNodes,
     startSelectionBox,
     updateSelectionBox,
     endSelectionBox,
