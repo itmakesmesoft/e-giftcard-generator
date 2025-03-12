@@ -1,12 +1,20 @@
 import Konva from "konva";
 import { Text } from "react-konva";
 import { Html } from "react-konva-utils";
-import { useEffect, useRef, useState } from "react";
+import { ChangeEvent, CSSProperties, useEffect, useRef, useState } from "react";
 import { useCanvasContext } from "@/app/context/canvas";
 import { ShapeHelper, ShapeHelperConfig } from "./ShapeHelper";
 
 const EditableText = (props: Konva.TextConfig) => {
-  const { id, text = "텍스트", onDragEnd, isDrawing, ...restProps } = props;
+  const {
+    id,
+    text = "텍스트",
+    onDragEnd,
+    isDrawing,
+    fontStyle,
+    textAlign,
+    ...restProps
+  } = props;
   const { selectedNodes } = useCanvasContext();
 
   const textRef = useRef<Konva.Text>(null);
@@ -22,68 +30,81 @@ const EditableText = (props: Konva.TextConfig) => {
     setHelperConfig({ x, y, width, height, visible: isDrawing });
   }, [props]);
 
-  const node = textRef.current;
-  const width = node?.width() ?? props.width;
-  const height = node?.height() ?? props.height;
+  // const node = textRef.current;
+  // const width = Math.floor(node?.width() ?? props.width ?? 0);
+  // const height = Math.floor(node?.height() ?? props.height ?? 0);
 
   useEffect(() => {
     if (!textRef.current || selectedNodes.includes(textRef.current)) return;
 
+    textRef.current.setAttrs({ visible: true });
     setIsFocus(false);
   }, [selectedNodes]);
+  console.log(props);
+
+  const handleTransform = () => {
+    const text = textRef.current as Konva.Text | null;
+
+    text?.setAttrs({
+      width: Math.max(text.width() * text.scaleX(), 1),
+      height: Math.max(text.height() * text.scaleY(), 1),
+      scaleX: 1,
+      scaleY: 1,
+    });
+  };
+
+  const handleValueChange = (e: ChangeEvent<HTMLTextAreaElement>) =>
+    setValue(e.target.value);
+
+  const handleDoubleClick = () => {
+    setIsFocus(true);
+    textRef.current?.setAttrs({ visible: false });
+  };
 
   return (
     <>
       <Text
-        ref={(node) => {
-          textRef.current = node;
-        }}
+        ref={textRef}
         id={id}
         text={value}
         strokeEnabled={false}
         onDragEnd={onDragEnd}
-        onDblClick={() => setIsFocus(true)}
         {...restProps}
-        visible={!isFocus}
-        scaleX={1}
-        scaleY={1}
-        onTransform={() => {
-          const node = textRef.current as Konva.Text | null;
-          node?.setAttrs({
-            scaleX: 1,
-            scaleY: 1,
-            width: node.width() * node.scaleX(),
-            height: node.height() * node.scaleY(),
-          });
-        }}
+        onDblClick={handleDoubleClick}
+        onTransform={handleTransform}
+        align={textAlign}
+        fontStyle={fontStyle}
       />
       {isDrawing && <ShapeHelper config={helperConfig} />}
-      <Html>
-        {isFocus && (
+
+      {isFocus && (
+        <Html>
           <textarea
-            className=""
             value={value}
-            onChange={(e) => setValue(e.target.value)}
+            onChange={handleValueChange}
             style={{
+              ...(restProps as CSSProperties),
               position: "absolute",
               top: props.y,
               left: props.x,
               lineHeight: props.lineHeight ?? 1,
-              width: width,
-              height: height,
               color: props.fill as string,
-              fontSize: props.fontSize,
-              fontWeight: props.fontWeight,
-              fontFamily: props.fontFamily,
-              fontStyle: props.fontStyle,
+              width: props.width,
+              height: props.height,
+              transformOrigin: "left top",
+              transform: `rotateZ(${props.rotation}deg)`,
+              fontWeight: fontStyle?.includes("bold") ? "800" : "normal",
+              fontStyle: fontStyle?.includes("italic") ? "italic" : "normal",
+              textAlign,
+              zIndex: 100,
               resize: "none",
               outline: "none",
               border: "none",
               overflow: "hidden",
             }}
           />
-        )}
-      </Html>
+        </Html>
+      )}
     </>
   );
 };
