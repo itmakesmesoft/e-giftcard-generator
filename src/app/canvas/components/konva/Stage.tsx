@@ -1,24 +1,25 @@
 import { useCanvasContext } from "@/app/context/canvas";
-import { useSelect, useShapes } from "@/app/hooks";
-import { useControlStore } from "@/app/store/canvas";
+import { useControl, useSelect, useShapes } from "@/app/hooks";
 import Konva from "konva";
 import { Vector2d } from "konva/lib/types";
 import { ReactNode, useRef } from "react";
 import { Stage as KonvaStage, Layer, Transformer } from "react-konva";
 import BackgroundLayer from "./BackgroundLayer";
+import { useControlStore } from "@/app/store/canvas";
 
 const Stage = ({ children }: { children: ReactNode }) => {
   const { canvasSize, stageRef, transformerRef } = useCanvasContext();
+  const { action, setAction, getAttributes } = useControl();
+
+  // const fill = useControlStore((state) => state.fill);
+  // const stroke = useControlStore((state) => state.stroke);
+  // const action = useControlStore((state) => state.action);
+  // const setAction = useControlStore((state) => state.setAction);
 
   const isPointerDown = useRef(false);
 
-  const setAction = useControlStore((state) => state.setAction);
-  const fill = useControlStore((state) => state.fill);
-  const action = useControlStore((state) => state.action);
-  const stroke = useControlStore((state) => state.stroke);
-  const fontSize = useControlStore((state) => state.fontSize);
-  const strokeWidth = useControlStore((state) => state.strokeWidth);
-
+  const { startShapeCreation, updateShapeCreation, completeShapeCreation } =
+    useShapes();
   const {
     selectNodeById,
     clearSelectNodes,
@@ -27,9 +28,6 @@ const Stage = ({ children }: { children: ReactNode }) => {
     endSelectionBox,
     SelectionBox,
   } = useSelect();
-
-  const { startShapeCreation, updateShapeCreation, completeShapeCreation } =
-    useShapes();
 
   const onPointerDown = (e: Konva.KonvaEventObject<PointerEvent>) => {
     if (action === "select") {
@@ -56,10 +54,9 @@ const Stage = ({ children }: { children: ReactNode }) => {
 
     startShapeCreation({
       type: action,
-      fill,
-      stroke,
-      strokeWidth,
-      fontSize,
+      ...getAttributes,
+      // fill,
+      // stroke,
       ...(hasPoints ? { points: [x, y] } : { x, y }),
     });
   };

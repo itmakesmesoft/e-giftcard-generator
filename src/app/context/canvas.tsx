@@ -9,7 +9,7 @@ import {
   useState,
 } from "react";
 
-interface CanvasSize {
+export interface CanvasSize {
   width: number;
   height: number;
 }
@@ -52,6 +52,7 @@ export const CanvasProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (selectedNodes.length > 0) {
       transformerRef.current?.nodes([...selectedNodes]);
+      console.log(selectedNodes);
     }
   }, [selectedNodes]);
 

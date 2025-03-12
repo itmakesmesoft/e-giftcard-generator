@@ -1,147 +1,133 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useCanvasContext } from "../context/canvas";
+import { State, useControlStore } from "../store/canvas";
 
-type ActionType =
-  | "select"
-  | "rectangle"
-  | "circle"
-  | "pencil"
-  | "eraser"
-  | "arrow"
-  | "text";
+// interface Controls extends ControlValues {
+//   setAction: (prop: ActionType) => void;
+//   setFill: (prop: string) => void;
+//   setStroke: (prop: string) => void;
+//   setStrokeWidth: (prop: number) => void;
+//   setOpacity: (prop: number) => void;
+//   setLineJoin: (prop: string) => void;
+//   setLineCap: (prop: string) => void;
+//   setRadius: (prop: number) => void;
+//   setFontSize: (prop: number) => void;
+//   setFontWeight: (prop: number) => void;
+//   setFontFamily: (prop: string) => void;
+//   setFontStyle: (prop: string) => void;
+// }
 
-interface ControlValues {
-  action: ActionType;
-  fill: string;
-  stroke: string;
-  strokeWidth: number;
-  opacity: number;
-  draggable: boolean;
-  lineJoin: string;
-  lineCap: string;
-  radius: number;
-  image: unknown;
-
-  // font
-  fontSize: number;
-  fontWeight: number;
-  fontFamily: string;
-  fontStyle: string;
-}
-
-interface Controls extends ControlValues {
-  setAction: (prop: ActionType) => void;
-  setFill: (prop: string) => void;
-  setStroke: (prop: string) => void;
-  setStrokeWidth: (prop: number) => void;
-  setOpacity: (prop: number) => void;
-  setDraggable: (prop: boolean) => void;
-  setLineJoin: (prop: string) => void;
-  setLineCap: (prop: string) => void;
-  setRadius: (prop: number) => void;
-  setImage: (prop: unknown) => void;
-  // font
-  setFontSize: (prop: number) => void;
-  setFontWeight: (prop: number) => void;
-  setFontFamily: (prop: string) => void;
-  setFontStyle: (prop: string) => void;
-}
-
-const defaultValues: ControlValues = {
+const defaultValues: State = {
   action: "select",
   fill: "#ff0000",
   stroke: "#000000",
   strokeWidth: 2,
   opacity: 1,
-  draggable: true,
   lineJoin: "round",
   lineCap: "round",
   radius: 0,
-  image: "",
   fontSize: 16,
-  fontWeight: 500,
+  // fontWeight: "normal",
   fontFamily: "Arial",
-  fontStyle: "italic",
+  fontStyle: "normal",
+  textAlign: "center",
 };
 
-const useControl = (props?: ControlValues): Controls => {
-  const config = { ...defaultValues, ...props };
+const useControl = () => {
+  const action = useControlStore((state) => state.action);
+  const setAction = useControlStore((state) => state.setAction);
 
-  const [action, setAction] = useState<ActionType>(config.action);
-  const [fill, setFill] = useState<string>(config.fill);
-  const [stroke, setStroke] = useState<string>(config.stroke);
-  const [strokeWidth, setStrokeWidth] = useState<number>(config.strokeWidth);
-  const [opacity, setOpacity] = useState<number>(config.opacity);
-  const [draggable, setDraggable] = useState<boolean>(config.draggable);
-  const [lineJoin, setLineJoin] = useState<string>(config.lineJoin);
-  const [lineCap, setLineCap] = useState<string>(config.lineCap);
-  const [radius, setRadius] = useState<number>(config.radius);
-  const [image, setImage] = useState<unknown>(config.image);
-  const [fontSize, setFontSize] = useState<number>(config.fontSize);
-  const [fontWeight, setFontWeight] = useState<number>(config.fontWeight);
-  const [fontFamily, setFontFamily] = useState<string>(config.fontFamily);
-  const [fontStyle, setFontStyle] = useState<string>(config.fontStyle);
+  const fill = useControlStore((state) => state.fill);
+  const stroke = useControlStore((state) => state.stroke);
+  const strokeWidth = useControlStore((state) => state.strokeWidth);
+  const opacity = useControlStore((state) => state.opacity);
+  const lineJoin = useControlStore((state) => state.lineJoin);
+  const lineCap = useControlStore((state) => state.lineCap);
+  const radius = useControlStore((state) => state.radius);
+  const fontSize = useControlStore((state) => state.fontSize);
+  // const fontWeight = useControlStore((state) => state.fontWeight);
+  const fontFamily = useControlStore((state) => state.fontFamily);
+  const fontStyle = useControlStore((state) => state.fontStyle);
+  const textAlign = useControlStore((state) => state.textAlign);
+  const setFill = useControlStore((state) => state.setFill);
+  const setOpacity = useControlStore((state) => state.setOpacity);
+  const setStroke = useControlStore((state) => state.setStroke);
+  const setStrokeWidth = useControlStore((state) => state.setStrokeWidth);
+  const setLineJoin = useControlStore((state) => state.setLineJoin);
+  const setLineCap = useControlStore((state) => state.setLineCap);
+  const setRadius = useControlStore((state) => state.setRadius);
+  const setFontSize = useControlStore((state) => state.setFontSize);
+  // const setFontWeight = useControlStore((state) => state.setFontWeight);
+  const setFontFamily = useControlStore((state) => state.setFontFamily);
+  const setFontStyle = useControlStore((state) => state.setFontStyle);
+  const setTextAlign = useControlStore((state) => state.setTextAlign);
 
   const { selectedNodes } = useCanvasContext();
 
   useEffect(() => {
     if (selectedNodes.length === 1) {
       const attrs = selectedNodes[0].attrs;
-
       setFill(attrs.barColor ?? attrs.fill ?? defaultValues.fill);
       setStroke(attrs.textColor ?? attrs.stroke ?? defaultValues.stroke);
       setStrokeWidth(attrs.strokeWidth ?? defaultValues.strokeWidth);
       setOpacity(attrs.opacity ?? defaultValues.opacity);
-      setDraggable(
-        action === "select" ? false : attrs.draggable ?? defaultValues.draggable
-      );
       setLineJoin(attrs.lineJoin ?? defaultValues.lineJoin);
       setLineCap(attrs.lineCap ?? defaultValues.lineCap);
       setRadius(attrs.radius ?? defaultValues.radius);
       setFontSize(attrs.fontSize ?? defaultValues.fontSize);
-      setFontWeight(attrs.fontWeight ?? defaultValues.fontWeight);
+      // setFontWeight(fontWeight ?? defaultValues.fontWeight);
       setFontFamily(attrs.fontFamily ?? defaultValues.fontFamily);
       setFontStyle(attrs.fontStyle ?? defaultValues.fontStyle);
+      setTextAlign(attrs.align ?? defaultValues.textAlign);
     }
-  }, [action, selectedNodes]);
-
-  return {
-    // for Shape
+  }, [
     action,
-    fill,
-    stroke,
-    strokeWidth,
-    opacity,
-    draggable,
-    setAction,
+    selectedNodes,
     setFill,
+    setFontFamily,
+    setFontSize,
+    setFontStyle,
+    // setFontWeight,
+    setLineCap,
+    setLineJoin,
+    setOpacity,
+    setRadius,
     setStroke,
     setStrokeWidth,
-    setOpacity,
-    setDraggable,
-    // line
-    lineCap,
-    lineJoin,
-    setLineJoin,
-    setLineCap,
+    setTextAlign,
+  ]);
 
-    // for Elipse
-    radius,
-    setRadius,
-
-    // for image
-    image,
-    setImage,
-
-    // font
-    fontSize,
-    fontWeight,
-    fontFamily,
-    fontStyle,
-    setFontSize,
-    setFontWeight,
-    setFontFamily,
-    setFontStyle,
+  return {
+    action,
+    setAction,
+    getAttributes: {
+      fill,
+      stroke,
+      strokeWidth,
+      opacity,
+      fontSize,
+      // fontWeight,
+      fontFamily,
+      fontStyle,
+      lineCap,
+      lineJoin,
+      radius,
+      textAlign,
+    },
+    setAttributes: {
+      setFill,
+      setStroke,
+      setStrokeWidth,
+      setOpacity,
+      setLineJoin,
+      setLineCap,
+      setRadius,
+      setFontSize,
+      // setFontWeight,
+      setFontFamily,
+      setFontStyle,
+      setTextAlign,
+    },
   };
 };
 

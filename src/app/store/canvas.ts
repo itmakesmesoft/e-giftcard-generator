@@ -1,38 +1,41 @@
 import { create } from "zustand";
 import { ActionType, ShapeConfig } from "../types/canvas";
+import { LineCap, LineJoin } from "konva/lib/Shape";
 
-type State = {
+export type TextAlign = "center" | "left" | "right";
+export type FontStyle = "bold" | "italic" | "italic bold" | "normal";
+export type State = {
   action: ActionType;
   fill: string;
   stroke: string;
   strokeWidth: number;
   opacity: number;
-  draggable: boolean;
-  lineJoin: string;
-  lineCap: string;
+  // draggable: boolean;
+  lineJoin: LineJoin;
+  lineCap: LineCap;
   radius: number;
-  image: unknown;
   fontSize: number;
-  fontWeight: number;
+  // fontWeight: FontWeight;
   fontFamily: string;
-  fontStyle: string;
+  fontStyle: FontStyle;
+  textAlign: TextAlign;
 };
 
-type Action = {
+export type Action = {
   setAction: (action: State["action"]) => void;
   setFontSize: (fontSize: State["fontSize"]) => void;
-  setFontWeight: (fontWeight: State["fontWeight"]) => void;
+  // setFontWeight: (fontWeight: State["fontWeight"]) => void;
   setFontFamily: (fontFamily: State["fontFamily"]) => void;
   setFontStyle: (fontStyle: State["fontStyle"]) => void;
+  setTextAlign: (textAlign: State["textAlign"]) => void;
   setFill: (fill: State["fill"]) => void;
   setStroke: (stroke: State["stroke"]) => void;
   setStrokeWidth: (strokeWidth: State["strokeWidth"]) => void;
   setOpacity: (opacity: State["opacity"]) => void;
-  setDraggable: (draggable: State["draggable"]) => void;
+  // setDraggable: (draggable: State["draggable"]) => void;
   setLineJoin: (lineJoin: State["lineJoin"]) => void;
   setLineCap: (lineCap: State["lineCap"]) => void;
   setRadius: (radius: State["radius"]) => void;
-  setImage: (image: State["image"]) => void;
 };
 
 const useControlStore = create<State & Action>((set) => ({
@@ -41,7 +44,7 @@ const useControlStore = create<State & Action>((set) => ({
   stroke: "#000000",
   strokeWidth: 2,
   opacity: 1,
-  draggable: true,
+  // draggable: true,
   lineJoin: "round",
   lineCap: "round",
   radius: 0,
@@ -50,20 +53,21 @@ const useControlStore = create<State & Action>((set) => ({
   fontWeight: 500,
   fontFamily: "Arial",
   fontStyle: "italic",
-  setAction: (action) => set(() => ({ action: action })),
-  setFontSize: (fontSize) => set(() => ({ fontSize: fontSize })),
-  setFontWeight: (fontWeight) => set(() => ({ fontWeight: fontWeight })),
-  setFontFamily: (fontFamily) => set(() => ({ fontFamily: fontFamily })),
-  setFontStyle: (fontStyle) => set(() => ({ fontStyle: fontStyle })),
-  setFill: (fill) => set(() => ({ fill: fill })),
-  setStroke: (stroke) => set(() => ({ stroke: stroke })),
-  setStrokeWidth: (strokeWidth) => set(() => ({ strokeWidth: strokeWidth })),
-  setOpacity: (opacity) => set(() => ({ opacity: opacity })),
-  setDraggable: (draggable) => set(() => ({ draggable: draggable })),
-  setLineJoin: (lineJoin) => set(() => ({ lineJoin: lineJoin })),
-  setLineCap: (lineCap) => set(() => ({ lineCap: lineCap })),
-  setRadius: (radius) => set(() => ({ radius: radius })),
-  setImage: (image) => set(() => ({ image: image })),
+  textAlign: "center",
+  setAction: (action) => set(() => ({ action })),
+  setFontSize: (fontSize) => set(() => ({ fontSize })),
+  // setFontWeight: (fontWeight) => set(() => ({ fontWeight })),
+  setFontFamily: (fontFamily) => set(() => ({ fontFamily })),
+  setFontStyle: (fontStyle) => set(() => ({ fontStyle })),
+  setTextAlign: (textAlign) => set(() => ({ textAlign })),
+  setFill: (fill) => set(() => ({ fill })),
+  setStroke: (stroke) => set(() => ({ stroke })),
+  setStrokeWidth: (strokeWidth) => set(() => ({ strokeWidth })),
+  setOpacity: (opacity) => set(() => ({ opacity })),
+  // setDraggable: (draggable) => set(() => ({ draggable: draggable })),
+  setLineJoin: (lineJoin) => set(() => ({ lineJoin })),
+  setLineCap: (lineCap) => set(() => ({ lineCap })),
+  setRadius: (radius) => set(() => ({ radius })),
 }));
 
 type StateConfig = ShapeConfig[];
