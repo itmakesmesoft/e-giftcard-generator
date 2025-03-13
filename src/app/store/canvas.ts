@@ -12,7 +12,6 @@ export type State = {
   stroke: string;
   strokeWidth: number;
   opacity: number;
-  // draggable: boolean;
   lineJoin: LineJoin;
   lineCap: LineCap;
   radius: number;
@@ -36,7 +35,6 @@ export type Action = {
   setStroke: (stroke: State["stroke"]) => void;
   setStrokeWidth: (strokeWidth: State["strokeWidth"]) => void;
   setOpacity: (opacity: State["opacity"]) => void;
-  // setDraggable: (draggable: State["draggable"]) => void;
   setLineJoin: (lineJoin: State["lineJoin"]) => void;
   setLineCap: (lineCap: State["lineCap"]) => void;
   setRadius: (radius: State["radius"]) => void;
@@ -48,7 +46,6 @@ const useControlStore = create<State & Action>((set) => ({
   stroke: "#000000",
   strokeWidth: 2,
   opacity: 1,
-  // draggable: true,
   lineJoin: "round",
   lineCap: "round",
   radius: 0,
@@ -70,7 +67,6 @@ const useControlStore = create<State & Action>((set) => ({
   setStroke: (stroke) => set(() => ({ stroke })),
   setStrokeWidth: (strokeWidth) => set(() => ({ strokeWidth })),
   setOpacity: (opacity) => set(() => ({ opacity })),
-  // setDraggable: (draggable) => set(() => ({ draggable: draggable })),
   setLineJoin: (lineJoin) => set(() => ({ lineJoin })),
   setLineCap: (lineCap) => set(() => ({ lineCap })),
   setRadius: (radius) => set(() => ({ radius })),

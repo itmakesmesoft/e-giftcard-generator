@@ -54,8 +54,9 @@ const EditableText = (props: Konva.TextConfig) => {
     });
   };
 
-  const handleValueChange = (e: ChangeEvent<HTMLTextAreaElement>) =>
+  const handleValueChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setValue(e.target.value);
+  };
 
   const handleDoubleClick = () => {
     setIsFocus(true);
@@ -65,9 +66,7 @@ const EditableText = (props: Konva.TextConfig) => {
   return (
     <>
       <Text
-        ref={(node) => {
-          textRef.current = node;
-        }}
+        ref={textRef}
         id={id}
         text={value}
         strokeEnabled={false}

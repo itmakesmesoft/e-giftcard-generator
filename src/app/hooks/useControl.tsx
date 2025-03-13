@@ -2,21 +2,6 @@ import { useEffect } from "react";
 import { useCanvasContext } from "../context/canvas";
 import { State, useControlStore } from "../store/canvas";
 
-// interface Controls extends ControlValues {
-//   setAction: (prop: ActionType) => void;
-//   setFill: (prop: string) => void;
-//   setStroke: (prop: string) => void;
-//   setStrokeWidth: (prop: number) => void;
-//   setOpacity: (prop: number) => void;
-//   setLineJoin: (prop: string) => void;
-//   setLineCap: (prop: string) => void;
-//   setRadius: (prop: number) => void;
-//   setFontSize: (prop: number) => void;
-//   setFontWeight: (prop: number) => void;
-//   setFontFamily: (prop: string) => void;
-//   setFontStyle: (prop: string) => void;
-// }
-
 const defaultValues: State = {
   action: "select",
   fill: "#ff0000",
@@ -30,6 +15,7 @@ const defaultValues: State = {
   fontWeight: "500",
   fontFamily: "Arial",
   fontStyle: "normal",
+  typeFace: "sans-serif",
   textAlign: "center",
 };
 
@@ -69,12 +55,10 @@ const useControl = () => {
   useEffect(() => {
     if (selectedNodes.length === 1) {
       const attrs = selectedNodes[0].attrs;
-      const [fontStyle, fontWeight] = attrs.fontStyle.split(" ");
-      // const [fontFamily, typeFace] = attrs.fontFamily
-      //   .replaceAll('"', "")
-      //   .split(", ");
-
-      console.log(attrs.fontFamily, attrs.typeFace);
+      const [fontStyle, fontWeight] = attrs.fontStyle?.split(" ") ?? [
+        undefined,
+        undefined,
+      ];
 
       setFill(attrs.barColor ?? attrs.fill ?? defaultValues.fill);
       setStroke(attrs.textColor ?? attrs.stroke ?? defaultValues.stroke);

@@ -16,7 +16,10 @@ const CanvasImage = (props: CanvasImageProps) => {
     if (!dataURL) return;
     const img = new Image();
     img.src = dataURL;
-    img.onload = () => setImage(img);
+    img.onload = () => {
+      console.log(img);
+      setImage(img);
+    };
   }, [dataURL]);
 
   const centerX = Math.floor((canvasSize.width - (image?.width ?? 0)) / 2);

@@ -1,12 +1,17 @@
-const ColorPicker = ({
-  color,
-  onChange,
-}: {
+export interface ColorPickerProps {
   color: string;
+  className?: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-}) => (
+}
+
+const ColorPicker = ({ color, onChange, className }: ColorPickerProps) => (
   <button>
-    <input className="w-6 h-6" type="color" value={color} onChange={onChange} />
+    <input
+      className={className}
+      type="color"
+      value={color}
+      onChange={onChange}
+    />
   </button>
 );
 
