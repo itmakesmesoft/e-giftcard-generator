@@ -25,6 +25,7 @@ import {
   TextIcon,
 } from "@radix-ui/react-icons";
 import QrIcon from "./ui/QrIcon";
+import Button from "./ui/Button";
 
 const Sidebar = ({ className }: { className: string }) => {
   const { stageRef, canvasSize, setCanvasSize } = useCanvasContext();
@@ -68,6 +69,7 @@ const Sidebar = ({ className }: { className: string }) => {
 
   const handleSaveCanvas = () => {
     const exportedData = exportCanvasAsJSON();
+    console.log(exportedData);
     if (!exportedData) return;
     const key = "autoSaved";
     saveToLocalStorage(key, exportedData);
@@ -82,18 +84,18 @@ const Sidebar = ({ className }: { className: string }) => {
       .filter((layer) => extractIds.includes(layer.attrs.id))
       .map((layer) => layer.children)
       .flat();
-    return JSON.parse(JSON.stringify(json));
+    return json;
   };
 
-  const handleLoadCanvas = () => {
+  const handleLoadCanvas = async () => {
     const key = "autoSaved";
-    const loadedData = loadFromLocalStorage(key);
+    const loadedData = await loadFromLocalStorage(key);
     loadCanvasByJSON(loadedData);
   };
 
   const loadCanvasByJSON = (data: Konva.Layer[]) => {
     if (!stageRef.current) return;
-
+    // console.log(data);
     setShapes(data.map(({ attrs }) => attrs));
   };
 
@@ -243,9 +245,9 @@ const Sidebar = ({ className }: { className: string }) => {
         label="앞으로"
         icon={<ResetIcon className="rotate-180" />}
       />
-      {/* <Button onClick={handleExportAsImage} label="다운로드" />
+      <Button onClick={handleExportAsImage} label="다운로드" />
       <Button onClick={handleSaveCanvas} label="저장" />
-      <Button onClick={handleLoadCanvas} label="불러오기" /> */}
+      <Button onClick={handleLoadCanvas} label="불러오기" />
     </Menubar>
   );
 };

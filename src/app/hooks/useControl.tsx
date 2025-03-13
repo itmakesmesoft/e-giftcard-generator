@@ -27,7 +27,7 @@ const defaultValues: State = {
   lineCap: "round",
   radius: 0,
   fontSize: 16,
-  // fontWeight: "normal",
+  fontWeight: "500",
   fontFamily: "Arial",
   fontStyle: "normal",
   textAlign: "center",
@@ -48,6 +48,7 @@ const useControl = () => {
   const fontWeight = useControlStore((state) => state.fontWeight);
   const fontFamily = useControlStore((state) => state.fontFamily);
   const fontStyle = useControlStore((state) => state.fontStyle);
+  const typeFace = useControlStore((state) => state.typeFace);
   const textAlign = useControlStore((state) => state.textAlign);
   const setFill = useControlStore((state) => state.setFill);
   const setOpacity = useControlStore((state) => state.setOpacity);
@@ -60,6 +61,7 @@ const useControl = () => {
   const setFontWeight = useControlStore((state) => state.setFontWeight);
   const setFontFamily = useControlStore((state) => state.setFontFamily);
   const setFontStyle = useControlStore((state) => state.setFontStyle);
+  const setTypeFace = useControlStore((state) => state.setTypeFace);
   const setTextAlign = useControlStore((state) => state.setTextAlign);
 
   const { selectedNodes } = useCanvasContext();
@@ -68,7 +70,11 @@ const useControl = () => {
     if (selectedNodes.length === 1) {
       const attrs = selectedNodes[0].attrs;
       const [fontStyle, fontWeight] = attrs.fontStyle.split(" ");
-      console.log(fontStyle, fontWeight);
+      // const [fontFamily, typeFace] = attrs.fontFamily
+      //   .replaceAll('"', "")
+      //   .split(", ");
+
+      console.log(attrs.fontFamily, attrs.typeFace);
 
       setFill(attrs.barColor ?? attrs.fill ?? defaultValues.fill);
       setStroke(attrs.textColor ?? attrs.stroke ?? defaultValues.stroke);
@@ -81,6 +87,7 @@ const useControl = () => {
       setFontWeight(fontWeight ?? defaultValues.fontWeight);
       setFontFamily(attrs.fontFamily ?? defaultValues.fontFamily);
       setFontStyle(fontStyle ?? defaultValues.fontStyle);
+      setTypeFace(attrs.typeFace ?? defaultValues.typeFace);
       setTextAlign(attrs.align ?? defaultValues.textAlign);
     }
   }, [
@@ -98,6 +105,7 @@ const useControl = () => {
     setStroke,
     setStrokeWidth,
     setTextAlign,
+    setTypeFace,
   ]);
 
   return {
@@ -112,6 +120,7 @@ const useControl = () => {
       fontWeight,
       fontFamily,
       fontStyle,
+      typeFace,
       lineCap,
       lineJoin,
       radius,
@@ -128,6 +137,7 @@ const useControl = () => {
       setFontSize,
       setFontWeight,
       setFontFamily,
+      setTypeFace,
       setFontStyle,
       setTextAlign,
     },

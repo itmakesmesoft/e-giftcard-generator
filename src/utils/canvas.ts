@@ -2,7 +2,7 @@ import { ShapeConfig } from "@/app/types/canvas";
 import Konva from "konva";
 import { nanoid } from "nanoid";
 
-export const saveToLocalStorage = (key: string, data: string | JSON) => {
+export const saveToLocalStorage = (key: string, data: unknown) => {
   window.localStorage.setItem(key, JSON.stringify(data));
   return true;
 };
@@ -10,8 +10,13 @@ export const saveToLocalStorage = (key: string, data: string | JSON) => {
 export const loadFromLocalStorage = (key: string) => {
   const dataAsString = window.localStorage.getItem(key);
   if (dataAsString) {
-    return JSON.parse(dataAsString)?.map((item: string) => JSON.parse(item));
+    const converted = JSON.parse(dataAsString);
+    if (!Array.isArray(converted)) return converted;
+    return converted.map((item: string) =>
+      typeof item === "string" ? JSON.parse(item) : item
+    );
   }
+  return undefined;
 };
 
 export const generateShapeConfig = (

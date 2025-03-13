@@ -2,64 +2,24 @@ import Konva from "konva";
 import ColorPicker from "./ui/ColorPicker";
 import { ChangeEvent } from "react";
 import { useCanvasContext } from "@/app/context/canvas";
-import { FontStyle, TextAlign, useShapeStore } from "@/app/store/canvas";
+import { TextAlign, useShapeStore } from "@/app/store/canvas";
 import Input from "./ui/Input";
-import { DropdownMenu, Toolbar as RadixToolbar, Slider } from "radix-ui";
+import {
+  DropdownMenu,
+  Toolbar as RadixToolbar,
+  Select,
+  Slider,
+} from "radix-ui";
 import {
   TextAlignLeftIcon,
   TextAlignCenterIcon,
   TextAlignRightIcon,
   FontBoldIcon,
   FontItalicIcon,
+  ChevronDownIcon,
 } from "@radix-ui/react-icons";
 import { useControl, useFonts } from "@/app/hooks";
 import { RxTransparencyGrid } from "react-icons/rx";
-
-type ActionType =
-  | "select"
-  | "rectangle"
-  | "circle"
-  | "pencil"
-  | "eraser"
-  | "arrow"
-  | "text";
-
-interface ControlValues {
-  action: ActionType;
-  fill: string;
-  stroke: string;
-  strokeWidth: number;
-  opacity: number;
-  draggable: boolean;
-  lineJoin: string;
-  lineCap: string;
-  radius: number;
-  image: unknown;
-
-  // font
-  fontSize: number;
-  fontFamily: string;
-  fontStyle: FontStyle;
-  textAlign: "center" | "left" | "right";
-}
-
-const defaultValues: ControlValues = {
-  action: "select",
-  fill: "#ff0000",
-  stroke: "#000000",
-  strokeWidth: 2,
-  opacity: 1,
-  draggable: true,
-  lineJoin: "round",
-  lineCap: "round",
-  radius: 0,
-  image: "",
-  fontSize: 16,
-  // fontWeight: 500,
-  fontFamily: "Arial",
-  fontStyle: "normal",
-  textAlign: "center",
-};
 
 const Toolbar = ({ className }: { className: string }) => {
   const { selectedNodes } = useCanvasContext();
@@ -109,10 +69,17 @@ const Toolbar = ({ className }: { className: string }) => {
     updateSelectedShapeAttributes({ fontSize: size });
   };
 
-  const onFontFamilyChange = (font: string) => {
-    console.log(font);
-    // setAttributes.setFontFamily(font);
-    // updateSelectedShapeAttributes({ fontFamily: font });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const onFontFamilyChange = async (fontFamily: string) => {
+    const res = await loadFontFamily(fontFamily);
+
+    if (!res) return;
+    const typeFace = fontDict[fontFamily].category;
+
+    setAttributes.setFontFamily(fontFamily);
+    setAttributes.setTypeFace(typeFace);
+    console.log(fontFamily, typeFace);
+    updateSelectedShapeAttributes({ fontFamily, typeFace });
   };
 
   const onOpacityChange = (value: number[]) => {
@@ -134,7 +101,7 @@ const Toolbar = ({ className }: { className: string }) => {
     );
   };
 
-  const { getFontList } = useFonts();
+  const { fontList, currentFont, loadFontFamily, fontDict } = useFonts();
 
   return (
     <div className={className}>
@@ -189,10 +156,43 @@ const Toolbar = ({ className }: { className: string }) => {
           </RadixToolbar.ToggleItem>
         </RadixToolbar.ToggleGroup>
         <RadixToolbar.Separator className="ToolbarSeparator" />
-        <RadixToolbar.Button onClick={() => getFontList()}>
-          getFontList
-        </RadixToolbar.Button>
-
+        <Select.Root
+          value={getAttributes.fontFamily}
+          onValueChange={onFontFamilyChange}
+        >
+          <RadixToolbar.Button asChild>
+            <Select.Trigger
+              className="flex flex-row justify-between items-center gap-4 px-4 cursor-pointer"
+              aria-label="font"
+            >
+              <Select.Value placeholder="Select a font">
+                {getAttributes.fontFamily}
+              </Select.Value>
+              <Select.Icon className="">
+                <ChevronDownIcon />
+              </Select.Icon>
+            </Select.Trigger>
+          </RadixToolbar.Button>
+          <Select.Portal>
+            <Select.Content
+              className="bg-white p-2 rounded-lg"
+              position="popper"
+              sideOffset={10}
+            >
+              <Select.Viewport className="SelectViewport">
+                {fontList?.map((item, index) => (
+                  <Select.Item
+                    key={index}
+                    value={item.family}
+                    className="hover:bg-gray-200 px-2 py-0.5 cursor-pointer"
+                  >
+                    {item.family}
+                  </Select.Item>
+                ))}
+              </Select.Viewport>
+            </Select.Content>
+          </Select.Portal>
+        </Select.Root>
         <Input
           value={String(getAttributes.fontSize)}
           onChange={onFontSizeChange}
@@ -236,17 +236,6 @@ const Toolbar = ({ className }: { className: string }) => {
           value={getAttributes.strokeWidth}
           onChange={onStrokeWidthChange}
         /> */}
-
-        <DropdownMenu.Root>
-          <RadixToolbar.Button asChild>
-            <DropdownMenu.Trigger>Trigger</DropdownMenu.Trigger>
-          </RadixToolbar.Button>
-          <DropdownMenu.Content>
-            <DropdownMenu.DropdownMenuItem>1</DropdownMenu.DropdownMenuItem>
-            <DropdownMenu.DropdownMenuItem>2</DropdownMenu.DropdownMenuItem>
-            <DropdownMenu.DropdownMenuItem>3</DropdownMenu.DropdownMenuItem>
-          </DropdownMenu.Content>
-        </DropdownMenu.Root>
       </RadixToolbar.Root>
     </div>
   );

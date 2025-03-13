@@ -15,11 +15,11 @@ export interface CanvasSize {
 }
 interface CanvasContextValueProps {
   canvasSize: CanvasSize;
-  setCanvasSize: (size: CanvasSize) => void;
-  setSelectedNodes: (node: Konva.Node[]) => void;
   selectedNodes: Konva.Node[];
   stageRef: RefObject<Konva.Stage | null>;
   transformerRef: RefObject<Konva.Transformer | null>;
+  setCanvasSize: (size: CanvasSize) => void;
+  setSelectedNodes: (node: Konva.Node[]) => void;
   getAllSelectedNodes: () => Konva.Node[];
   getSingleSelectedNode: () => Konva.Node | undefined;
   selectNodeById: (id: string) => void;
@@ -27,14 +27,14 @@ interface CanvasContextValueProps {
 
 const defaultValue: CanvasContextValueProps = {
   canvasSize: { width: 1000, height: 600 },
+  selectedNodes: [],
+  stageRef: { current: null },
+  transformerRef: { current: null },
   setCanvasSize: () => {},
   setSelectedNodes: () => {},
   getAllSelectedNodes: () => [],
   getSingleSelectedNode: () => undefined,
   selectNodeById: () => {},
-  selectedNodes: [],
-  stageRef: { current: null },
-  transformerRef: { current: null },
 };
 
 const CanvasContext = createContext<CanvasContextValueProps>(defaultValue);
@@ -77,10 +77,10 @@ export const CanvasProvider = ({ children }: { children: ReactNode }) => {
     <CanvasContext.Provider
       value={{
         canvasSize,
-        setCanvasSize,
+        selectedNodes,
         stageRef: stageRef as RefObject<Konva.Stage>,
         transformerRef: transformerRef as RefObject<Konva.Transformer>,
-        selectedNodes,
+        setCanvasSize,
         setSelectedNodes,
         getAllSelectedNodes,
         getSingleSelectedNode,

@@ -77,7 +77,8 @@ const MenuGroup = (props: MenuGroupProps) => {
         <RadixMenubar.Portal>
           <RadixMenubar.Content
             side="right"
-            className={`ml-4 p-2 min-w-[150px] rounded-lg bg-white flex flex-col gap-1 shadow-xl ${
+            sideOffset={20}
+            className={`p-2 min-w-[150px] rounded-lg bg-white flex flex-col gap-1 shadow-xl ${
               className ?? ""
             }`}
           >

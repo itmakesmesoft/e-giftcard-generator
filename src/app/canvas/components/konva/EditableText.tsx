@@ -11,8 +11,10 @@ const EditableText = (props: Konva.TextConfig) => {
     text = "텍스트",
     onDragEnd,
     isDrawing,
-    fontStyle,
+    fontStyle: fontStyleFromProps,
     fontWeight,
+    fontFamily,
+    typeFace,
     textAlign,
     ...restProps
   } = props;
@@ -22,6 +24,7 @@ const EditableText = (props: Konva.TextConfig) => {
   const [value, setValue] = useState<string>(text);
   const [isFocus, setIsFocus] = useState<boolean>(true);
   const [helperConfig, setHelperConfig] = useState<ShapeHelperConfig>();
+  const fontStyle = fontStyleFromProps?.split(" ")[0] ?? "normal";
 
   useEffect(() => {
     if (!props || !props.isDrawing || props.type !== "text")
@@ -58,12 +61,13 @@ const EditableText = (props: Konva.TextConfig) => {
     setIsFocus(true);
     textRef.current?.setAttrs({ visible: false });
   };
-  console.log(`${fontStyle} ${fontWeight}`);
 
   return (
     <>
       <Text
-        ref={textRef}
+        ref={(node) => {
+          textRef.current = node;
+        }}
         id={id}
         text={value}
         strokeEnabled={false}
@@ -72,16 +76,19 @@ const EditableText = (props: Konva.TextConfig) => {
         onDblClick={handleDoubleClick}
         onTransform={handleTransform}
         align={textAlign}
-        fontStyle={`${fontStyle} ${fontWeight}`}
+        fontStyle={`${fontStyle}${fontWeight ? ` ${fontWeight}` : ""}`}
+        fontFamily={fontFamily}
+        typeFace={typeFace}
       />
       {isDrawing && <ShapeHelper config={helperConfig} />}
       {isFocus && (
-        <Html>
+        <Html key={fontFamily}>
           <textarea
             value={value}
             onChange={handleValueChange}
             style={{
               ...(restProps as CSSProperties),
+              fontFamily: `"${fontFamily}", ${typeFace}`,
               position: "absolute",
               top: props.y,
               left: props.x,

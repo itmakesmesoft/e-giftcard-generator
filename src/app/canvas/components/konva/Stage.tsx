@@ -5,16 +5,10 @@ import { Vector2d } from "konva/lib/types";
 import { ReactNode, useRef } from "react";
 import { Stage as KonvaStage, Layer, Transformer } from "react-konva";
 import BackgroundLayer from "./BackgroundLayer";
-import { useControlStore } from "@/app/store/canvas";
 
 const Stage = ({ children }: { children: ReactNode }) => {
   const { canvasSize, stageRef, transformerRef } = useCanvasContext();
   const { action, setAction, getAttributes } = useControl();
-
-  // const fill = useControlStore((state) => state.fill);
-  // const stroke = useControlStore((state) => state.stroke);
-  // const action = useControlStore((state) => state.action);
-  // const setAction = useControlStore((state) => state.setAction);
 
   const isPointerDown = useRef(false);
 
@@ -51,12 +45,9 @@ const Stage = ({ children }: { children: ReactNode }) => {
 
     isPointerDown.current = true;
     const hasPoints = ["pencil", "eraser", "arrow"].includes(action);
-
     startShapeCreation({
       type: action,
       ...getAttributes,
-      // fill,
-      // stroke,
       ...(hasPoints ? { points: [x, y] } : { x, y }),
     });
   };
