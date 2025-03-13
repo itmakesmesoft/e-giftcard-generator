@@ -48,7 +48,7 @@ const Sidebar = ({ className }: { className: string }) => {
     const format = convertBarcodeFormat(data.format);
     const newShape = generateShapeConfig({
       type: "barcode",
-      text: data.value,
+      code: data.value,
       codeFormat: format,
       // fill: getAttributes.fill,
       // stroke: getAttributes.stroke,
@@ -112,7 +112,10 @@ const Sidebar = ({ className }: { className: string }) => {
   };
 
   const handleAddBarcode = (e: ChangeEvent<HTMLInputElement>) => {
-    loadFileFromLocal(e, (file) => decodeFromImage(file));
+    loadFileFromLocal(e, (file) => {
+      if (!file) return;
+      decodeFromImage(file);
+    });
   };
 
   const handleAddImage = (e: ChangeEvent<HTMLInputElement>) => {

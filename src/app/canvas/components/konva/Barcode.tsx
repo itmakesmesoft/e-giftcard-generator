@@ -5,7 +5,7 @@ import { Image as KonvaImage } from "react-konva";
 import { useCanvasContext } from "@/app/context/canvas";
 
 interface BarcodeProps extends Konva.ShapeConfig {
-  text?: string;
+  code?: string;
   codeFormat?: GeneraterFormatType;
 }
 interface ImageSize {
@@ -13,7 +13,7 @@ interface ImageSize {
   height: number;
 }
 interface GetDataURLProps {
-  text: string;
+  code: string;
   codeFormat: GeneraterFormatType;
   barColor?: string;
   textColor?: string;
@@ -24,7 +24,7 @@ const Barcode = (props: BarcodeProps) => {
   // Shape 객체에 fill과 stroke가 들어가지 않도록 구조분해 해야함
   const {
     codeFormat,
-    text,
+    code,
     stroke,
     fill,
     textColor: textColorFromProps, // 불러온 객체 내부에 textColor가 존재하는 경우를 대비
@@ -46,7 +46,7 @@ const Barcode = (props: BarcodeProps) => {
     generateCode({
       canvas,
       options: {
-        text: props.text,
+        text: props.code,
         bcid: props.codeFormat,
         barcolor: props.barColor ?? "#000000",
         textcolor: props.textColor ?? "#000000",
@@ -58,11 +58,14 @@ const Barcode = (props: BarcodeProps) => {
 
   useEffect(() => {
     const img = new Image();
-    if (!text || !codeFormat) return setImage(img);
-    const url = getDataURL({ text, codeFormat, barColor, textColor });
+    if (!code || !codeFormat) return setImage(img);
+
+    const url = getDataURL({ code, codeFormat, barColor, textColor });
     img.src = url;
-    img.onload = () => setImage(img);
-  }, [codeFormat, text, image, getDataURL, barColor, textColor]);
+    img.onload = () => {
+      setImage(img);
+    };
+  }, [barColor, code, codeFormat, getDataURL, textColor]);
 
   useEffect(() => {
     if (stroke) setTextColor(stroke as string);
@@ -71,14 +74,14 @@ const Barcode = (props: BarcodeProps) => {
     // 이후 Control을 통해 조작 시, 객체 내부로 fill과 stroke가 들어오게 됨.
   }, [stroke, fill]);
 
-  const centerX = Math.floor((canvasSize.width - (image?.width ?? 0)) / 2);
-  const centerY = Math.floor((canvasSize.height - (image?.height ?? 0)) / 2);
+  const centerX = Math.floor((canvasSize.width - (image?.width ?? 1)) / 2);
+  const centerY = Math.floor((canvasSize.height - (image?.height ?? 1)) / 2);
 
   return (
     <KonvaImage
       name="shape"
       alt="barcode"
-      text={text} // decode에 필요한 코드값
+      code={code} // decode에 필요한 코드값
       image={image}
       barColor={barColor}
       textColor={textColor}
