@@ -3,7 +3,8 @@ import { ActionType, ShapeConfig } from "../types/canvas";
 import { LineCap, LineJoin } from "konva/lib/Shape";
 
 export type TextAlign = "center" | "left" | "right";
-export type FontStyle = "bold" | "italic" | "italic bold" | "normal";
+export type FontWeight = string | number;
+export type fontStyle = "italic" | "normal";
 export type State = {
   action: ActionType;
   fill: string;
@@ -15,16 +16,16 @@ export type State = {
   lineCap: LineCap;
   radius: number;
   fontSize: number;
-  // fontWeight: FontWeight;
+  fontWeight: FontWeight;
+  fontStyle: fontStyle;
   fontFamily: string;
-  fontStyle: FontStyle;
   textAlign: TextAlign;
 };
 
 export type Action = {
   setAction: (action: State["action"]) => void;
   setFontSize: (fontSize: State["fontSize"]) => void;
-  // setFontWeight: (fontWeight: State["fontWeight"]) => void;
+  setFontWeight: (fontWeight: State["fontWeight"]) => void;
   setFontFamily: (fontFamily: State["fontFamily"]) => void;
   setFontStyle: (fontStyle: State["fontStyle"]) => void;
   setTextAlign: (textAlign: State["textAlign"]) => void;
@@ -52,11 +53,11 @@ const useControlStore = create<State & Action>((set) => ({
   fontSize: 16,
   fontWeight: 500,
   fontFamily: "Arial",
-  fontStyle: "italic",
+  fontStyle: "normal",
   textAlign: "center",
   setAction: (action) => set(() => ({ action })),
   setFontSize: (fontSize) => set(() => ({ fontSize })),
-  // setFontWeight: (fontWeight) => set(() => ({ fontWeight })),
+  setFontWeight: (fontWeight) => set(() => ({ fontWeight })),
   setFontFamily: (fontFamily) => set(() => ({ fontFamily })),
   setFontStyle: (fontStyle) => set(() => ({ fontStyle })),
   setTextAlign: (textAlign) => set(() => ({ textAlign })),

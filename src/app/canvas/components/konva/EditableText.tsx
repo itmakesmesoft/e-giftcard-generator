@@ -12,6 +12,7 @@ const EditableText = (props: Konva.TextConfig) => {
     onDragEnd,
     isDrawing,
     fontStyle,
+    fontWeight,
     textAlign,
     ...restProps
   } = props;
@@ -30,17 +31,14 @@ const EditableText = (props: Konva.TextConfig) => {
     setHelperConfig({ x, y, width, height, visible: isDrawing });
   }, [props]);
 
-  // const node = textRef.current;
-  // const width = Math.floor(node?.width() ?? props.width ?? 0);
-  // const height = Math.floor(node?.height() ?? props.height ?? 0);
-
   useEffect(() => {
     if (!textRef.current || selectedNodes.includes(textRef.current)) return;
 
+    // Note. Text 컴포넌트의 props로 넘기는 경우,
+    // 간헐적으로 visible이 먹지 않는 경우가 발생하여, setAttrs을 통해 설정
     textRef.current.setAttrs({ visible: true });
     setIsFocus(false);
   }, [selectedNodes]);
-  console.log(props);
 
   const handleTransform = () => {
     const text = textRef.current as Konva.Text | null;
@@ -60,6 +58,7 @@ const EditableText = (props: Konva.TextConfig) => {
     setIsFocus(true);
     textRef.current?.setAttrs({ visible: false });
   };
+  console.log(`${fontStyle} ${fontWeight}`);
 
   return (
     <>
@@ -73,10 +72,9 @@ const EditableText = (props: Konva.TextConfig) => {
         onDblClick={handleDoubleClick}
         onTransform={handleTransform}
         align={textAlign}
-        fontStyle={fontStyle}
+        fontStyle={`${fontStyle} ${fontWeight}`}
       />
       {isDrawing && <ShapeHelper config={helperConfig} />}
-
       {isFocus && (
         <Html>
           <textarea
@@ -93,8 +91,8 @@ const EditableText = (props: Konva.TextConfig) => {
               height: props.height,
               transformOrigin: "left top",
               transform: `rotateZ(${props.rotation}deg)`,
-              fontWeight: fontStyle?.includes("bold") ? "800" : "normal",
-              fontStyle: fontStyle?.includes("italic") ? "italic" : "normal",
+              fontWeight: fontWeight,
+              fontStyle: fontStyle,
               textAlign,
               zIndex: 100,
               resize: "none",

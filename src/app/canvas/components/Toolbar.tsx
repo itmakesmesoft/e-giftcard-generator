@@ -1,29 +1,18 @@
 import Konva from "konva";
-// import Select from "./ui/Select";
-// import Slider from "./ui/Slider";
 import ColorPicker from "./ui/ColorPicker";
-import { ChangeEvent, useEffect } from "react";
-import { ShapeConfig } from "@/app/types/canvas";
+import { ChangeEvent } from "react";
 import { useCanvasContext } from "@/app/context/canvas";
-import {
-  FontStyle,
-  // FontWeight,
-  TextAlign,
-  useControlStore,
-  useShapeStore,
-} from "@/app/store/canvas";
+import { FontStyle, TextAlign, useShapeStore } from "@/app/store/canvas";
 import Input from "./ui/Input";
-
 import { DropdownMenu, Toolbar as RadixToolbar, Slider } from "radix-ui";
 import {
-  StrikethroughIcon,
   TextAlignLeftIcon,
   TextAlignCenterIcon,
   TextAlignRightIcon,
   FontBoldIcon,
   FontItalicIcon,
 } from "@radix-ui/react-icons";
-import { useControl } from "@/app/hooks";
+import { useControl, useFonts } from "@/app/hooks";
 import { RxTransparencyGrid } from "react-icons/rx";
 
 type ActionType =
@@ -49,7 +38,6 @@ interface ControlValues {
 
   // font
   fontSize: number;
-  // fontWeight: number;
   fontFamily: string;
   fontStyle: FontStyle;
   textAlign: "center" | "left" | "right";
@@ -96,14 +84,12 @@ const Toolbar = ({ className }: { className: string }) => {
 
   const onFontStylesChange = (values: string[]) => {
     const fontStyle = values.includes("italic") ? "italic" : "normal";
-    const fontWeight = values.includes("bold") ? "bold" : "normal";
-    const merged = Array.from(new Set([fontStyle, fontWeight])).join(" ");
-    const newFontStyle =
-      merged === "normal bold" ? "bold" : (merged as FontStyle);
-    console.log(newFontStyle);
-    setAttributes.setFontStyle(newFontStyle);
+    const fontWeight = values.includes("900") ? "900" : "400";
 
-    updateSelectedShapeAttributes({ fontStyle: newFontStyle });
+    setAttributes.setFontStyle(fontStyle);
+    setAttributes.setFontWeight(fontWeight);
+    console.log({ fontStyle, fontWeight });
+    updateSelectedShapeAttributes({ fontStyle, fontWeight });
   };
 
   const onTextAlignChange = (textAlign: string) => {
@@ -121,6 +107,12 @@ const Toolbar = ({ className }: { className: string }) => {
     const size = Number(e.target.value);
     setAttributes.setFontSize(size);
     updateSelectedShapeAttributes({ fontSize: size });
+  };
+
+  const onFontFamilyChange = (font: string) => {
+    console.log(font);
+    // setAttributes.setFontFamily(font);
+    // updateSelectedShapeAttributes({ fontFamily: font });
   };
 
   const onOpacityChange = (value: number[]) => {
@@ -142,16 +134,18 @@ const Toolbar = ({ className }: { className: string }) => {
     );
   };
 
+  const { getFontList } = useFonts();
+
   return (
     <div className={className}>
       <RadixToolbar.Root className="flex flex-row gap-4 bg-white px-4 py-2 rounded-xl border">
         <RadixToolbar.ToggleGroup
           type="multiple"
-          value={getAttributes.fontStyle?.split(" ")}
+          value={[getAttributes.fontStyle, `${getAttributes.fontWeight}`]}
           onValueChange={onFontStylesChange}
         >
           <RadixToolbar.ToggleItem
-            value="bold"
+            value="900"
             className={`data-[state="on"]:bg-purple-500`}
           >
             <FontBoldIcon />
@@ -195,7 +189,9 @@ const Toolbar = ({ className }: { className: string }) => {
           </RadixToolbar.ToggleItem>
         </RadixToolbar.ToggleGroup>
         <RadixToolbar.Separator className="ToolbarSeparator" />
-        <RadixToolbar.Button className="">Button</RadixToolbar.Button>
+        <RadixToolbar.Button onClick={() => getFontList()}>
+          getFontList
+        </RadixToolbar.Button>
 
         <Input
           value={String(getAttributes.fontSize)}
