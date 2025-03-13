@@ -2,13 +2,13 @@ import { ShapeConfig } from "@/app/types/canvas";
 import Konva from "konva";
 import { nanoid } from "nanoid";
 
-export const saveToLocalStorage = (data: string | JSON) => {
-  window.localStorage.setItem("autoSaved", JSON.stringify(data));
+export const saveToLocalStorage = (key: string, data: string | JSON) => {
+  window.localStorage.setItem(key, JSON.stringify(data));
   return true;
 };
 
-export const loadFromLocalStorage = () => {
-  const dataAsString = window.localStorage.getItem("autoSaved");
+export const loadFromLocalStorage = (key: string) => {
+  const dataAsString = window.localStorage.getItem(key);
   if (dataAsString) {
     return JSON.parse(dataAsString)?.map((item: string) => JSON.parse(item));
   }

@@ -22,11 +22,9 @@ import {
   Pencil1Icon,
   ResetIcon,
   SquareIcon,
-  StarIcon,
   TextIcon,
 } from "@radix-ui/react-icons";
 import QrIcon from "./ui/QrIcon";
-import { useControl } from "@/app/hooks";
 
 const Sidebar = ({ className }: { className: string }) => {
   const { stageRef, canvasSize, setCanvasSize } = useCanvasContext();
@@ -71,7 +69,8 @@ const Sidebar = ({ className }: { className: string }) => {
   const handleSaveCanvas = () => {
     const exportedData = exportCanvasAsJSON();
     if (!exportedData) return;
-    saveToLocalStorage(exportedData);
+    const key = "autoSaved";
+    saveToLocalStorage(key, exportedData);
   };
 
   const exportCanvasAsJSON = () => {
@@ -87,7 +86,8 @@ const Sidebar = ({ className }: { className: string }) => {
   };
 
   const handleLoadCanvas = () => {
-    const loadedData = loadFromLocalStorage();
+    const key = "autoSaved";
+    const loadedData = loadFromLocalStorage(key);
     loadCanvasByJSON(loadedData);
   };
 
