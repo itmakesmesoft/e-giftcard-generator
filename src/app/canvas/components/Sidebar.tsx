@@ -1,12 +1,6 @@
-import { useControlStore, useShapeStore } from "@/app/store/canvas";
 import Menubar from "./ui/Menubar";
-import {
-  readCodeByImage,
-  convertBarcodeFormat,
-  saveToLocalStorage,
-  loadFromLocalStorage,
-} from "@/utils";
-import Konva from "konva";
+import { useShapeStore } from "@/app/store/canvas";
+import { readCodeByImage, convertBarcodeFormat } from "@/utils";
 import { useCanvasContext } from "@/app/context/canvas";
 import { ChangeEvent } from "react";
 import { generateShapeConfig } from "@/utils/canvas";
@@ -25,16 +19,12 @@ import {
   TextIcon,
 } from "@radix-ui/react-icons";
 import QrIcon from "./ui/QrIcon";
-import Button from "./ui/Button";
+import { useControl } from "@/app/hooks";
 
 const Sidebar = ({ className }: { className: string }) => {
-  const { stageRef, canvasSize, setCanvasSize } = useCanvasContext();
+  const { canvasSize, setCanvasSize } = useCanvasContext();
 
-  const fill = useControlStore((state) => state.fill);
-  const stroke = useControlStore((state) => state.stroke);
-  const action = useControlStore((state) => state.action);
-  const setAction = useControlStore((state) => state.setAction);
-  // const { action, setAction, getAttributes } = useControl();
+  const { action, setAction, getAttributes } = useControl();
 
   const redo = useShapeStore((state) => state.redo);
   const undo = useShapeStore((state) => state.undo);
@@ -50,55 +40,11 @@ const Sidebar = ({ className }: { className: string }) => {
       type: "barcode",
       code: data.value,
       codeFormat: format,
-      // fill: getAttributes.fill,
-      // stroke: getAttributes.stroke,
-      fill,
-      stroke,
+      fill: getAttributes.fill,
+      stroke: getAttributes.stroke,
     });
     setShapes((shapes) => [...shapes, newShape]);
   };
-
-  const handleExportAsImage = () => {
-    if (!stageRef.current) return;
-    const uri = stageRef.current.toDataURL();
-    const link = document.createElement("a");
-    link.download = "image.png";
-    link.href = uri;
-    link.click();
-  };
-
-  const handleSaveCanvas = () => {
-    const exportedData = exportCanvasAsJSON();
-    console.log(exportedData);
-    if (!exportedData) return;
-    const key = "autoSaved";
-    saveToLocalStorage(key, exportedData);
-  };
-
-  const exportCanvasAsJSON = () => {
-    if (!stageRef.current) return;
-    const children = stageRef.current.getChildren();
-    const extractIds = ["_shapeLayer", "_drawLayer"];
-
-    const json = children
-      .filter((layer) => extractIds.includes(layer.attrs.id))
-      .map((layer) => layer.children)
-      .flat();
-    return json;
-  };
-
-  const handleLoadCanvas = async () => {
-    const key = "autoSaved";
-    const loadedData = await loadFromLocalStorage(key);
-    loadCanvasByJSON(loadedData);
-  };
-
-  const loadCanvasByJSON = (data: Konva.Layer[]) => {
-    if (!stageRef.current) return;
-    // console.log(data);
-    setShapes(data.map(({ attrs }) => attrs));
-  };
-
   const loadFileFromLocal = (
     e: ChangeEvent<HTMLInputElement>,
     callback: (result: string | null) => unknown
@@ -113,14 +59,14 @@ const Sidebar = ({ className }: { className: string }) => {
 
   const handleAddBarcode = (e: ChangeEvent<HTMLInputElement>) => {
     loadFileFromLocal(e, (file) => {
-      if (!file) return;
-      decodeFromImage(file);
+      if (file) decodeFromImage(file);
     });
   };
 
   const handleAddImage = (e: ChangeEvent<HTMLInputElement>) => {
     loadFileFromLocal(e, (file) => {
       if (!file) return;
+
       const newShape = generateShapeConfig({
         type: "image",
         dataURL: file,
@@ -131,70 +77,55 @@ const Sidebar = ({ className }: { className: string }) => {
   };
 
   return (
-    <Menubar className={`flex flex-col gap-1 items-center ${className}`}>
+    <Menubar className={`flex flex-col items-center ${className}`}>
       <Menubar.MenuInputFileItem
         accept="image/*"
         onValueChange={handleAddBarcode}
+        className="pt-4 group hover:bg-blue-400! active:bg-blue-500!"
         icon={
-          <QrIcon width="24" height="24" className="group-hover:text-red-600" />
+          <QrIcon width="30" height="30" className="group-hover:fill-white" />
         }
       />
-      <Menubar.Separator className="w-full my-2 border-b border-black" />
+      <Menubar.Separator />
       <Menubar.MenuItem
         onClick={() => setAction("select")}
         label="커서"
         active={action === "select"}
-        icon={
-          <CursorArrowIcon color={action === "select" ? "blue" : "black"} />
-        }
+        icon={<CursorArrowIcon width="18" height="18" />}
       />
       <Menubar.MenuItem
         onClick={() => setAction("pencil")}
         label="펜"
         active={action === "pencil"}
-        icon={<Pencil1Icon color={action === "pencil" ? "blue" : "black"} />}
+        icon={<Pencil1Icon width="18" height="18" />}
       />
       <Menubar.MenuItem
         onClick={() => setAction("eraser")}
         label="지우개"
         active={action === "eraser"}
-        icon={<EraserIcon color={action === "eraser" ? "blue" : "black"} />}
+        icon={<EraserIcon width="18" height="18" />}
       />
       <Menubar.MenuGroup
         label="도형"
         className="text-black"
         onClick={() => setAction("rectangle")}
-        icon={
-          <MixIcon
-            color={
-              action === "rectangle" ||
-              action === "circle" ||
-              action === "arrow"
-                ? "blue"
-                : "black"
-            }
-          />
-        }
+        icon={<MixIcon width="18" height="18" />}
       >
         <Menubar.MenuGroupItem
           onClick={() => setAction("rectangle")}
-          icon={
-            <SquareIcon color={action === "rectangle" ? "blue" : "black"} />
-          }
+          icon={<SquareIcon width="16" height="16" />}
         >
           사각형
         </Menubar.MenuGroupItem>
         <Menubar.MenuGroupItem
           onClick={() => setAction("circle")}
-          icon={<CircleIcon color={action === "circle" ? "blue" : "black"} />}
+          icon={<CircleIcon width="16" height="16" />}
         >
           원
         </Menubar.MenuGroupItem>
         <Menubar.MenuGroupItem
           onClick={() => setAction("arrow")}
-          icon={
-            <ArrowTopLeftIcon color={action === "arrow" ? "blue" : "black"} />
-          }
+          icon={<ArrowTopLeftIcon width="16" height="16" />}
         >
           화살표
         </Menubar.MenuGroupItem>
@@ -203,54 +134,56 @@ const Sidebar = ({ className }: { className: string }) => {
         onClick={() => setAction("text")}
         label="글자"
         active={action === "text"}
-        icon={<TextIcon color={action === "text" ? "blue" : "black"} />}
+        icon={<TextIcon width="18" height="18" />}
       />
       <Menubar.MenuInputFileItem
         accept="image/*"
         onChange={handleAddImage}
         icon={<ImageIcon />}
       />
-      <Menubar.MenuGroup label="Frame" icon={<FrameIcon />}>
+      <Menubar.MenuGroup
+        label="Frame"
+        icon={<FrameIcon width="18" height="18" />}
+        className="p-2 text-center w-[220px]"
+      >
         <p>프레임 크기 조절</p>
-        <Menubar.MenuGroupItem asChild>
-          <Menubar.Menu>
-            <>
-              <Input
-                value={canvasSize.width}
-                onValueChange={(e) =>
-                  setCanvasSize({
-                    ...canvasSize,
-                    width: Number(e.target.value),
-                  })
-                }
-                className="h-5 bg-white"
-                label="W"
-              />
-              <Input
-                value={canvasSize.height}
-                onValueChange={(e) =>
-                  setCanvasSize({
-                    ...canvasSize,
-                    height: Number(e.target.value),
-                  })
-                }
-                className="h-5 bg-white"
-                label="H"
-              />
-            </>
-          </Menubar.Menu>
-        </Menubar.MenuGroupItem>
+        <div className="grid grid-cols-2 gap-4 px-2 py-1">
+          <Input
+            value={canvasSize.width}
+            onValueChange={(e) =>
+              setCanvasSize({
+                ...canvasSize,
+                width: Number(e.target.value),
+              })
+            }
+            className="h-5 bg-white"
+            label="W"
+          />
+          <Input
+            value={canvasSize.height}
+            onValueChange={(e) =>
+              setCanvasSize({
+                ...canvasSize,
+                height: Number(e.target.value),
+              })
+            }
+            className="h-5 bg-white"
+            label="H"
+          />
+        </div>
       </Menubar.MenuGroup>
-      <Menubar.Separator className="w-full my-2 border-b border-black" />
-      <Menubar.MenuItem onClick={undo} label="뒤로" icon={<ResetIcon />} />
+      <Menubar.Separator />
+      <Menubar.MenuItem
+        onClick={undo}
+        label="뒤로"
+        icon={<ResetIcon width="18" height="18" />}
+      />
       <Menubar.MenuItem
         onClick={redo}
         label="앞으로"
-        icon={<ResetIcon className="rotate-180" />}
+        icon={<ResetIcon className="rotate-180" width="18" height="18" />}
+        className="pb-3"
       />
-      <Button onClick={handleExportAsImage} label="다운로드" />
-      <Button onClick={handleSaveCanvas} label="저장" />
-      <Button onClick={handleLoadCanvas} label="불러오기" />
     </Menubar>
   );
 };

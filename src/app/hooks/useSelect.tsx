@@ -115,9 +115,12 @@ const useSelect = () => {
         selectionRef.current = node;
       }}
       id="selectBox"
-      fill="rgba(0,0,255,0.5)"
+      fill="rgba(211,237,255,0.5)"
+      stroke="rgba(211,237,255,1)"
+      strokeWidth={1}
       visible={false}
       listening={false}
+      perfectDrawEnabled={false}
     />
   );
 

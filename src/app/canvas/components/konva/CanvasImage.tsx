@@ -17,7 +17,6 @@ const CanvasImage = (props: CanvasImageProps) => {
     const img = new Image();
     img.src = dataURL;
     img.onload = () => {
-      console.log(img);
       setImage(img);
     };
   }, [dataURL]);

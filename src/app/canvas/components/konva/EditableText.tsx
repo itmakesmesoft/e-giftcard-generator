@@ -16,6 +16,7 @@ const EditableText = (props: Konva.TextConfig) => {
     fontFamily,
     typeFace,
     textAlign,
+    align,
     ...restProps
   } = props;
   const { selectedNodes } = useCanvasContext();
@@ -66,7 +67,9 @@ const EditableText = (props: Konva.TextConfig) => {
   return (
     <>
       <Text
-        ref={textRef}
+        ref={(node) => {
+          textRef.current = node;
+        }}
         id={id}
         text={value}
         strokeEnabled={false}
@@ -74,14 +77,14 @@ const EditableText = (props: Konva.TextConfig) => {
         {...restProps}
         onDblClick={handleDoubleClick}
         onTransform={handleTransform}
-        align={textAlign}
+        align={textAlign ?? align}
         fontStyle={`${fontStyle}${fontWeight ? ` ${fontWeight}` : ""}`}
         fontFamily={fontFamily}
         typeFace={typeFace}
       />
       {isDrawing && <ShapeHelper config={helperConfig} />}
       {isFocus && (
-        <Html key={fontFamily}>
+        <Html>
           <textarea
             value={value}
             onChange={handleValueChange}

@@ -38,6 +38,7 @@ const Canvas = () => {
                   strokeWidth={2}
                   draggable={isDraggable}
                   strokeScaleEnabled={false}
+                  perfectDrawEnabled={false}
                   onDragEnd={onDragEnd}
                   {...node}
                 />
@@ -48,6 +49,7 @@ const Canvas = () => {
                   key={index}
                   draggable={isDraggable}
                   strokeScaleEnabled={false}
+                  perfectDrawEnabled={false}
                   onDragEnd={onDragEnd}
                   {...node}
                 />
@@ -58,6 +60,7 @@ const Canvas = () => {
                   key={index}
                   draggable={isDraggable}
                   strokeScaleEnabled={false}
+                  perfectDrawEnabled={false}
                   onDragEnd={onDragEnd}
                   points={node.points}
                   {...node}
@@ -69,6 +72,7 @@ const Canvas = () => {
                   key={index}
                   alt="이미지"
                   draggable={isDraggable}
+                  perfectDrawEnabled={false}
                   onDragEnd={onDragEnd}
                   dataURL={node.dataURL}
                   {...node}
@@ -79,6 +83,7 @@ const Canvas = () => {
                 <EditableText
                   key={index}
                   draggable={isDraggable}
+                  perfectDrawEnabled={false}
                   onDragEnd={onDragEnd}
                   {...node}
                 />
@@ -91,6 +96,7 @@ const Canvas = () => {
                   text={text}
                   codeFormat={codeFormat}
                   draggable={isDraggable}
+                  perfectDrawEnabled={false}
                   onDragEnd={onDragEnd}
                   {...restProps}
                 />

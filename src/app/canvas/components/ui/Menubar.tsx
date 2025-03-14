@@ -2,7 +2,7 @@ import { Slot, Menubar as RadixMenubar } from "radix-ui";
 import { ChangeEvent, memo, ReactNode } from "react";
 
 const commonStyle =
-  "p-2 rounded-xl active:bg-gray-200 hover:bg-gray-100 cursor-pointer";
+  "p-2 w-full aspect-square flex justify-center items-center active:bg-gray-200 hover:bg-gray-100 cursor-pointer";
 
 interface MenuProps {
   children?: ReactNode;
@@ -39,9 +39,9 @@ const MenuItem = (props: MenuItemProps) => {
   return (
     <RadixMenubar.Menu>
       <Component
-        className={`${commonStyle} border ${
-          active ? "border-black" : "border-transparent"
-        } ${classNameFromProps ?? ""}`}
+        className={`${commonStyle} ${active ? "bg-gray-200" : ""} ${
+          classNameFromProps ?? ""
+        }`}
         {...restProps}
         aria-label={label}
         onClick={onClick}
@@ -65,11 +65,11 @@ const MenuGroup = (props: MenuGroupProps) => {
   const { icon, label, className, children, onClick, ...restProps } = props;
   return (
     <RadixMenubar.Menu>
-      <RadixMenubar.Group>
+      <RadixMenubar.Group className="w-full">
         <RadixMenubar.Trigger
           aria-label={label}
           onClick={onClick}
-          className={`${commonStyle} border border-transparent data-[state="open"]:border-black`}
+          className={`${commonStyle} data-[state="open"]:bg-gray-200`}
           {...restProps}
         >
           {icon}
@@ -77,8 +77,8 @@ const MenuGroup = (props: MenuGroupProps) => {
         <RadixMenubar.Portal>
           <RadixMenubar.Content
             side="right"
-            sideOffset={20}
-            className={`p-2 min-w-[150px] rounded-lg bg-white flex flex-col gap-1 shadow-xl ${
+            sideOffset={10}
+            className={`min-w-[150px] rounded-lg bg-white flex flex-col gap-1 shadow-xl overflow-hidden ${
               className ?? ""
             }`}
           >
@@ -104,7 +104,7 @@ const MenuGroupItem = (props: MenuGroupItemProps) => {
   const Component = asChild ? Slot.Root : RadixMenubar.Item;
   return (
     <Component
-      className={`px-2 py-1 flex flex-row gap-2 items-center rounded-sm cursor-pointer active:bg-gray-200 hover:bg-gray-100 ${
+      className={`px-3 py-1.5 flex flex-row gap-2 items-center rounded-sm cursor-pointer active:bg-gray-200 hover:bg-gray-100 ${
         className ?? ""
       }`}
       {...restProps}
@@ -159,10 +159,16 @@ const MenubarBase = ({
   children: ReactNode;
 }) => (
   <RadixMenubar.Root
-    className={`py-3 px-2 rounded-2xl bg-white text-black ${className ?? ""}`}
+    className={`rounded-2xl bg-white text-black overflow-hidden ${
+      className ?? ""
+    }`}
   >
     {children}
   </RadixMenubar.Root>
+);
+
+const Separator = () => (
+  <RadixMenubar.Separator className="w-full border-b border-gray-300" />
 );
 
 export const Menubar = Object.assign(memo(MenubarBase), {
@@ -171,7 +177,7 @@ export const Menubar = Object.assign(memo(MenubarBase), {
   MenuInputFileItem: MenuInputFileItem,
   MenuGroup: MenuGroup,
   MenuGroupItem: MenuGroupItem,
-  Separator: RadixMenubar.Separator,
+  Separator: Separator,
 });
 
 Menubar.displayName = "Menubar";

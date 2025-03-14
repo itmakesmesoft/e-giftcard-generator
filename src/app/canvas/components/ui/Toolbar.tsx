@@ -1,11 +1,11 @@
-import { ChangeEvent, ReactNode } from "react";
+import { ChangeEvent, ReactNode, useEffect, useState } from "react";
 import Input, { type InputProps } from "./Input";
-import ColorPicker, { type ColorPickerProps } from "./ColorPicker";
 import { DropdownMenu, Toolbar as RadixToolbar, Select } from "radix-ui";
 import {
   ToolbarToggleGroupMultipleProps,
   ToolbarToggleGroupSingleProps,
 } from "@radix-ui/react-toolbar";
+import { Color, ColorResult, SketchPicker } from "react-color";
 
 const Toolbar = ({ children }: { children: ReactNode }) => {
   return (
@@ -31,7 +31,7 @@ const ToolbarToggleGroup = ({
 }: ToolbarToggleGroupProps) => {
   return (
     <RadixToolbar.ToggleGroup
-      className={`${className} flex flex-row items-center`}
+      className={`flex flex-row items-center ${className}`}
       {...restProps}
     >
       {items.map((item, index) => (
@@ -51,17 +51,19 @@ const ToolbarToggleGroup = ({
 type ToolbarSelectProps = Select.SelectProps & {
   title: ReactNode;
   children: ReactNode;
+  className?: string;
 };
 const ToolbarSelect = ({
   title,
   children,
+  className,
   ...restProps
 }: ToolbarSelectProps) => {
   return (
     <Select.Root {...restProps}>
       <RadixToolbar.Button asChild>
         <Select.Trigger
-          className="flex flex-row justify-between items-center gap-4 px-4 cursor-pointer"
+          className={`flex flex-row justify-between items-center gap-4 pl-4 pr-2 cursor-pointer ${className}`}
           aria-label="font"
         >
           {title}
@@ -69,13 +71,11 @@ const ToolbarSelect = ({
       </RadixToolbar.Button>
       <Select.Portal>
         <Select.Content
-          className="bg-white p-2 rounded-lg"
+          className="bg-white rounded-lg overflow-hidden py-2"
           position="popper"
           sideOffset={10}
         >
-          <Select.Viewport className="SelectViewport">
-            {children}
-          </Select.Viewport>
+          <Select.Viewport className="">{children}</Select.Viewport>
         </Select.Content>
       </Select.Portal>
     </Select.Root>
@@ -85,15 +85,21 @@ interface SelectItemsProps {
   value: string;
   icon?: ReactNode;
   label: string;
+  className?: string;
 }
-const ToolbarSelectItem = ({ value, icon, label }: SelectItemsProps) => {
+const ToolbarSelectItem = ({
+  value,
+  icon,
+  label,
+  className,
+}: SelectItemsProps) => {
   return (
     <Select.Item
       value={value}
       aria-label={label}
-      className="hover:bg-gray-200 px-2 py-0.5 cursor-pointer flex flex-row items-center"
+      className={`text-gray-500 hover:bg-gray-200 hover:text-black active:bg-gray-300 px-2 py-0.5 cursor-pointer flex flex-row items-center ${className}`}
     >
-      <span className="mr-2">{icon}</span>
+      <span className="w-4 mr-2">{icon}</span>
       {label}
     </Select.Item>
   );
@@ -116,14 +122,58 @@ const ToolbarDropdown = ({ title, children }: ToolbarDropdownProps) => {
   );
 };
 
-type ToolbarColorPickerProps = ColorPickerProps;
 const ToolbarColorPicker = ({
   color,
-  onChange,
+  variant = "default",
+  onValueChange,
+  onValueChangeComplete,
   className,
-}: ToolbarColorPickerProps) => {
+  customTitle,
+}: {
+  color?: Color;
+  variant?: "default" | "border" | "custom";
+  onValueChange?: (value: ColorResult) => void;
+  onValueChangeComplete?: (value: ColorResult) => void;
+  className?: string;
+  customTitle?: ((currentColor: string) => React.ReactNode) | ReactNode;
+}) => {
+  const [currentColor, setCurrentColor] = useState<Color>(color ?? "");
+
+  useEffect(() => {
+    if (color) setCurrentColor(color);
+  }, [color]);
+
   return (
-    <ColorPicker color={color} onChange={onChange} className={className} />
+    <ToolbarDropdown
+      title={
+        variant !== "custom" ? (
+          <span
+            className={`w-5 h-5 rounded-full block ${className}`}
+            style={{
+              ...(variant === "default" && {
+                backgroundColor: currentColor as string,
+              }),
+              ...(variant === "border" && {
+                border: `3px solid ${currentColor}`,
+              }),
+            }}
+          />
+        ) : typeof customTitle === "function" ? (
+          customTitle(currentColor as string)
+        ) : (
+          customTitle
+        )
+      }
+    >
+      <SketchPicker
+        color={currentColor}
+        onChange={(result) => {
+          setCurrentColor(result.hex);
+          onValueChange?.(result);
+        }}
+        onChangeComplete={onValueChangeComplete}
+      />
+    </ToolbarDropdown>
   );
 };
 
@@ -137,7 +187,7 @@ const ToolbarInput = ({
 }: ToolbarInputProps) => {
   return (
     <Input
-      className={`${className} w-[60px]`}
+      className={`w-[60px] ${className}`}
       onChange={(e: ChangeEvent<HTMLInputElement>) => {
         onValueChange?.(e.target.value);
       }}
