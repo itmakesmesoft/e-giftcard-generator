@@ -8,12 +8,14 @@ import SaveIcon from "./ui/SaveIcon";
 import LoadIcon from "./ui/LoadIcon";
 
 const FloatingButtonGroup = ({ className }: { className?: string }) => {
-  const { stageRef } = useCanvasContext();
+  const { stageRef, canvasInfo } = useCanvasContext();
   const setShapes = useShapeStore((state) => state.setShapes);
 
   const handleExportAsImage = () => {
     if (!stageRef.current) return;
-    const uri = stageRef.current.toDataURL();
+    const uri = stageRef.current.toDataURL({
+      ...canvasInfo,
+    });
     const link = document.createElement("a");
     link.download = "image.png";
     link.href = uri;

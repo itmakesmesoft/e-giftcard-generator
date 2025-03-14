@@ -22,7 +22,7 @@ import QrIcon from "./ui/QrIcon";
 import { useControl } from "@/app/hooks";
 
 const Sidebar = ({ className }: { className: string }) => {
-  const { canvasSize, setCanvasSize } = useCanvasContext();
+  const { canvasInfo, setCanvasInfo } = useCanvasContext();
 
   const { action, setAction, getAttributes } = useControl();
 
@@ -149,10 +149,10 @@ const Sidebar = ({ className }: { className: string }) => {
         <p>프레임 크기 조절</p>
         <div className="grid grid-cols-2 gap-4 px-2 py-1">
           <Input
-            value={canvasSize.width}
+            value={canvasInfo.width}
             onValueChange={(e) =>
-              setCanvasSize({
-                ...canvasSize,
+              setCanvasInfo({
+                ...canvasInfo,
                 width: Number(e.target.value),
               })
             }
@@ -160,10 +160,10 @@ const Sidebar = ({ className }: { className: string }) => {
             label="W"
           />
           <Input
-            value={canvasSize.height}
+            value={canvasInfo.height}
             onValueChange={(e) =>
-              setCanvasSize({
-                ...canvasSize,
+              setCanvasInfo({
+                ...canvasInfo,
                 height: Number(e.target.value),
               })
             }

@@ -36,7 +36,7 @@ const Barcode = (props: BarcodeProps) => {
 
   const [image, setImage] = useState<HTMLImageElement>();
   const [imageSize, setImageSize] = useState<ImageSize>({ width, height });
-  const { canvasSize } = useCanvasContext();
+  const { canvasInfo } = useCanvasContext();
   const [textColor, setTextColor] = useState<string>(textColorFromProps);
   const [barColor, setBarColor] = useState<string>(barColorFromProps);
   // props에 textColor와 barColor가 존재할 경우, 해당 값으로 초기화
@@ -74,8 +74,8 @@ const Barcode = (props: BarcodeProps) => {
     // 이후 Control을 통해 조작 시, 객체 내부로 fill과 stroke가 들어오게 됨.
   }, [stroke, fill]);
 
-  const centerX = Math.floor((canvasSize.width - (image?.width ?? 1)) / 2);
-  const centerY = Math.floor((canvasSize.height - (image?.height ?? 1)) / 2);
+  const centerX = Math.floor((canvasInfo.width - (image?.width ?? 1)) / 2);
+  const centerY = Math.floor((canvasInfo.height - (image?.height ?? 1)) / 2);
 
   return (
     <KonvaImage

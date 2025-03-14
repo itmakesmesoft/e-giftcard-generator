@@ -1,24 +1,28 @@
 import Konva from "konva";
 import {
   createContext,
+  Dispatch,
   ReactNode,
   RefObject,
+  SetStateAction,
   useContext,
   useEffect,
   useRef,
   useState,
 } from "react";
 
-export interface CanvasSize {
+export interface CanvasInfo {
+  x: number;
+  y: number;
   width: number;
   height: number;
 }
 interface CanvasContextValueProps {
-  canvasSize: CanvasSize;
+  canvasInfo: CanvasInfo;
   selectedNodes: Konva.Node[];
   stageRef: RefObject<Konva.Stage | null>;
   transformerRef: RefObject<Konva.Transformer | null>;
-  setCanvasSize: (size: CanvasSize) => void;
+  setCanvasInfo: Dispatch<SetStateAction<CanvasInfo>>;
   setSelectedNodes: (node: Konva.Node[]) => void;
   getAllSelectedNodes: () => Konva.Node[];
   getSingleSelectedNode: () => Konva.Node | undefined;
@@ -26,11 +30,11 @@ interface CanvasContextValueProps {
 }
 
 const defaultValue: CanvasContextValueProps = {
-  canvasSize: { width: 1000, height: 600 },
+  canvasInfo: { width: 1000, height: 600, x: 0, y: 0 },
   selectedNodes: [],
   stageRef: { current: null },
   transformerRef: { current: null },
-  setCanvasSize: () => {},
+  setCanvasInfo: () => {},
   setSelectedNodes: () => {},
   getAllSelectedNodes: () => [],
   getSingleSelectedNode: () => undefined,
@@ -42,8 +46,8 @@ const CanvasContext = createContext<CanvasContextValueProps>(defaultValue);
 export const useCanvasContext = () => useContext(CanvasContext);
 
 export const CanvasProvider = ({ children }: { children: ReactNode }) => {
-  const [canvasSize, setCanvasSize] = useState<CanvasSize>(
-    defaultValue.canvasSize
+  const [canvasInfo, setCanvasInfo] = useState<CanvasInfo>(
+    defaultValue.canvasInfo
   );
   const [selectedNodes, setSelectedNodes] = useState<Konva.Node[]>([]);
   const stageRef = useRef<Konva.Stage>(null);
@@ -76,11 +80,11 @@ export const CanvasProvider = ({ children }: { children: ReactNode }) => {
   return (
     <CanvasContext.Provider
       value={{
-        canvasSize,
+        canvasInfo,
         selectedNodes,
         stageRef: stageRef as RefObject<Konva.Stage>,
         transformerRef: transformerRef as RefObject<Konva.Transformer>,
-        setCanvasSize,
+        setCanvasInfo,
         setSelectedNodes,
         getAllSelectedNodes,
         getSingleSelectedNode,

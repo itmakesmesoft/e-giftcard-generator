@@ -12,12 +12,11 @@ const BackgroundLayer = (props: {
     <Layer {...restProps}>
       <Rect
         id="bg"
-        x={0}
         fill="white"
-        y={0}
         width={width}
         height={height}
         onPointerDown={onPointerDown}
+        // {...restProps}
       />
     </Layer>
   );

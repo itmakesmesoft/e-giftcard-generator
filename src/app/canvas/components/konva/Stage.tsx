@@ -2,12 +2,13 @@ import { useCanvasContext } from "@/app/context/canvas";
 import { useControl, useSelect, useShapes } from "@/app/hooks";
 import Konva from "konva";
 import { Vector2d } from "konva/lib/types";
-import { ReactNode, useRef } from "react";
-import { Stage as KonvaStage, Layer, Transformer } from "react-konva";
+import { ReactNode, useEffect, useRef } from "react";
+import { Group, Stage as KonvaStage, Layer, Transformer } from "react-konva";
 import BackgroundLayer from "./BackgroundLayer";
 
 const Stage = ({ children }: { children: ReactNode }) => {
-  const { canvasSize, stageRef, transformerRef } = useCanvasContext();
+  const { canvasInfo, setCanvasInfo, stageRef, transformerRef } =
+    useCanvasContext();
   const { action, setAction, getAttributes } = useControl();
 
   const isPointerDown = useRef(false);
@@ -112,11 +113,21 @@ const Stage = ({ children }: { children: ReactNode }) => {
     setAction("select");
   };
 
+  const viewPortWidth = typeof window !== "undefined" ? window.innerWidth : 0;
+  const viewPortHeight = typeof window !== "undefined" ? window.innerHeight : 0;
+  useEffect(() => {
+    setCanvasInfo((canvasInfo) => ({
+      ...canvasInfo,
+      x: (viewPortWidth - canvasInfo.width) / 2,
+      y: (viewPortHeight - canvasInfo.height) / 2,
+    }));
+  }, [setCanvasInfo, viewPortHeight, viewPortWidth]);
+
   return (
     <KonvaStage
       ref={stageRef}
-      width={canvasSize.width}
-      height={canvasSize.height}
+      width={viewPortWidth}
+      height={viewPortHeight}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
@@ -124,10 +135,11 @@ const Stage = ({ children }: { children: ReactNode }) => {
       <BackgroundLayer
         id="_bgLayer"
         onPointerDown={clearSelectNodes}
-        width={canvasSize.width}
-        height={canvasSize.height}
+        {...canvasInfo}
       />
-      {children}
+      <Layer>
+        <Group clip={{ ...canvasInfo }}>{children}</Group>
+      </Layer>
       <Layer id="_selectLayer">
         <SelectionBox />
         <Transformer ref={transformerRef} />

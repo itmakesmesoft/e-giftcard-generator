@@ -2,7 +2,7 @@ import Barcode from "./Barcode";
 import CanvasImage from "./CanvasImage";
 import EditableText from "./EditableText";
 import { Vector2d } from "konva/lib/types";
-import { Arrow, Circle, Layer, Line, Rect } from "react-konva";
+import { Arrow, Circle, Group, Line, Rect } from "react-konva";
 import { useControlStore, useShapeStore } from "@/app/store/canvas";
 import { KonvaEventObject, NodeConfig, Node } from "konva/lib/Node";
 
@@ -127,12 +127,12 @@ const Canvas = () => {
 
   return (
     <>
-      <Layer id="_shapeLayer">
+      <Group id="_shapeLayer">
         {shapesRenderer({
           isDraggable: action === "select",
         })}
-      </Layer>
-      <Layer id="_drawLayer">{drawingRenderer()}</Layer>
+      </Group>
+      <Group id="_drawLayer">{drawingRenderer()}</Group>
     </>
   );
 };

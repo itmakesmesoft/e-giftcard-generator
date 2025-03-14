@@ -18,7 +18,7 @@ const CanvasContainer = () => {
         </div>
         <Sidebar className="fixed left-2 z-100" />
         <Menubar className="fixed top-2 z-100" />
-        <FloatingButtonGroup className="fixed bottom-2 right-2" />
+        <FloatingButtonGroup className="fixed bottom-2 right-2 z-100" />
         <Stage>
           <Canvas />
         </Stage>

@@ -10,7 +10,7 @@ interface CanvasImageProps extends Omit<Konva.ImageConfig, "image"> {
 const CanvasImage = (props: CanvasImageProps) => {
   const { dataURL, ...restProps } = props;
   const [image, setImage] = useState<HTMLImageElement>();
-  const { canvasSize } = useCanvasContext();
+  const { canvasInfo } = useCanvasContext();
 
   useEffect(() => {
     if (!dataURL) return;
@@ -21,8 +21,8 @@ const CanvasImage = (props: CanvasImageProps) => {
     };
   }, [dataURL]);
 
-  const centerX = Math.floor((canvasSize.width - (image?.width ?? 0)) / 2);
-  const centerY = Math.floor((canvasSize.height - (image?.height ?? 0)) / 2);
+  const centerX = Math.floor((canvasInfo.width - (image?.width ?? 0)) / 2);
+  const centerY = Math.floor((canvasInfo.height - (image?.height ?? 0)) / 2);
 
   return (
     <KonvaImage
