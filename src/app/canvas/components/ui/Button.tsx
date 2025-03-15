@@ -1,22 +1,18 @@
+import { ReactNode } from "react";
+
 const Button = ({
-  active,
-  label,
+  // active,
+  children,
   onClick,
+  className,
 }: {
-  active?: boolean;
-  label: string;
+  // active?: boolean;
+  children?: ReactNode;
   onClick: () => void;
+  className?: string;
 }) => (
-  <button
-    className={`text-black
-      ${
-        active
-          ? "p-1 bg-blue-300 rounded"
-          : "p-1 hover:bg-blue-500 bg-blue-100 rounded"
-      }`}
-    onClick={onClick}
-  >
-    {label}
+  <button className={`${className}`} onClick={onClick}>
+    {children}
   </button>
 );
 

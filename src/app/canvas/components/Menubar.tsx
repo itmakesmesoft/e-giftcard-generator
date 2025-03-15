@@ -14,10 +14,13 @@ import {
   CheckIcon,
   TextIcon,
 } from "@radix-ui/react-icons";
-import { useControl, useFonts } from "@/app/hooks";
+import { useControl, useFonts, useSelect } from "@/app/hooks";
 import { RxTransparencyGrid } from "react-icons/rx";
 import Toolbar from "./ui/Toolbar";
 import { ColorResult } from "react-color";
+import Button from "./ui/Button";
+import MoveForwardIcon from "./ui/MoveForwardIcon";
+import MoveBackwardIcon from "./ui/MoveBackwardIcon";
 
 const fontStyleOptions = [
   {
@@ -65,6 +68,7 @@ const getProperPanelType = (nodes: Konva.Node[]) => {
 };
 
 const Menubar = ({ className }: { className: string }) => {
+  const { clearSelectNodes } = useSelect();
   const { selectedNodes } = useCanvasContext();
   const [panelType, setPanelType] = useState<PanelType>(null);
   const setShapes = useShapeStore((state) => state.setShapes);
@@ -117,6 +121,13 @@ const Menubar = ({ className }: { className: string }) => {
       })
     );
   };
+  const removeShapeOnCanvas = (ids: string[]) => {
+    if (ids.length === 0) return;
+    setShapes((shapes) =>
+      shapes.filter((shape) => shape.id && !ids.includes(shape.id))
+    );
+    clearSelectNodes();
+  };
 
   return (
     <div className={className}>
@@ -125,11 +136,13 @@ const Menubar = ({ className }: { className: string }) => {
           {panelType === "shape" && (
             <ShapeControlPanel
               updateSelectedShapeAttributes={updateSelectedShapeAttributes}
+              removeShapeOnCanvas={removeShapeOnCanvas}
             />
           )}
           {panelType === "text" && (
             <TextControlPanel
               updateSelectedShapeAttributes={updateSelectedShapeAttributes}
+              removeShapeOnCanvas={removeShapeOnCanvas}
             />
           )}
           {panelType === "brush" && (
@@ -144,13 +157,18 @@ const Menubar = ({ className }: { className: string }) => {
 };
 interface ControlPanelProps {
   updateSelectedShapeAttributes: (newAttrs: Konva.ShapeConfig) => void;
+  removeShapeOnCanvas?: (ids: string[]) => void;
 }
 
 const TextControlPanel = ({
   updateSelectedShapeAttributes,
+  removeShapeOnCanvas,
 }: ControlPanelProps) => {
-  const { fontList, loadFontFamily, fontDict } = useFonts();
+  const { moveToForward, moveToBackward } = useShapeStore();
   const { getAttributes, setAttributes } = useControl();
+  const { fontList, loadFontFamily, fontDict } = useFonts();
+  const { selectedNodes, selectNodesByIdList, getAllSelectedNodes } =
+    useCanvasContext();
 
   const onFontStylesChange = (values: string[]) => {
     const fontStyle = values.includes("italic") ? "italic" : "normal";
@@ -186,6 +204,28 @@ const TextControlPanel = ({
   const onFontColorChange = (value: ColorResult) => {
     setAttributes.setFill(value.hex);
     updateSelectedShapeAttributes({ fill: value.hex });
+  };
+
+  const onMoveToForward = () => {
+    if (selectedNodes.length === 0) return;
+    const selectedIds = selectedNodes.map((node) => node.attrs.id);
+    for (const id of selectedIds) moveToForward(id);
+    selectNodesByIdList(selectedIds);
+  };
+
+  const onMoveToBackward = () => {
+    if (selectedNodes.length === 0) return;
+    const selectedIds = selectedNodes.map((node) => node.attrs.id);
+    for (const id of selectedIds) moveToBackward(id);
+    selectNodesByIdList(selectedIds);
+  };
+
+  const removeShapes = () => {
+    if (!removeShapeOnCanvas) return;
+
+    const nodes = getAllSelectedNodes();
+    const ids = nodes.map((node) => node.attrs.id) as string[];
+    if (ids.length > 0) removeShapeOnCanvas(ids);
   };
 
   return (
@@ -252,14 +292,25 @@ const TextControlPanel = ({
           </span>
         )}
       />
+      <Button className="" onClick={onMoveToForward}>
+        <MoveForwardIcon width="20" height="20" className="" />
+      </Button>
+      <Button className="" onClick={onMoveToBackward}>
+        <MoveBackwardIcon width="20" height="20" className="" />
+      </Button>
+      <Button onClick={removeShapes}>removeShapes</Button>
     </>
   );
 };
 
 const ShapeControlPanel = ({
   updateSelectedShapeAttributes,
+  removeShapeOnCanvas,
 }: ControlPanelProps) => {
   const { getAttributes, setAttributes } = useControl();
+  const { selectedNodes, selectNodesByIdList, getAllSelectedNodes } =
+    useCanvasContext();
+  const { moveToForward, moveToBackward } = useShapeStore();
 
   const onFillChange = (value: ColorResult) => {
     setAttributes.setFill(value.hex);
@@ -279,6 +330,28 @@ const ShapeControlPanel = ({
   const onOpacityChange = (value: number[]) => {
     setAttributes.setOpacity(value[0]);
     updateSelectedShapeAttributes({ opacity: value[0] });
+  };
+
+  const onMoveToForward = () => {
+    if (selectedNodes.length === 0) return;
+    const selectedIds = selectedNodes.map((node) => node.attrs.id);
+    for (const id of selectedIds) moveToForward(id);
+    selectNodesByIdList(selectedIds);
+  };
+
+  const onMoveToBackward = () => {
+    if (selectedNodes.length === 0) return;
+    const selectedIds = selectedNodes.map((node) => node.attrs.id);
+    for (const id of selectedIds) moveToBackward(id);
+    selectNodesByIdList(selectedIds);
+  };
+
+  const removeShapes = () => {
+    if (!removeShapeOnCanvas) return;
+
+    const nodes = getAllSelectedNodes();
+    const ids = nodes.map((node) => node.attrs.id) as string[];
+    if (ids.length > 0) removeShapeOnCanvas(ids);
   };
 
   return (
@@ -349,6 +422,15 @@ const ShapeControlPanel = ({
           />
         </Slider.Root>
       </Toolbar.Dropdown>
+      <Button className="" onClick={onMoveToForward}>
+        <MoveForwardIcon width="20" height="20" className="" />
+      </Button>
+      <Button className="" onClick={onMoveToBackward}>
+        <MoveBackwardIcon width="20" height="20" className="" />
+      </Button>
+      <Button className="" onClick={removeShapes}>
+        removeShapes
+      </Button>
     </>
   );
 };

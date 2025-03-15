@@ -60,6 +60,7 @@ const Sidebar = ({ className }: { className: string }) => {
   const handleAddBarcode = (e: ChangeEvent<HTMLInputElement>) => {
     loadFileFromLocal(e, (file) => {
       if (file) decodeFromImage(file);
+      setAction("select");
     });
   };
 
@@ -73,6 +74,7 @@ const Sidebar = ({ className }: { className: string }) => {
         isDrawing: false,
       });
       setShapes((shapes) => [...shapes, newShape]);
+      setAction("select");
     });
   };
 

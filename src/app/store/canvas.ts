@@ -88,6 +88,8 @@ type ChangeAction = {
   setShapes: (shapes: FunctionableState, logHistory?: boolean) => void;
   redo: () => void;
   undo: () => void;
+  moveToForward: (id: string) => void;
+  moveToBackward: (id: string) => void;
 };
 
 const updatestate = (
@@ -134,6 +136,40 @@ const useShapeStore = create<Shapes & ChangeAction>((set) => ({
         historyIndex: Math.max(historyIndex, -1),
         shapes: historyIndex >= 0 ? state.history[historyIndex] : [],
       };
+    }),
+  moveToForward: (id: string) =>
+    set((state) => {
+      const shape = state.shapes.find((shape) => shape.id === id);
+      if (!shape) return state;
+      const newShapes = [...state.shapes];
+      const index = newShapes.indexOf(shape);
+      newShapes.splice(index, 1);
+      newShapes.push(shape);
+
+      const history = [
+        ...state.history.slice(0, state.historyIndex + 1),
+        newShapes,
+      ];
+      const historyIndex = history.length - 1;
+
+      return { shapes: newShapes, history, historyIndex };
+    }),
+  moveToBackward: (id: string) =>
+    set((state) => {
+      const shape = state.shapes.find((shape) => shape.id === id);
+      if (!shape) return state;
+      const newShapes = [...state.shapes];
+      const index = newShapes.indexOf(shape);
+      newShapes.splice(index, 1);
+      newShapes.unshift(shape);
+
+      const history = [
+        ...state.history.slice(0, state.historyIndex + 1),
+        newShapes,
+      ];
+      const historyIndex = history.length - 1;
+
+      return { shapes: newShapes, history, historyIndex };
     }),
 }));
 

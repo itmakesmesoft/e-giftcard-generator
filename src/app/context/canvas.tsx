@@ -27,6 +27,7 @@ interface CanvasContextValueProps {
   getAllSelectedNodes: () => Konva.Node[];
   getSingleSelectedNode: () => Konva.Node | undefined;
   selectNodeById: (id: string) => void;
+  selectNodesByIdList: (idList: string[]) => void;
 }
 
 const defaultValue: CanvasContextValueProps = {
@@ -39,6 +40,7 @@ const defaultValue: CanvasContextValueProps = {
   getAllSelectedNodes: () => [],
   getSingleSelectedNode: () => undefined,
   selectNodeById: () => {},
+  selectNodesByIdList: () => {},
 };
 
 const CanvasContext = createContext<CanvasContextValueProps>(defaultValue);
@@ -56,8 +58,9 @@ export const CanvasProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (selectedNodes.length > 0) {
       transformerRef.current?.nodes([...selectedNodes]);
-      console.log(selectedNodes);
+      return;
     }
+    transformerRef.current?.nodes([]);
   }, [selectedNodes]);
 
   const selectNodeById = (id: string) => {
@@ -65,10 +68,21 @@ export const CanvasProvider = ({ children }: { children: ReactNode }) => {
 
     const selectedNodes = getAllSelectedNodes();
     const stage = stageRef.current;
-    const node = stage.find(".shape").find((node) => node.attrs.id === id);
+    const node = stage.find(".shape").find(({ attrs }) => attrs.id === id);
     if (node && !selectedNodes.includes(node)) {
       setSelectedNodes([node]);
     }
+  };
+
+  const selectNodesByIdList = (idList: string[]) => {
+    if (!transformerRef.current || !stageRef.current) return;
+
+    const stage = stageRef.current;
+
+    const nodes = stage.find(({ attrs }: Konva.Node) =>
+      idList.includes(attrs.id)
+    );
+    if (nodes && nodes.length > 0) setSelectedNodes(nodes);
   };
 
   const getSingleSelectedNode = (): Konva.Node | undefined =>
@@ -89,6 +103,7 @@ export const CanvasProvider = ({ children }: { children: ReactNode }) => {
         getAllSelectedNodes,
         getSingleSelectedNode,
         selectNodeById,
+        selectNodesByIdList,
       }}
     >
       {children}
