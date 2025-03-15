@@ -2,15 +2,17 @@ import { ChangeEvent, ReactNode, useEffect, useState } from "react";
 import Input, { type InputProps } from "./Input";
 import { DropdownMenu, Toolbar as RadixToolbar, Select } from "radix-ui";
 import {
+  ToolbarButtonProps,
   ToolbarToggleGroupMultipleProps,
   ToolbarToggleGroupSingleProps,
 } from "@radix-ui/react-toolbar";
 import { Color, ColorResult, SketchPicker } from "react-color";
+import { Tooltip as RadixTooltip } from "radix-ui";
 
 const Toolbar = ({ children }: { children: ReactNode }) => {
   return (
     <RadixToolbar.Root className="flex flex-row gap-4 bg-white px-4 py-2 rounded-xl border">
-      {children}
+      <RadixTooltip.Provider>{children}</RadixTooltip.Provider>
     </RadixToolbar.Root>
   );
 };
@@ -35,14 +37,15 @@ const ToolbarToggleGroup = ({
       {...restProps}
     >
       {items.map((item, index) => (
-        <RadixToolbar.ToggleItem
-          key={index}
-          value={item.value}
-          aria-label={item.label}
-          className={`data-[state="on"]:bg-purple-500`}
-        >
-          {item.icon}
-        </RadixToolbar.ToggleItem>
+        <Tooltip key={index} label={item.label}>
+          <RadixToolbar.ToggleItem
+            value={item.value}
+            aria-label={item.label}
+            className={`data-[state="on"]:bg-purple-500 cursor-pointer`}
+          >
+            {item.icon}
+          </RadixToolbar.ToggleItem>
+        </Tooltip>
       ))}
     </RadixToolbar.ToggleGroup>
   );
@@ -52,22 +55,26 @@ type ToolbarSelectProps = Select.SelectProps & {
   title: ReactNode;
   children: ReactNode;
   className?: string;
+  label: string;
 };
 const ToolbarSelect = ({
   title,
   children,
   className,
+  label,
   ...restProps
 }: ToolbarSelectProps) => {
   return (
     <Select.Root {...restProps}>
       <RadixToolbar.Button asChild>
-        <Select.Trigger
-          className={`flex flex-row justify-between items-center gap-4 pl-4 pr-2 cursor-pointer ${className}`}
-          aria-label="font"
-        >
-          {title}
-        </Select.Trigger>
+        <Tooltip label={label}>
+          <Select.Trigger
+            className={`flex flex-row justify-between items-center gap-4 pl-4 pr-2 cursor-pointer ${className}`}
+            aria-label="font"
+          >
+            {title}
+          </Select.Trigger>
+        </Tooltip>
       </RadixToolbar.Button>
       <Select.Portal>
         <Select.Content
@@ -107,13 +114,18 @@ const ToolbarSelectItem = ({
 
 type ToolbarDropdownProps = DropdownMenu.DropdownMenuProps & {
   title: ReactNode;
+  label: string;
   children: ReactNode;
 };
-const ToolbarDropdown = ({ title, children }: ToolbarDropdownProps) => {
+const ToolbarDropdown = ({ title, label, children }: ToolbarDropdownProps) => {
   return (
     <DropdownMenu.Root>
       <RadixToolbar.Button asChild>
-        <DropdownMenu.Trigger className="">{title}</DropdownMenu.Trigger>
+        <Tooltip label={label}>
+          <DropdownMenu.Trigger className="cursor-pointer">
+            {title}
+          </DropdownMenu.Trigger>
+        </Tooltip>
       </RadixToolbar.Button>
       <DropdownMenu.Content className="mt-4 py-2 px-4 rounded-xl bg-white">
         {children}
@@ -129,6 +141,7 @@ const ToolbarColorPicker = ({
   onValueChangeComplete,
   className,
   customTitle,
+  label,
 }: {
   color?: Color;
   variant?: "default" | "border" | "custom";
@@ -136,6 +149,7 @@ const ToolbarColorPicker = ({
   onValueChangeComplete?: (value: ColorResult) => void;
   className?: string;
   customTitle?: ((currentColor: string) => React.ReactNode) | ReactNode;
+  label: string;
 }) => {
   const [currentColor, setCurrentColor] = useState<Color>(color ?? "");
 
@@ -145,6 +159,7 @@ const ToolbarColorPicker = ({
 
   return (
     <ToolbarDropdown
+      label={label}
       title={
         variant !== "custom" ? (
           <span
@@ -196,11 +211,50 @@ const ToolbarInput = ({
   );
 };
 
+const Tooltip = ({
+  label,
+  children,
+}: {
+  label?: string;
+  children: ReactNode;
+}) => {
+  return (
+    <RadixTooltip.Root>
+      <RadixTooltip.Trigger asChild tabIndex={-1}>
+        {children}
+      </RadixTooltip.Trigger>
+      <RadixTooltip.Portal>
+        <RadixTooltip.Content
+          className="bg-black px-2 py-1 rounded-sm text-sm text-white"
+          sideOffset={10}
+          side="bottom"
+        >
+          {label}
+          <RadixTooltip.Arrow className="fill-black" />
+        </RadixTooltip.Content>
+      </RadixTooltip.Portal>
+    </RadixTooltip.Root>
+  );
+};
+
 const ToolbarSeparator = () => (
   <RadixToolbar.Separator className="ToolbarSeparator" />
 );
 
+const ToolbarButton = (props: ToolbarButtonProps) => {
+  const { className, children, ...restProps } = props;
+  return (
+    <RadixToolbar.Button
+      className={`cursor-pointer ${className}`}
+      {...restProps}
+    >
+      {children}
+    </RadixToolbar.Button>
+  );
+};
+
 export default Object.assign(Toolbar, {
+  Button: ToolbarButton,
   ToggleGroup: ToolbarToggleGroup,
   Select: ToolbarSelect,
   SelectItem: ToolbarSelectItem,
@@ -208,4 +262,5 @@ export default Object.assign(Toolbar, {
   ColorPicker: ToolbarColorPicker,
   Input: ToolbarInput,
   Separator: ToolbarSeparator,
+  Tooltip: Tooltip,
 });

@@ -1,5 +1,6 @@
 import { Slot, Menubar as RadixMenubar } from "radix-ui";
 import { ChangeEvent, memo, ReactNode } from "react";
+import { Tooltip as RadixTooltip } from "radix-ui";
 
 const commonStyle =
   "p-2 w-full aspect-square flex justify-center items-center active:bg-gray-200 hover:bg-gray-100 cursor-pointer";
@@ -38,17 +39,19 @@ const MenuItem = (props: MenuItemProps) => {
 
   return (
     <RadixMenubar.Menu>
-      <Component
-        className={`${commonStyle} ${active ? "bg-gray-200" : ""} ${
-          classNameFromProps ?? ""
-        }`}
-        {...restProps}
-        aria-label={label}
-        onClick={onClick}
-      >
-        {icon}
-        <Slot.Slottable>{children}</Slot.Slottable>
-      </Component>
+      <Tooltip label={label}>
+        <Component
+          className={`${commonStyle} ${active ? "bg-gray-200" : ""} ${
+            classNameFromProps ?? ""
+          }`}
+          {...restProps}
+          aria-label={label}
+          onClick={onClick}
+        >
+          {icon}
+          <Slot.Slottable>{children}</Slot.Slottable>
+        </Component>
+      </Tooltip>
     </RadixMenubar.Menu>
   );
 };
@@ -66,18 +69,20 @@ const MenuGroup = (props: MenuGroupProps) => {
   return (
     <RadixMenubar.Menu>
       <RadixMenubar.Group className="w-full">
-        <RadixMenubar.Trigger
-          aria-label={label}
-          onClick={onClick}
-          className={`${commonStyle} data-[state="open"]:bg-gray-200`}
-          {...restProps}
-        >
-          {icon}
-        </RadixMenubar.Trigger>
+        <Tooltip label={label}>
+          <RadixMenubar.Trigger
+            aria-label={label}
+            onClick={onClick}
+            className={`${commonStyle} data-[state="open"]:bg-gray-200`}
+            {...restProps}
+          >
+            {icon}
+          </RadixMenubar.Trigger>
+        </Tooltip>
         <RadixMenubar.Portal>
           <RadixMenubar.Content
             side="right"
-            sideOffset={10}
+            sideOffset={5}
             className={`min-w-[150px] rounded-lg bg-white flex flex-col gap-1 shadow-xl overflow-hidden ${
               className ?? ""
             }`}
@@ -121,6 +126,7 @@ interface MenuInputFileItemProps {
   value?: string | number;
   icon?: ReactNode;
   accept?: string;
+  label?: string;
   onValueChange?: (e: ChangeEvent<HTMLInputElement>) => void;
   [key: string]: unknown;
 }
@@ -131,23 +137,26 @@ const MenuInputFileItem = ({
   value,
   icon,
   accept,
+  label,
   onValueChange,
   ...restProps
 }: MenuInputFileItemProps) => {
   return (
     <RadixMenubar.Menu>
-      <label className={`${commonStyle} ${className}`}>
-        {icon}
-        <input
-          type="file"
-          id={id}
-          value={value}
-          accept={accept}
-          onChange={onValueChange}
-          className="hidden"
-          {...restProps}
-        />
-      </label>
+      <Tooltip label={label}>
+        <label className={`${commonStyle} ${className}`} aria-label={label}>
+          {icon}
+          <input
+            type="file"
+            id={id}
+            value={value}
+            accept={accept}
+            onChange={onValueChange}
+            className="hidden"
+            {...restProps}
+          />
+        </label>
+      </Tooltip>
     </RadixMenubar.Menu>
   );
 };
@@ -163,13 +172,39 @@ const MenubarBase = ({
       className ?? ""
     }`}
   >
-    {children}
+    <RadixTooltip.Provider>{children}</RadixTooltip.Provider>
   </RadixMenubar.Root>
 );
 
 const Separator = () => (
   <RadixMenubar.Separator className="w-full border-b border-gray-300" />
 );
+
+const Tooltip = ({
+  label,
+  children,
+}: {
+  label?: string;
+  children: ReactNode;
+}) => {
+  return (
+    <RadixTooltip.Root>
+      <RadixTooltip.Trigger asChild tabIndex={-1}>
+        {children}
+      </RadixTooltip.Trigger>
+      <RadixTooltip.Portal>
+        <RadixTooltip.Content
+          className="bg-black px-2 py-1 rounded-sm text-sm text-white"
+          sideOffset={5}
+          side="right"
+        >
+          {label}
+          <RadixTooltip.Arrow className="fill-black" />
+        </RadixTooltip.Content>
+      </RadixTooltip.Portal>
+    </RadixTooltip.Root>
+  );
+};
 
 export const Menubar = Object.assign(memo(MenubarBase), {
   Menu: Menu,
@@ -178,6 +213,7 @@ export const Menubar = Object.assign(memo(MenubarBase), {
   MenuGroup: MenuGroup,
   MenuGroupItem: MenuGroupItem,
   Separator: Separator,
+  Tooltip: Tooltip,
 });
 
 Menubar.displayName = "Menubar";

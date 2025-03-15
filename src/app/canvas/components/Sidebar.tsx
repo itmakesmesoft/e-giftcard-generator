@@ -19,12 +19,13 @@ import {
   TextIcon,
 } from "@radix-ui/react-icons";
 import QrIcon from "./ui/QrIcon";
-import { useControl } from "@/app/hooks";
+import { useControl, useSelect } from "@/app/hooks";
 
 const Sidebar = ({ className }: { className: string }) => {
   const { canvasInfo, setCanvasInfo } = useCanvasContext();
 
   const { action, setAction, getAttributes } = useControl();
+  const { clearSelectNodes } = useSelect();
 
   const redo = useShapeStore((state) => state.redo);
   const undo = useShapeStore((state) => state.undo);
@@ -38,6 +39,7 @@ const Sidebar = ({ className }: { className: string }) => {
     const format = convertBarcodeFormat(data.format);
     const newShape = generateShapeConfig({
       type: "barcode",
+      name: "shape",
       code: data.value,
       codeFormat: format,
       fill: getAttributes.fill,
@@ -70,12 +72,48 @@ const Sidebar = ({ className }: { className: string }) => {
 
       const newShape = generateShapeConfig({
         type: "image",
+        name: "shape",
         dataURL: file,
         isDrawing: false,
       });
       setShapes((shapes) => [...shapes, newShape]);
       setAction("select");
     });
+  };
+
+  const handleSetSelect = () => {
+    setAction("select");
+    clearSelectNodes();
+  };
+
+  const handleSetPencil = () => {
+    setAction("pencil");
+    clearSelectNodes();
+  };
+
+  const handleSetEraser = () => {
+    setAction("eraser");
+    clearSelectNodes();
+  };
+
+  const handleSetRectangle = () => {
+    setAction("rectangle");
+    clearSelectNodes();
+  };
+
+  const handleSetCircle = () => {
+    setAction("circle");
+    clearSelectNodes();
+  };
+
+  const handleSetArrow = () => {
+    setAction("arrow");
+    clearSelectNodes();
+  };
+
+  const handleSetText = () => {
+    setAction("text");
+    clearSelectNodes();
   };
 
   return (
@@ -87,22 +125,23 @@ const Sidebar = ({ className }: { className: string }) => {
         icon={
           <QrIcon width="30" height="30" className="group-hover:fill-white" />
         }
+        label="QR/바코드 추가"
       />
       <Menubar.Separator />
       <Menubar.MenuItem
-        onClick={() => setAction("select")}
+        onClick={handleSetSelect}
         label="커서"
         active={action === "select"}
         icon={<CursorArrowIcon width="18" height="18" />}
       />
       <Menubar.MenuItem
-        onClick={() => setAction("pencil")}
+        onClick={handleSetPencil}
         label="펜"
         active={action === "pencil"}
         icon={<Pencil1Icon width="18" height="18" />}
       />
       <Menubar.MenuItem
-        onClick={() => setAction("eraser")}
+        onClick={handleSetEraser}
         label="지우개"
         active={action === "eraser"}
         icon={<EraserIcon width="18" height="18" />}
@@ -110,30 +149,30 @@ const Sidebar = ({ className }: { className: string }) => {
       <Menubar.MenuGroup
         label="도형"
         className="text-black"
-        onClick={() => setAction("rectangle")}
+        onClick={handleSetRectangle}
         icon={<MixIcon width="18" height="18" />}
       >
         <Menubar.MenuGroupItem
-          onClick={() => setAction("rectangle")}
+          onClick={handleSetRectangle}
           icon={<SquareIcon width="16" height="16" />}
         >
           사각형
         </Menubar.MenuGroupItem>
         <Menubar.MenuGroupItem
-          onClick={() => setAction("circle")}
+          onClick={handleSetCircle}
           icon={<CircleIcon width="16" height="16" />}
         >
           원
         </Menubar.MenuGroupItem>
         <Menubar.MenuGroupItem
-          onClick={() => setAction("arrow")}
+          onClick={handleSetArrow}
           icon={<ArrowTopLeftIcon width="16" height="16" />}
         >
           화살표
         </Menubar.MenuGroupItem>
       </Menubar.MenuGroup>
       <Menubar.MenuItem
-        onClick={() => setAction("text")}
+        onClick={handleSetText}
         label="글자"
         active={action === "text"}
         icon={<TextIcon width="18" height="18" />}
@@ -142,6 +181,7 @@ const Sidebar = ({ className }: { className: string }) => {
         accept="image/*"
         onChange={handleAddImage}
         icon={<ImageIcon />}
+        label="이미지 추가"
       />
       <Menubar.MenuGroup
         label="Frame"

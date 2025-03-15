@@ -5,7 +5,7 @@ const SaveIcon = ({
 }: {
   width: string;
   height: string;
-  className: string;
+  className?: string;
 }) => (
   <svg
     fill="currentColor"

@@ -5,7 +5,7 @@ const MoveForwardIcon = ({
 }: {
   width: string;
   height: string;
-  className: string;
+  className?: string;
 }) => (
   <svg
     width={width}

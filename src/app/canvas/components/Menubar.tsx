@@ -18,9 +18,9 @@ import { useControl, useFonts, useSelect } from "@/app/hooks";
 import { RxTransparencyGrid } from "react-icons/rx";
 import Toolbar from "./ui/Toolbar";
 import { ColorResult } from "react-color";
-import Button from "./ui/Button";
 import MoveForwardIcon from "./ui/MoveForwardIcon";
 import MoveBackwardIcon from "./ui/MoveBackwardIcon";
+import DeleteIcon from "./ui/DeleteIcon";
 
 const fontStyleOptions = [
   {
@@ -247,6 +247,7 @@ const TextControlPanel = ({
         defaultValue={getAttributes.fontFamily}
         onValueChange={onFontFamilyChange}
         className="w-[150px] overflow-hidden"
+        label="폰트 선택"
         title={
           <>
             <Select.Value placeholder="Select a font" asChild>
@@ -254,7 +255,7 @@ const TextControlPanel = ({
                 {getAttributes.fontFamily}
               </span>
             </Select.Value>
-            <Select.Icon className="">
+            <Select.Icon>
               <ChevronDownIcon />
             </Select.Icon>
           </>
@@ -279,6 +280,7 @@ const TextControlPanel = ({
         onChange={onFontSizeChange}
       />
       <Toolbar.ColorPicker
+        label="텍스트 색상"
         color={getAttributes.fill}
         onValueChangeComplete={onFontColorChange}
         variant="custom"
@@ -292,13 +294,21 @@ const TextControlPanel = ({
           </span>
         )}
       />
-      <Button className="" onClick={onMoveToForward}>
-        <MoveForwardIcon width="20" height="20" className="" />
-      </Button>
-      <Button className="" onClick={onMoveToBackward}>
-        <MoveBackwardIcon width="20" height="20" className="" />
-      </Button>
-      <Button onClick={removeShapes}>removeShapes</Button>
+      <Toolbar.Tooltip label="앞으로 이동">
+        <Toolbar.Button onClick={onMoveToForward}>
+          <MoveForwardIcon width="20" height="20" />
+        </Toolbar.Button>
+      </Toolbar.Tooltip>
+      <Toolbar.Tooltip label="뒤로 이동">
+        <Toolbar.Button onClick={onMoveToBackward}>
+          <MoveBackwardIcon width="20" height="20" />
+        </Toolbar.Button>
+      </Toolbar.Tooltip>
+      <Toolbar.Tooltip label="삭제">
+        <Toolbar.Button onClick={removeShapes}>
+          <DeleteIcon width="17" height="17" />
+        </Toolbar.Button>
+      </Toolbar.Tooltip>
     </>
   );
 };
@@ -357,15 +367,18 @@ const ShapeControlPanel = ({
   return (
     <>
       <Toolbar.ColorPicker
+        label="채우기 색상"
         color={getAttributes.fill}
         onValueChangeComplete={onFillChange}
       />
       <Toolbar.ColorPicker
+        label="선 색상"
         variant="border"
         color={getAttributes.stroke}
         onValueChangeComplete={onStrokeChange}
       />
       <Toolbar.Dropdown
+        label="불투명도"
         title={
           <RxTransparencyGrid
             width="24"
@@ -393,6 +406,7 @@ const ShapeControlPanel = ({
         </Slider.Root>
       </Toolbar.Dropdown>
       <Toolbar.Dropdown
+        label="선 굵기"
         title={
           <span className="flex flex-row gap-0.5 items-center min-w-10">
             <StrokeWidthIcon
@@ -422,15 +436,21 @@ const ShapeControlPanel = ({
           />
         </Slider.Root>
       </Toolbar.Dropdown>
-      <Button className="" onClick={onMoveToForward}>
-        <MoveForwardIcon width="20" height="20" className="" />
-      </Button>
-      <Button className="" onClick={onMoveToBackward}>
-        <MoveBackwardIcon width="20" height="20" className="" />
-      </Button>
-      <Button className="" onClick={removeShapes}>
-        removeShapes
-      </Button>
+      <Toolbar.Tooltip label="앞으로 이동">
+        <Toolbar.Button onClick={onMoveToForward}>
+          <MoveForwardIcon width="20" height="20" />
+        </Toolbar.Button>
+      </Toolbar.Tooltip>
+      <Toolbar.Tooltip label="뒤로 이동">
+        <Toolbar.Button onClick={onMoveToBackward}>
+          <MoveBackwardIcon width="20" height="20" />
+        </Toolbar.Button>
+      </Toolbar.Tooltip>
+      <Toolbar.Tooltip label="삭제">
+        <Toolbar.Button onClick={removeShapes}>
+          <DeleteIcon width="17" height="17" />
+        </Toolbar.Button>
+      </Toolbar.Tooltip>
     </>
   );
 };
@@ -458,10 +478,12 @@ const BrushControlPanel = ({
   return (
     <>
       <Toolbar.ColorPicker
+        label="브러쉬 색상"
         color={getAttributes.stroke}
         onValueChangeComplete={onBrushColorChange}
       />
       <Toolbar.Dropdown
+        label="불투명도"
         title={
           <RxTransparencyGrid
             width="24"
@@ -521,6 +543,7 @@ const BrushRadiusControl = ({
 
   return (
     <Toolbar.Dropdown
+      label="브러쉬 굵기"
       title={
         <span className="flex flex-row gap-0.5 items-center">
           <span className="w-[25px] flex justify-center items-center">
