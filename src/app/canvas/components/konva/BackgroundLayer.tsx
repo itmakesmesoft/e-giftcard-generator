@@ -5,6 +5,8 @@ const BackgroundLayer = (props: {
   onPointerDown?: (e: Konva.KonvaEventObject<PointerEvent>) => void;
   width: number;
   height: number;
+  viewPortWidth: number;
+  viewPortHeight: number;
   [key: string]: unknown;
 }) => {
   const { onPointerDown, width, height, ...restProps } = props;

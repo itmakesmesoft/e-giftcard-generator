@@ -3,7 +3,7 @@ import { useControl, useSelect, useShapes } from "@/app/hooks";
 import Konva from "konva";
 import { Vector2d } from "konva/lib/types";
 import { ReactNode, useEffect, useRef } from "react";
-import { Group, Stage as KonvaStage, Layer, Transformer } from "react-konva";
+import { Stage as KonvaStage, Layer, Transformer } from "react-konva";
 import BackgroundLayer from "./BackgroundLayer";
 
 const Stage = ({ children }: { children: ReactNode }) => {
@@ -113,6 +113,8 @@ const Stage = ({ children }: { children: ReactNode }) => {
     setAction("select");
   };
 
+  // TODO. 이 부분 개선해야 함.
+  // 글고, canvas 크기를 변경하거나, frame 크기를 변경할 때, x,y 위치도 바뀌도록 해야함.
   const viewPortWidth = typeof window !== "undefined" ? window.innerWidth : 0;
   const viewPortHeight = typeof window !== "undefined" ? window.innerHeight : 0;
   useEffect(() => {
@@ -135,11 +137,11 @@ const Stage = ({ children }: { children: ReactNode }) => {
       <BackgroundLayer
         id="_bgLayer"
         onPointerDown={clearSelectNodes}
+        viewPortWidth={viewPortWidth}
+        viewPortHeight={viewPortHeight}
         {...canvasInfo}
       />
-      <Layer>
-        <Group clip={{ ...canvasInfo }}>{children}</Group>
-      </Layer>
+      {children}
       <Layer id="_selectLayer">
         <SelectionBox />
         <Transformer ref={transformerRef} />

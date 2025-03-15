@@ -2,14 +2,16 @@ import Barcode from "./Barcode";
 import CanvasImage from "./CanvasImage";
 import EditableText from "./EditableText";
 import { Vector2d } from "konva/lib/types";
-import { Arrow, Circle, Group, Line, Rect } from "react-konva";
+import { Arrow, Circle, Layer, Line, Rect } from "react-konva";
 import { useControlStore, useShapeStore } from "@/app/store/canvas";
 import { KonvaEventObject, NodeConfig, Node } from "konva/lib/Node";
+import { useCanvasContext } from "@/app/context/canvas";
 
 const Canvas = () => {
   const action = useControlStore((state) => state.action);
   const shapes = useShapeStore((state) => state.shapes);
   const setShapes = useShapeStore((state) => state.setShapes);
+  const { canvasInfo } = useCanvasContext();
 
   const onDragEnd = (e: KonvaEventObject<DragEvent, Node<NodeConfig>>) => {
     const position = e.target.getPosition() as Vector2d;
@@ -127,12 +129,14 @@ const Canvas = () => {
 
   return (
     <>
-      <Group id="_shapeLayer">
+      <Layer id="_shapeLayer" clip={{ ...canvasInfo }}>
         {shapesRenderer({
           isDraggable: action === "select",
         })}
-      </Group>
-      <Group id="_drawLayer">{drawingRenderer()}</Group>
+      </Layer>
+      <Layer id="_drawLayer" clip={{ ...canvasInfo }}>
+        {drawingRenderer()}
+      </Layer>
     </>
   );
 };
