@@ -61,7 +61,7 @@ const FloatingButtonGroup = ({ className }: { className?: string }) => {
       <Menubar.MenuItem label="불러오기" onClick={handleLoadCanvas}>
         <LoadIcon width="24" height="24" className="text-black" />
       </Menubar.MenuItem>
-      <Toast title="hihihihihi" />
+      <Toast />
     </Menubar>
   );
 };

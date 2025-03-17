@@ -13,8 +13,9 @@ import {
 } from "react";
 import { useShapeStore } from "../store/canvas";
 import { Group } from "konva/lib/Group";
-import { Shape, ShapeConfig } from "konva/lib/Shape";
+import { Shape } from "konva/lib/Shape";
 import { Vector2d } from "konva/lib/types";
+import { ShapeConfig } from "../types/canvas";
 
 export interface CanvasSize {
   width: number;
@@ -217,16 +218,15 @@ export const CanvasProvider = ({ children }: { children: ReactNode }) => {
   const loadCanvasByJSON = (data: CanvasData) => {
     if (!stageRef.current) return;
     const { width, height, children: childrenFromData } = data.canvas;
-    setCanvasSize({ width, height });
     if (!childrenFromData) return;
-    const children = childrenFromData?.map((child) => ({
-      ...child,
-      attrs: {
-        ...child.attrs,
-        ...convertToAbsolutePosition(child.attrs), // 절대 좌표로 변환
-      },
-    }));
-    setShapes(children.map(({ attrs }) => attrs));
+
+    const children = childrenFromData?.map(({ attrs }) => ({
+      ...attrs,
+      ...convertToAbsolutePosition(attrs), // 절대 좌표로 변환
+    })) as ShapeConfig[];
+
+    setCanvasSize({ width, height });
+    setShapes(children);
   };
 
   const exportCanvasAsJSON = () => {

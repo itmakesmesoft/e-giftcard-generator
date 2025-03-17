@@ -82,6 +82,7 @@ const Barcode = (props: BarcodeProps) => {
 
   return (
     <KonvaImage
+      {...restProps}
       name="shape"
       alt="barcode"
       code={code} // decode에 필요한 코드값
@@ -93,7 +94,6 @@ const Barcode = (props: BarcodeProps) => {
       {...imageSize}
       x={centerX}
       y={centerY}
-      {...restProps}
     />
   );
 };
