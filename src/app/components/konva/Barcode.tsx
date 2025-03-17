@@ -33,7 +33,7 @@ const Barcode = (props: BarcodeProps) => {
     ...restProps
   } = props;
 
-  const [image, setImage] = useState<HTMLImageElement>();
+  const [image, setImage] = useState<HTMLImageElement | null>(null);
   const [imageSize, setImageSize] = useState<ImageSize>({ width, height });
   const { canvasSize, canvasPos } = useCanvasContext();
   const [textColor, setTextColor] = useState<string>(textColorFromProps);
@@ -79,6 +79,8 @@ const Barcode = (props: BarcodeProps) => {
   const centerY = Math.floor(
     canvasPos.y + (canvasSize.height - (image?.height ?? 1)) / 2
   );
+
+  if (!image) return null;
 
   return (
     <KonvaImage
