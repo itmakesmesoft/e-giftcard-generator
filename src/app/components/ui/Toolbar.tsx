@@ -18,7 +18,7 @@ const Toolbar = ({
 }) => {
   return (
     <RadixToolbar.Root
-      className={`flex flex-row gap-4 bg-white px-4 py-2 rounded-xl border ${className}`}
+      className={`flex flex-row gap-4 bg-white px-4 py-2 rounded-xl ${className}`}
     >
       <RadixTooltip.Provider>{children}</RadixTooltip.Provider>
     </RadixToolbar.Root>

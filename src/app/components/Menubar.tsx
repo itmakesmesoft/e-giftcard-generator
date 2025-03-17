@@ -14,16 +14,15 @@ import {
   CheckIcon,
   TextIcon,
 } from "@radix-ui/react-icons";
-import { useControl, useFonts, useSelect } from "@/app/hooks";
-import { RxTransparencyGrid } from "react-icons/rx";
+import { nanoid } from "nanoid";
 import Toolbar from "./ui/Toolbar";
 import { ColorResult } from "react-color";
+import DeleteIcon from "./ui/DeleteIcon";
 import MoveForwardIcon from "./ui/MoveForwardIcon";
 import MoveBackwardIcon from "./ui/MoveBackwardIcon";
-import DeleteIcon from "./ui/DeleteIcon";
-import useDebounce from "../hooks/useDebounce";
+import { RxTransparencyGrid } from "react-icons/rx";
 import { useHotkeys } from "react-hotkeys-hook";
-import { nanoid } from "nanoid";
+import { useControl, useFonts, useSelect, useDebounce } from "@/app/hooks";
 
 const fontStyleOptions = [
   {
@@ -72,11 +71,13 @@ const getProperPanelType = (nodes: Konva.Node[]) => {
 
 const Menubar = ({ className }: { className: string }) => {
   const { clearSelectNodes } = useSelect();
-  const { selectedNodes, selectNodesByIdList, getAllSelectedNodes } =
-    useCanvasContext();
   const [panelType, setPanelType] = useState<PanelType>(null);
   const setShapes = useShapeStore((state) => state.setShapes);
   const action = useControlStore((state) => state.action);
+  const { selectedNodes, selectNodesByIdList, getAllSelectedNodes } =
+    useCanvasContext();
+
+  const clipboardRef = useRef<Konva.Node[]>(null);
 
   useEffect(() => {
     if (selectedNodes.length === 0) {
@@ -112,6 +113,28 @@ const Menubar = ({ className }: { className: string }) => {
     }
   }, [selectedNodes, action]);
 
+  const copySelectedShapes = () => {
+    if (!selectedNodes) return;
+    clipboardRef.current = selectedNodes;
+  };
+
+  const pasteCopiedShape = () => {
+    if (!clipboardRef.current) return;
+    const ids: string[] = [];
+    const copied = clipboardRef.current?.map(({ attrs }) => {
+      const id = nanoid();
+      ids.push(id);
+      return {
+        ...attrs,
+        id,
+        x: attrs.x + 10,
+        y: attrs.y + 10,
+      };
+    });
+    setShapes((shapes) => [...shapes, ...copied]);
+    selectNodesByIdList(ids);
+  };
+
   const updateSelectedShapeAttributes = (newAttrs: Konva.ShapeConfig) => {
     const ids = selectedNodes.map((node) => node.attrs.id);
     if (ids.length === 0) return;
@@ -135,41 +158,13 @@ const Menubar = ({ className }: { className: string }) => {
     clearSelectNodes();
   };
 
-  useHotkeys("delete", () => {
+  useHotkeys(["delete", "backspace"], () => {
     removeShapeOnCanvas();
   });
 
-  const clipboardRef = useRef<Konva.Node[]>(null);
+  useHotkeys("ctrl+c", copySelectedShapes, [selectedNodes]);
 
-  useHotkeys(
-    "ctrl+c",
-    () => {
-      if (!selectedNodes) return;
-      clipboardRef.current = selectedNodes;
-    },
-    [selectedNodes]
-  );
-
-  useHotkeys(
-    "ctrl+v",
-    () => {
-      if (!clipboardRef.current) return;
-      const ids: string[] = [];
-      const copied = clipboardRef.current?.map(({ attrs }) => {
-        const id = nanoid();
-        ids.push(id);
-        return {
-          ...attrs,
-          id,
-          x: attrs.x + 10,
-          y: attrs.y + 10,
-        };
-      });
-      setShapes((shapes) => [...shapes, ...copied]);
-      selectNodesByIdList(ids);
-    },
-    [selectedNodes]
-  );
+  useHotkeys("ctrl+v", pasteCopiedShape, [selectedNodes]);
 
   return (
     <div className={className}>

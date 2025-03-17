@@ -178,23 +178,23 @@ const MenuInputFileItem = ({
   );
 };
 const MenubarBase = ({
-  className,
+  className = "",
   children,
 }: {
-  className: string;
-  children: ReactNode;
+  className?: string;
+  children?: ReactNode;
 }) => (
   <RadixMenubar.Root
-    className={`rounded-2xl bg-white text-black overflow-hidden ${
-      className ?? ""
-    }`}
+    className={`rounded-2xl bg-white text-black overflow-hidden ${className}`}
   >
     <RadixTooltip.Provider>{children}</RadixTooltip.Provider>
   </RadixMenubar.Root>
 );
 
-const Separator = () => (
-  <RadixMenubar.Separator className="w-full border-b border-gray-300" />
+const Separator = ({ className = "" }: { className?: string }) => (
+  <RadixMenubar.Separator
+    className={`w-full border-b border-gray-300 ${className}`}
+  />
 );
 
 const Tooltip = ({

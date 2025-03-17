@@ -133,8 +133,10 @@ const Sidebar = ({ className }: { className: string }) => {
             <Image src="/example.png" width="300" height="300" alt="barcode" />
           </div>
           <p className="text-sm break-keep text-center">
-            <strong>QR 코드 또는 바코드가 포함된 사진</strong>을 선택하면
-            자동으로 캔버스에 추가됩니다.
+            <strong className="font-semibold">
+              QR 코드 또는 바코드가 포함된 사진
+            </strong>
+            을 선택하면 자동으로 캔버스에 추가됩니다.
           </p>
           <Menubar.MenuInputFileItem
             accept="image/*"
@@ -213,7 +215,7 @@ const Sidebar = ({ className }: { className: string }) => {
           />
         }
       >
-        <p>프레임 크기 조절</p>
+        <p className="text-sm font-semibold">프레임 크기 조절</p>
         <div className="grid grid-cols-2 gap-4 px-2 py-1">
           <DebounceInput
             value={canvasSize.width}

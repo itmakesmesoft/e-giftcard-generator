@@ -1,6 +1,6 @@
-import useDebounce from "@/app/hooks/useDebounce";
-import { useState, useEffect } from "react";
 import Input from "./Input";
+import { useState, useEffect } from "react";
+import useDebounce from "@/app/hooks/useDebounce";
 
 const DebounceInput = ({
   value,
