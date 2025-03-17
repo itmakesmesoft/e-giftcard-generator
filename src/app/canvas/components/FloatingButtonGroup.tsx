@@ -9,13 +9,14 @@ import LoadIcon from "./ui/LoadIcon";
 import { Tooltip as RadixTooltip } from "radix-ui";
 
 const FloatingButtonGroup = ({ className }: { className?: string }) => {
-  const { stageRef, canvasInfo } = useCanvasContext();
+  const { stageRef, canvasSize, canvasPos } = useCanvasContext();
   const setShapes = useShapeStore((state) => state.setShapes);
 
   const handleExportAsImage = () => {
     if (!stageRef.current) return;
     const uri = stageRef.current.toDataURL({
-      ...canvasInfo,
+      ...canvasSize,
+      ...canvasPos,
     });
     const link = document.createElement("a");
     link.download = "image.png";

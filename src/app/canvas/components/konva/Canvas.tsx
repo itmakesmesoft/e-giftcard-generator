@@ -11,7 +11,7 @@ const Canvas = () => {
   const action = useControlStore((state) => state.action);
   const shapes = useShapeStore((state) => state.shapes);
   const setShapes = useShapeStore((state) => state.setShapes);
-  const { canvasInfo } = useCanvasContext();
+  const { canvasSize, canvasPos } = useCanvasContext();
 
   const onDragEnd = (e: KonvaEventObject<DragEvent, Node<NodeConfig>>) => {
     const position = e.target.getPosition() as Vector2d;
@@ -129,12 +129,12 @@ const Canvas = () => {
 
   return (
     <>
-      <Layer id="_shapeLayer" clip={{ ...canvasInfo }}>
+      <Layer id="_shapeLayer" clip={{ ...canvasSize, ...canvasPos }}>
         {shapesRenderer({
           isDraggable: action === "select",
         })}
       </Layer>
-      <Layer id="_drawLayer" clip={{ ...canvasInfo }}>
+      <Layer id="_drawLayer" clip={{ ...canvasSize, ...canvasPos }}>
         {drawingRenderer()}
       </Layer>
     </>

@@ -7,9 +7,11 @@ const BackgroundLayer = (props: {
   height: number;
   viewPortWidth: number;
   viewPortHeight: number;
+  x: number;
+  y: number;
   [key: string]: unknown;
 }) => {
-  const { onPointerDown, width, height, ...restProps } = props;
+  const { onPointerDown, width, height, x, y, ...restProps } = props;
   return (
     <Layer {...restProps}>
       <Rect
@@ -18,7 +20,8 @@ const BackgroundLayer = (props: {
         width={width}
         height={height}
         onPointerDown={onPointerDown}
-        // {...restProps}
+        x={x}
+        y={y}
       />
     </Layer>
   );
