@@ -1,6 +1,6 @@
 import Konva from "konva";
 import StrokeWidthIcon from "./ui/StrokeWidthIcon";
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { useCanvasContext } from "@/app/context/canvas";
 import { TextAlign, useControlStore, useShapeStore } from "@/app/store/canvas";
 import { Select, Slider } from "radix-ui";
@@ -22,6 +22,8 @@ import MoveForwardIcon from "./ui/MoveForwardIcon";
 import MoveBackwardIcon from "./ui/MoveBackwardIcon";
 import DeleteIcon from "./ui/DeleteIcon";
 import useDebounce from "../hooks/useDebounce";
+import { useHotkeys } from "react-hotkeys-hook";
+import { nanoid } from "nanoid";
 
 const fontStyleOptions = [
   {
@@ -70,7 +72,8 @@ const getProperPanelType = (nodes: Konva.Node[]) => {
 
 const Menubar = ({ className }: { className: string }) => {
   const { clearSelectNodes } = useSelect();
-  const { selectedNodes } = useCanvasContext();
+  const { selectedNodes, selectNodesByIdList, getAllSelectedNodes } =
+    useCanvasContext();
   const [panelType, setPanelType] = useState<PanelType>(null);
   const setShapes = useShapeStore((state) => state.setShapes);
   const action = useControlStore((state) => state.action);
@@ -122,13 +125,51 @@ const Menubar = ({ className }: { className: string }) => {
       })
     );
   };
-  const removeShapeOnCanvas = (ids: string[]) => {
+  const removeShapeOnCanvas = () => {
+    const nodes = getAllSelectedNodes();
+    const ids = nodes.map((node) => node.attrs.id) as string[];
     if (ids.length === 0) return;
     setShapes((shapes) =>
       shapes.filter((shape) => shape.id && !ids.includes(shape.id))
     );
     clearSelectNodes();
   };
+
+  useHotkeys("delete", () => {
+    removeShapeOnCanvas();
+  });
+
+  const clipboardRef = useRef<Konva.Node[]>(null);
+
+  useHotkeys(
+    "ctrl+c",
+    () => {
+      if (!selectedNodes) return;
+      clipboardRef.current = selectedNodes;
+    },
+    [selectedNodes]
+  );
+
+  useHotkeys(
+    "ctrl+v",
+    () => {
+      if (!clipboardRef.current) return;
+      const ids: string[] = [];
+      const copied = clipboardRef.current?.map(({ attrs }) => {
+        const id = nanoid();
+        ids.push(id);
+        return {
+          ...attrs,
+          id,
+          x: attrs.x + 10,
+          y: attrs.y + 10,
+        };
+      });
+      setShapes((shapes) => [...shapes, ...copied]);
+      selectNodesByIdList(ids);
+    },
+    [selectedNodes]
+  );
 
   return (
     <div className={className}>
@@ -158,7 +199,7 @@ const Menubar = ({ className }: { className: string }) => {
 };
 interface ControlPanelProps {
   updateSelectedShapeAttributes: (newAttrs: Konva.ShapeConfig) => void;
-  removeShapeOnCanvas?: (ids: string[]) => void;
+  removeShapeOnCanvas?: () => void;
 }
 
 const TextControlPanel = ({
@@ -168,8 +209,7 @@ const TextControlPanel = ({
   const { moveToForward, moveToBackward } = useShapeStore();
   const { getAttributes, setAttributes } = useControl();
   const { fontList, loadFontFamily, fontDict } = useFonts();
-  const { selectedNodes, selectNodesByIdList, getAllSelectedNodes } =
-    useCanvasContext();
+  const { selectedNodes, selectNodesByIdList } = useCanvasContext();
 
   const onFontStylesChange = (values: string[]) => {
     const fontStyle = values.includes("italic") ? "italic" : "normal";
@@ -219,14 +259,6 @@ const TextControlPanel = ({
     const selectedIds = selectedNodes.map((node) => node.attrs.id);
     for (const id of selectedIds) moveToBackward(id);
     selectNodesByIdList(selectedIds);
-  };
-
-  const removeShapes = () => {
-    if (!removeShapeOnCanvas) return;
-
-    const nodes = getAllSelectedNodes();
-    const ids = nodes.map((node) => node.attrs.id) as string[];
-    if (ids.length > 0) removeShapeOnCanvas(ids);
   };
 
   return (
@@ -306,7 +338,7 @@ const TextControlPanel = ({
         </Toolbar.Button>
       </Toolbar.Tooltip>
       <Toolbar.Tooltip label="삭제">
-        <Toolbar.Button onClick={removeShapes}>
+        <Toolbar.Button onClick={removeShapeOnCanvas}>
           <DeleteIcon width="17" height="17" />
         </Toolbar.Button>
       </Toolbar.Tooltip>
@@ -319,8 +351,7 @@ const ShapeControlPanel = ({
   removeShapeOnCanvas,
 }: ControlPanelProps) => {
   const { getAttributes, setAttributes } = useControl();
-  const { selectedNodes, selectNodesByIdList, getAllSelectedNodes } =
-    useCanvasContext();
+  const { selectedNodes, selectNodesByIdList } = useCanvasContext();
   const { moveToForward, moveToBackward } = useShapeStore();
 
   const onFillChange = (value: ColorResult) => {
@@ -355,14 +386,6 @@ const ShapeControlPanel = ({
     const selectedIds = selectedNodes.map((node) => node.attrs.id);
     for (const id of selectedIds) moveToBackward(id);
     selectNodesByIdList(selectedIds);
-  };
-
-  const removeShapes = () => {
-    if (!removeShapeOnCanvas) return;
-
-    const nodes = getAllSelectedNodes();
-    const ids = nodes.map((node) => node.attrs.id) as string[];
-    if (ids.length > 0) removeShapeOnCanvas(ids);
   };
 
   return (
@@ -448,7 +471,7 @@ const ShapeControlPanel = ({
         </Toolbar.Button>
       </Toolbar.Tooltip>
       <Toolbar.Tooltip label="삭제">
-        <Toolbar.Button onClick={removeShapes}>
+        <Toolbar.Button onClick={removeShapeOnCanvas}>
           <DeleteIcon width="17" height="17" />
         </Toolbar.Button>
       </Toolbar.Tooltip>

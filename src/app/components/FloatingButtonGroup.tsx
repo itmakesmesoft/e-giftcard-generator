@@ -5,6 +5,7 @@ import { ReactNode } from "react";
 import SaveIcon from "./ui/SaveIcon";
 import LoadIcon from "./ui/LoadIcon";
 import { Tooltip as RadixTooltip } from "radix-ui";
+import { useHotkeys } from "react-hotkeys-hook";
 
 const FloatingButtonGroup = ({ className }: { className?: string }) => {
   const {
@@ -35,28 +36,16 @@ const FloatingButtonGroup = ({ className }: { className?: string }) => {
     saveToLocalStorage(key, exportedData);
   };
 
-  // const exportCanvasAsJSON = () => {
-  //   if (!stageRef.current) return;
-  //   const children = stageRef.current.getChildren();
-  //   const extractIds = ["_shapeLayer", "_drawLayer"];
-
-  //   const json = children
-  //     .filter((layer) => extractIds.includes(layer.attrs.id))
-  //     .map((layer) => layer.children)
-  //     .flat();
-  //   return json;
-  // };
-
   const handleLoadCanvas = async () => {
     const key = "autoSaved";
     const loadedData = await loadFromLocalStorage(key);
     loadCanvasByJSON(loadedData);
   };
 
-  // const loadCanvasByJSON = (data: Konva.Layer[]) => {
-  //   if (!stageRef.current) return;
-  //   setShapes(data.map(({ attrs }) => attrs));
-  // };
+  useHotkeys("ctrl+s", (e) => {
+    handleSaveCanvas();
+    e.preventDefault();
+  });
 
   return (
     <RadixTooltip.Provider>

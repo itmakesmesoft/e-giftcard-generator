@@ -9,9 +9,17 @@ import {
 import { Color, ColorResult, SketchPicker } from "react-color";
 import { Tooltip as RadixTooltip } from "radix-ui";
 
-const Toolbar = ({ children }: { children: ReactNode }) => {
+const Toolbar = ({
+  className = "",
+  children,
+}: {
+  className?: string;
+  children: ReactNode;
+}) => {
   return (
-    <RadixToolbar.Root className="flex flex-row gap-4 bg-white px-4 py-2 rounded-xl border">
+    <RadixToolbar.Root
+      className={`flex flex-row gap-4 bg-white px-4 py-2 rounded-xl border ${className}`}
+    >
       <RadixTooltip.Provider>{children}</RadixTooltip.Provider>
     </RadixToolbar.Root>
   );
