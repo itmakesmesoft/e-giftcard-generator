@@ -8,6 +8,7 @@ interface CanvasImageProps extends Omit<Konva.ImageConfig, "image"> {
 }
 
 const CanvasImage = (props: CanvasImageProps) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { dataURL, image: _, ...restProps } = props;
   const [image, setImage] = useState<HTMLImageElement | null>(null);
   const { canvasSize, canvasPos } = useCanvasContext();
