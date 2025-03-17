@@ -30,6 +30,7 @@ const Barcode = (props: BarcodeProps) => {
     barColor: barColorFromProps, // 불러온 객체 내부에 barColor가 존재하는 경우를 대비
     width = 100,
     height = 100,
+    image: _,
     ...restProps
   } = props;
 
@@ -84,7 +85,6 @@ const Barcode = (props: BarcodeProps) => {
 
   return (
     <KonvaImage
-      {...restProps}
       name="shape"
       alt="barcode"
       code={code} // decode에 필요한 코드값
@@ -96,6 +96,7 @@ const Barcode = (props: BarcodeProps) => {
       {...imageSize}
       x={centerX}
       y={centerY}
+      {...restProps}
     />
   );
 };
