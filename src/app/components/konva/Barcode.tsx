@@ -20,8 +20,7 @@ interface GetDataURLProps {
 }
 
 const Barcode = (props: BarcodeProps) => {
-  // JSON으로 export시 stage의 Shape를 기준으로 하므로,
-  // Shape 객체에 fill과 stroke가 들어가지 않도록 구조분해 해야함
+  // JSON으로 export시 stage의 Shape를 기준으로 하므로, Shape 객체에 fill과 stroke가 들어가지 않도록 구조분해 해야함
   const {
     codeFormat,
     code,
@@ -36,7 +35,7 @@ const Barcode = (props: BarcodeProps) => {
 
   const [image, setImage] = useState<HTMLImageElement>();
   const [imageSize, setImageSize] = useState<ImageSize>({ width, height });
-  const { canvasSize } = useCanvasContext();
+  const { canvasSize, canvasPos } = useCanvasContext();
   const [textColor, setTextColor] = useState<string>(textColorFromProps);
   const [barColor, setBarColor] = useState<string>(barColorFromProps);
   // props에 textColor와 barColor가 존재할 경우, 해당 값으로 초기화
@@ -74,8 +73,12 @@ const Barcode = (props: BarcodeProps) => {
     // 이후 Control을 통해 조작 시, 객체 내부로 fill과 stroke가 들어오게 됨.
   }, [stroke, fill]);
 
-  const centerX = Math.floor((canvasSize.width - (image?.width ?? 1)) / 2);
-  const centerY = Math.floor((canvasSize.height - (image?.height ?? 1)) / 2);
+  const centerX = Math.floor(
+    canvasPos.x + (canvasSize.width - (image?.width ?? 1)) / 2
+  );
+  const centerY = Math.floor(
+    canvasPos.y + (canvasSize.height - (image?.height ?? 1)) / 2
+  );
 
   return (
     <KonvaImage

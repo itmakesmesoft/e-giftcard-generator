@@ -22,64 +22,13 @@ import QrIcon from "./ui/QrIcon";
 import { useControl, useSelect } from "@/app/hooks";
 
 const Sidebar = ({ className }: { className: string }) => {
-  const { canvasSize, setCanvasSize } = useCanvasContext();
-
-  const { action, setAction, getAttributes } = useControl();
   const { clearSelectNodes } = useSelect();
+  const { canvasSize, setCanvasSize } = useCanvasContext();
+  const { action, setAction, getAttributes } = useControl();
 
   const redo = useShapeStore((state) => state.redo);
   const undo = useShapeStore((state) => state.undo);
   const setShapes = useShapeStore((state) => state.setShapes);
-
-  const decodeFromImage = async (image: string | ArrayBuffer | null) => {
-    if (!image) return;
-    const data = await readCodeByImage(image as string);
-    if (!data) return;
-
-    const format = convertBarcodeFormat(data.format);
-    const newShape = generateShapeConfig({
-      type: "barcode",
-      name: "shape",
-      code: data.value,
-      codeFormat: format,
-      fill: getAttributes.fill,
-      stroke: getAttributes.stroke,
-    });
-    setShapes((shapes) => [...shapes, newShape]);
-  };
-  const loadFileFromLocal = (
-    e: ChangeEvent<HTMLInputElement>,
-    callback: (result: string | null) => unknown
-  ) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => callback(reader.result as string | null);
-  };
-
-  const handleAddBarcode = (e: ChangeEvent<HTMLInputElement>) => {
-    loadFileFromLocal(e, (file) => {
-      if (file) decodeFromImage(file);
-      setAction("select");
-    });
-  };
-
-  const handleAddImage = (e: ChangeEvent<HTMLInputElement>) => {
-    loadFileFromLocal(e, (file) => {
-      if (!file) return;
-
-      const newShape = generateShapeConfig({
-        type: "image",
-        name: "shape",
-        dataURL: file,
-        isDrawing: false,
-      });
-      setShapes((shapes) => [...shapes, newShape]);
-      setAction("select");
-    });
-  };
 
   const handleSetSelect = () => {
     setAction("select");
@@ -114,6 +63,57 @@ const Sidebar = ({ className }: { className: string }) => {
   const handleSetText = () => {
     setAction("text");
     clearSelectNodes();
+  };
+
+  const handleAddBarcode = (e: ChangeEvent<HTMLInputElement>) => {
+    loadFileFromLocal(e, (file) => {
+      if (file) decodeFromImage(file);
+      setAction("select");
+    });
+  };
+
+  const handleAddImage = (e: ChangeEvent<HTMLInputElement>) => {
+    loadFileFromLocal(e, (file) => {
+      if (!file) return;
+
+      const newShape = generateShapeConfig({
+        type: "image",
+        name: "shape",
+        dataURL: file,
+        isDrawing: false,
+      });
+      setShapes((shapes) => [...shapes, newShape]);
+      setAction("select");
+    });
+  };
+
+  const loadFileFromLocal = (
+    e: ChangeEvent<HTMLInputElement>,
+    callback: (result: string | null) => unknown
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => callback(reader.result as string | null);
+  };
+
+  const decodeFromImage = async (image: string | ArrayBuffer | null) => {
+    if (!image) return;
+    const data = await readCodeByImage(image as string);
+    if (!data) return;
+
+    const format = convertBarcodeFormat(data.format);
+    const newShape = generateShapeConfig({
+      type: "barcode",
+      name: "shape",
+      code: data.value,
+      codeFormat: format,
+      fill: getAttributes.fill,
+      stroke: getAttributes.stroke,
+    });
+    setShapes((shapes) => [...shapes, newShape]);
   };
 
   return (

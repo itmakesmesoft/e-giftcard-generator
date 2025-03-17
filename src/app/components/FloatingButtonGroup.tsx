@@ -1,16 +1,19 @@
 import { useCanvasContext } from "@/app/context/canvas";
-import { useShapeStore } from "@/app/store/canvas";
 import { loadFromLocalStorage, saveToLocalStorage } from "@/utils";
 import { DownloadIcon } from "@radix-ui/react-icons";
-import Konva from "konva";
 import { ReactNode } from "react";
 import SaveIcon from "./ui/SaveIcon";
 import LoadIcon from "./ui/LoadIcon";
 import { Tooltip as RadixTooltip } from "radix-ui";
 
 const FloatingButtonGroup = ({ className }: { className?: string }) => {
-  const { stageRef, canvasSize, canvasPos } = useCanvasContext();
-  const setShapes = useShapeStore((state) => state.setShapes);
+  const {
+    stageRef,
+    canvasSize,
+    canvasPos,
+    exportCanvasAsJSON,
+    loadCanvasByJSON,
+  } = useCanvasContext();
 
   const handleExportAsImage = () => {
     if (!stageRef.current) return;
@@ -32,17 +35,17 @@ const FloatingButtonGroup = ({ className }: { className?: string }) => {
     saveToLocalStorage(key, exportedData);
   };
 
-  const exportCanvasAsJSON = () => {
-    if (!stageRef.current) return;
-    const children = stageRef.current.getChildren();
-    const extractIds = ["_shapeLayer", "_drawLayer"];
+  // const exportCanvasAsJSON = () => {
+  //   if (!stageRef.current) return;
+  //   const children = stageRef.current.getChildren();
+  //   const extractIds = ["_shapeLayer", "_drawLayer"];
 
-    const json = children
-      .filter((layer) => extractIds.includes(layer.attrs.id))
-      .map((layer) => layer.children)
-      .flat();
-    return json;
-  };
+  //   const json = children
+  //     .filter((layer) => extractIds.includes(layer.attrs.id))
+  //     .map((layer) => layer.children)
+  //     .flat();
+  //   return json;
+  // };
 
   const handleLoadCanvas = async () => {
     const key = "autoSaved";
@@ -50,10 +53,10 @@ const FloatingButtonGroup = ({ className }: { className?: string }) => {
     loadCanvasByJSON(loadedData);
   };
 
-  const loadCanvasByJSON = (data: Konva.Layer[]) => {
-    if (!stageRef.current) return;
-    setShapes(data.map(({ attrs }) => attrs));
-  };
+  // const loadCanvasByJSON = (data: Konva.Layer[]) => {
+  //   if (!stageRef.current) return;
+  //   setShapes(data.map(({ attrs }) => attrs));
+  // };
 
   return (
     <RadixTooltip.Provider>
