@@ -156,9 +156,7 @@ export const CanvasProvider = ({ children }: { children: ReactNode }) => {
     };
     window.addEventListener("resize", resize);
 
-    return () => {
-      window.removeEventListener("resize", resize);
-    };
+    return () => window.removeEventListener("resize", resize);
   }, []);
 
   const canvasPosRef = useRef<Vector2d>(null);
@@ -219,15 +217,16 @@ export const CanvasProvider = ({ children }: { children: ReactNode }) => {
 
   const loadCanvasByJSON = (data: CanvasData) => {
     if (!stageRef.current) return;
-
-    const children = data.canvas.children?.map((child) => ({
+    const { width, height, children: childrenFromData } = data.canvas;
+    setCanvasSize({ width, height });
+    if (!childrenFromData) return;
+    const children = childrenFromData?.map((child) => ({
       ...child,
       attrs: {
         ...child.attrs,
         ...convertToAbsolutePosition(child.attrs), // 절대 좌표로 변환
       },
     }));
-    if (!children) return;
     setShapes(children.map(({ attrs }) => attrs));
   };
 

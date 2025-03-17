@@ -223,16 +223,18 @@ const Tooltip = ({
       <RadixTooltip.Trigger asChild tabIndex={-1}>
         {children}
       </RadixTooltip.Trigger>
-      <RadixTooltip.Portal>
-        <RadixTooltip.Content
-          className="bg-black px-2 py-1 rounded-sm text-sm text-white"
-          sideOffset={10}
-          side="bottom"
-        >
-          {label}
-          <RadixTooltip.Arrow className="fill-black" />
-        </RadixTooltip.Content>
-      </RadixTooltip.Portal>
+      {label && (
+        <RadixTooltip.Portal>
+          <RadixTooltip.Content
+            className="bg-black px-2 py-1 rounded-sm text-sm text-white"
+            sideOffset={10}
+            side="bottom"
+          >
+            {label}
+            <RadixTooltip.Arrow className="fill-black" />
+          </RadixTooltip.Content>
+        </RadixTooltip.Portal>
+      )}
     </RadixTooltip.Root>
   );
 };

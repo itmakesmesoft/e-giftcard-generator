@@ -1,6 +1,6 @@
 import Konva from "konva";
 import StrokeWidthIcon from "./ui/StrokeWidthIcon";
-import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { useCanvasContext } from "@/app/context/canvas";
 import { TextAlign, useControlStore, useShapeStore } from "@/app/store/canvas";
 import { Select, Slider } from "radix-ui";
@@ -21,6 +21,7 @@ import { ColorResult } from "react-color";
 import MoveForwardIcon from "./ui/MoveForwardIcon";
 import MoveBackwardIcon from "./ui/MoveBackwardIcon";
 import DeleteIcon from "./ui/DeleteIcon";
+import useDebounce from "../hooks/useDebounce";
 
 const fontStyleOptions = [
   {
@@ -436,12 +437,12 @@ const ShapeControlPanel = ({
           />
         </Slider.Root>
       </Toolbar.Dropdown>
-      <Toolbar.Tooltip label="앞으로 이동">
+      <Toolbar.Tooltip label="맨 앞으로 이동">
         <Toolbar.Button onClick={onMoveToForward}>
           <MoveForwardIcon width="20" height="20" />
         </Toolbar.Button>
       </Toolbar.Tooltip>
-      <Toolbar.Tooltip label="뒤로 이동">
+      <Toolbar.Tooltip label="맨 뒤로 이동">
         <Toolbar.Button onClick={onMoveToBackward}>
           <MoveBackwardIcon width="20" height="20" />
         </Toolbar.Button>
@@ -528,18 +529,13 @@ const BrushRadiusControl = ({
   onValueChange: (value: number) => void;
 }) => {
   const [brushRadius, setBrushRadius] = useState<number>(value);
+  const debounced = useDebounce(brushRadius, 300);
+
   const radius = 0.16 * Math.max(brushRadius, 1) + 4;
 
-  // TODO. debounce 별도의 훅으로 분리하기
-  const debounceRef = useRef<NodeJS.Timeout>(null);
   useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-
-    debounceRef.current = setTimeout(() => {
-      onValueChange(brushRadius);
-      debounceRef.current = null;
-    }, 100);
-  }, [brushRadius, onValueChange]);
+    onValueChange(debounced);
+  }, [debounced, onValueChange]);
 
   return (
     <Toolbar.Dropdown
@@ -563,7 +559,7 @@ const BrushRadiusControl = ({
         max={100}
         min={1}
         value={[brushRadius]}
-        onValueChange={(value) => setBrushRadius(value[0])}
+        onValueChange={(v) => setBrushRadius(v[0])}
         step={1}
       >
         <Slider.Track className="bg-black relative grow-1 h-1">

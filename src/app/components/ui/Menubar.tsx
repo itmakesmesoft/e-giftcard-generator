@@ -57,15 +57,15 @@ const MenuItem = (props: MenuItemProps) => {
 };
 
 interface MenuGroupProps {
-  icon?: ReactNode;
   label?: string;
   id?: string;
   className?: string;
-  children?: ReactNode;
+  trigger: ReactNode;
+  children: ReactNode;
   onClick?: () => void;
 }
 const MenuGroup = (props: MenuGroupProps) => {
-  const { icon, label, className, children, onClick, ...restProps } = props;
+  const { label, className, trigger, children, onClick, ...restProps } = props;
   return (
     <RadixMenubar.Menu>
       <RadixMenubar.Group className="w-full">
@@ -73,10 +73,10 @@ const MenuGroup = (props: MenuGroupProps) => {
           <RadixMenubar.Trigger
             aria-label={label}
             onClick={onClick}
-            className={`${commonStyle} data-[state="open"]:bg-gray-200`}
             {...restProps}
+            asChild
           >
-            {icon}
+            {trigger}
           </RadixMenubar.Trigger>
         </Tooltip>
         <RadixMenubar.Portal>
@@ -92,6 +92,23 @@ const MenuGroup = (props: MenuGroupProps) => {
         </RadixMenubar.Portal>
       </RadixMenubar.Group>
     </RadixMenubar.Menu>
+  );
+};
+
+interface MenuGroupTriggerProps {
+  id?: string;
+  className?: string;
+  icon?: ReactNode;
+}
+const MenuGroupTrigger = (props: MenuGroupTriggerProps) => {
+  const { icon, ...restProps } = props;
+  return (
+    <div
+      className={`${commonStyle} data-[state="open"]:bg-gray-200`}
+      {...restProps}
+    >
+      {icon}
+    </div>
   );
 };
 
@@ -124,7 +141,7 @@ interface MenuInputFileItemProps {
   id?: string;
   className?: string;
   value?: string | number;
-  icon?: ReactNode;
+  children?: ReactNode;
   accept?: string;
   label?: string;
   onValueChange?: (e: ChangeEvent<HTMLInputElement>) => void;
@@ -135,7 +152,7 @@ const MenuInputFileItem = ({
   id,
   className,
   value,
-  icon,
+  children,
   accept,
   label,
   onValueChange,
@@ -145,7 +162,7 @@ const MenuInputFileItem = ({
     <RadixMenubar.Menu>
       <Tooltip label={label}>
         <label className={`${commonStyle} ${className}`} aria-label={label}>
-          {icon}
+          {children}
           <input
             type="file"
             id={id}
@@ -192,16 +209,18 @@ const Tooltip = ({
       <RadixTooltip.Trigger asChild tabIndex={-1}>
         {children}
       </RadixTooltip.Trigger>
-      <RadixTooltip.Portal>
-        <RadixTooltip.Content
-          className="bg-black px-2 py-1 rounded-sm text-sm text-white"
-          sideOffset={5}
-          side="right"
-        >
-          {label}
-          <RadixTooltip.Arrow className="fill-black" />
-        </RadixTooltip.Content>
-      </RadixTooltip.Portal>
+      {label && (
+        <RadixTooltip.Portal>
+          <RadixTooltip.Content
+            className="bg-black px-2 py-1 rounded-sm text-sm text-white"
+            sideOffset={5}
+            side="right"
+          >
+            {label}
+            <RadixTooltip.Arrow className="fill-black" />
+          </RadixTooltip.Content>
+        </RadixTooltip.Portal>
+      )}
     </RadixTooltip.Root>
   );
 };
@@ -211,6 +230,7 @@ export const Menubar = Object.assign(memo(MenubarBase), {
   MenuItem: MenuItem,
   MenuInputFileItem: MenuInputFileItem,
   MenuGroup: MenuGroup,
+  MenuGroupTrigger: MenuGroupTrigger,
   MenuGroupItem: MenuGroupItem,
   Separator: Separator,
   Tooltip: Tooltip,

@@ -28,11 +28,14 @@ const useShapes = () => {
     transformerRef.current.on("transformend", onTransform);
   }, [onTransform, transformerRef]);
 
-  const createShape = <T extends ShapeConfig>(shapeConfig: T) => {
-    const shape = generateShapeConfig(shapeConfig);
-    setShapes((shapes) => [...shapes, shape]);
-    return shape;
-  };
+  const createShape = useCallback(
+    <T extends ShapeConfig>(shapeConfig: T) => {
+      const shape = generateShapeConfig(shapeConfig);
+      setShapes((shapes) => [...shapes, shape]);
+      return shape;
+    },
+    [setShapes]
+  );
 
   const updateShape = useCallback(
     (callback: (shape: ShapeConfig) => ShapeConfig) => {
@@ -41,37 +44,41 @@ const useShapes = () => {
     [setShapes]
   );
 
-  const startShapeCreation = <T extends Konva.ShapeConfig>(shapeConfig: T) => {
-    const shape = generateShapeConfig(shapeConfig);
-    setShapes((shapes) => [...shapes, shape], false);
-    currentShapeRef.current = shape;
-    return shape;
-  };
+  const startShapeCreation = useCallback(
+    <T extends Konva.ShapeConfig>(shapeConfig: T) => {
+      const shape = generateShapeConfig(shapeConfig);
+      setShapes((shapes) => [...shapes, shape], false);
+      currentShapeRef.current = shape;
+      return shape;
+    },
+    [setShapes]
+  );
 
-  const updateShapeCreation = (
-    callback: (shape: Konva.ShapeConfig) => Konva.ShapeConfig
-  ) => {
-    const currentId = currentShapeRef.current?.id;
-    if (!currentId || !currentShapeRef.current) return;
+  const updateShapeCreation = useCallback(
+    (callback: (shape: Konva.ShapeConfig) => Konva.ShapeConfig) => {
+      const currentId = currentShapeRef.current?.id;
+      if (!currentId || !currentShapeRef.current) return;
 
-    const updated = callback(currentShapeRef.current);
-    const newShape = { ...updated, isDrawing: true };
-    currentShapeRef.current = newShape;
-    setShapes(
-      (shapes) =>
-        shapes.map((shape) => (shape.id === currentId ? newShape : shape)),
-      false
-    );
-  };
+      const updated = callback(currentShapeRef.current);
+      const newShape = { ...updated, isDrawing: true };
+      currentShapeRef.current = newShape;
+      setShapes(
+        (shapes) =>
+          shapes.map((shape) => (shape.id === currentId ? newShape : shape)),
+        false
+      );
+    },
+    [setShapes]
+  );
 
-  const completeShapeCreation = () => {
+  const completeShapeCreation = useCallback(() => {
     setShapes((shapes) =>
       shapes.map((shape) => ({ ...shape, isDrawing: false }))
     );
-    const id = currentShapeRef.current?.id;
+    const id = currentShapeRef.current?.id as string;
     currentShapeRef.current = null;
-    return id as string;
-  };
+    return id;
+  }, [setShapes]);
 
   return {
     createShape,

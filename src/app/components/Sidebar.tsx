@@ -4,7 +4,6 @@ import { readCodeByImage, convertBarcodeFormat } from "@/utils";
 import { useCanvasContext } from "@/app/context/canvas";
 import { ChangeEvent } from "react";
 import { generateShapeConfig } from "@/utils/canvas";
-import Input from "./ui/Input";
 import {
   ArrowTopLeftIcon,
   CircleIcon,
@@ -20,6 +19,8 @@ import {
 } from "@radix-ui/react-icons";
 import QrIcon from "./ui/QrIcon";
 import { useControl, useSelect } from "@/app/hooks";
+import Image from "next/image";
+import DebounceInput from "./ui/DebounceInput";
 
 const Sidebar = ({ className }: { className: string }) => {
   const { clearSelectNodes } = useSelect();
@@ -118,15 +119,32 @@ const Sidebar = ({ className }: { className: string }) => {
 
   return (
     <Menubar className={`flex flex-col items-center ${className}`}>
-      <Menubar.MenuInputFileItem
-        accept="image/*"
-        onValueChange={handleAddBarcode}
-        className="pt-4 group hover:bg-blue-400! active:bg-blue-500!"
-        icon={
-          <QrIcon width="30" height="30" className="group-hover:fill-white" />
-        }
+      <Menubar.MenuGroup
+        className="p-4 text-center w-[300px]"
         label="QR/바코드 추가"
-      />
+        trigger={
+          <div className="group p-2 pt-4 hover:bg-blue-500 cursor-pointer">
+            <QrIcon width="30" height="30" className="group-hover:fill-white" />
+          </div>
+        }
+      >
+        <div className="flex flex-col items-center gap-3">
+          <div className="rounded-sm overflow-hidden">
+            <Image src="/example.png" width="300" height="300" alt="barcode" />
+          </div>
+          <p className="text-sm break-keep text-center">
+            <strong>QR 코드 또는 바코드가 포함된 사진</strong>을 선택하면
+            자동으로 캔버스에 추가됩니다.
+          </p>
+          <Menubar.MenuInputFileItem
+            accept="image/*"
+            onValueChange={handleAddBarcode}
+            className="py-2 h-auto rounded-sm !aspect-auto !bg-blue-400 !text-white hover:!bg-blue-500"
+          >
+            사진 불러오기
+          </Menubar.MenuInputFileItem>
+        </div>
+      </Menubar.MenuGroup>
       <Menubar.Separator />
       <Menubar.MenuItem
         onClick={handleSetSelect}
@@ -150,7 +168,9 @@ const Sidebar = ({ className }: { className: string }) => {
         label="도형"
         className="text-black"
         onClick={handleSetRectangle}
-        icon={<MixIcon width="18" height="18" />}
+        trigger={
+          <Menubar.MenuGroupTrigger icon={<MixIcon width="18" height="18" />} />
+        }
       >
         <Menubar.MenuGroupItem
           onClick={handleSetRectangle}
@@ -180,37 +200,44 @@ const Sidebar = ({ className }: { className: string }) => {
       <Menubar.MenuInputFileItem
         accept="image/*"
         onChange={handleAddImage}
-        icon={<ImageIcon />}
         label="이미지 추가"
-      />
+      >
+        <ImageIcon />
+      </Menubar.MenuInputFileItem>
       <Menubar.MenuGroup
         label="Frame"
-        icon={<FrameIcon width="18" height="18" />}
         className="p-2 text-center w-[220px]"
+        trigger={
+          <Menubar.MenuGroupTrigger
+            icon={<FrameIcon width="18" height="18" />}
+          />
+        }
       >
         <p>프레임 크기 조절</p>
         <div className="grid grid-cols-2 gap-4 px-2 py-1">
-          <Input
+          <DebounceInput
             value={canvasSize.width}
-            onValueChange={(e) =>
+            onValueChange={(value) =>
               setCanvasSize({
                 ...canvasSize,
-                width: Number(e.target.value),
+                width: Number(value),
               })
             }
             className="h-5 bg-white"
             label="W"
+            delay={50}
           />
-          <Input
+          <DebounceInput
             value={canvasSize.height}
-            onValueChange={(e) =>
+            onValueChange={(value) =>
               setCanvasSize({
                 ...canvasSize,
-                height: Number(e.target.value),
+                height: Number(value),
               })
             }
             className="h-5 bg-white"
             label="H"
+            delay={50}
           />
         </div>
       </Menubar.MenuGroup>
