@@ -16,9 +16,9 @@ const CanvasContainer = () => {
             Gifticon Generator
           </span>
         </div>
-        <Sidebar className="fixed left-2 z-100" />
-        <Menubar className="fixed top-2 z-100" />
-        <FloatingButtonGroup className="fixed bottom-2 right-2 z-100" />
+        <Sidebar className="fixed left-2 z-50" />
+        <Menubar className="fixed top-2 z-50" />
+        <FloatingButtonGroup className="fixed bottom-2 right-2 z-50" />
         <Stage>
           <Canvas />
         </Stage>

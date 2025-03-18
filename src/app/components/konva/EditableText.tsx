@@ -103,7 +103,7 @@ const EditableText = (props: Konva.TextConfig) => {
               fontWeight: fontWeight,
               fontStyle: fontStyle,
               textAlign,
-              zIndex: 100,
+              zIndex: 10,
               resize: "none",
               outline: "none",
               border: "none",

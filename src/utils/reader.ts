@@ -48,7 +48,7 @@ const extractData = (
 ): { format: ReaderFormatType; value: string } => {
   const format = FORMAT_LIST[data.getBarcodeFormat()];
   const value = data.getText();
+
   const returnObject = { format, value };
-  console.log(returnObject);
   return returnObject;
 };
