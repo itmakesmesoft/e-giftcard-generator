@@ -16,7 +16,7 @@
 
 ## 😃 Features
 ✅ Automatic Barcode & QR Code Detection<br />
-- Upload an image, and the system will automatically detect and convert barcodes or QR codes.
+- Upload an image, and the this will automatically detect and convert barcodes or QR codes.
 
   
 ✅ Customizable<br />
