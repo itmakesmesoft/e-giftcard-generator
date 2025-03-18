@@ -46,7 +46,7 @@
 
 ## ❓ Q & A
 - **The barcode is not being recognized.** <br />
-  Currently, only black barcodes on a white background are supported. We plan to update the system to recognize various barcode colors in the future.<br />
+  Currently, only black barcodes on a white background are supported. I plan to update to recognize various barcode colors in the future.<br />
 - **Can I use this on mobile?**<br />
   This project is optimized for PC at the moment.<br />
   Some UI elements may be broken or overflow on mobile, but mobile support will be updated soon.<br />
