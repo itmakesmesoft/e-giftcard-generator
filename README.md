@@ -52,3 +52,13 @@
 - Vercel
 
 
+## ❓ Q & A
+- **The barcode is not being recognized.** <br />
+  Currently, only black barcodes on a white background are supported. We plan to update the system to recognize various barcode colors in the future.<br />
+- **Can I use this on mobile?**<br /><br />
+  This project is optimized for PC at the moment.<br />
+  Some UI elements may be broken or overflow on mobile, but mobile support will be updated soon.<br />
+- **Can I save my eGift Card and edit it later?**<br />
+  Yes! You can save your progress and load it anytime to continue editing.<br />
+- **How can I share my customized eGift Card?**<br />
+  Download your customized gifticon as an image file and share it with friends!<br />
