@@ -143,6 +143,7 @@ export const CanvasProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (selectedNodes.length > 0) {
       transformerRef.current?.nodes([...selectedNodes]);
+      console.log(selectedNodes);
       return;
     }
     transformerRef.current?.nodes([]);

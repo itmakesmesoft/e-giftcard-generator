@@ -125,8 +125,12 @@ const Menubar = ({ className }: { className: string }) => {
     const copied = clipboardRef.current?.map(({ attrs }) => {
       const id = nanoid();
       ids.push(id);
+
+      // 이전 참조값을 제거하기 위해 ref는 구조분해 후 제거
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { ref: _, ...restAttrs } = attrs;
       return {
-        ...attrs,
+        ...restAttrs,
         id,
         x: attrs.x + 10,
         y: attrs.y + 10,
