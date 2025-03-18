@@ -15,29 +15,21 @@
 
 
 ## 😃 Features
-✅ Automatic Barcode & QR Code Detection
-
+✅ Automatic Barcode & QR Code Detection<br />
 - Upload an image, and the system will automatically detect and convert barcodes or QR codes.
 
-  이미지를 업로드하면 바코드 또는 QR코드를 자동 감지 및 변환해요.
   
-✅ Customizable
-
+✅ Customizable<br />
 - Add text, shapes, and images to personalize your design.
 
-  원하는 텍스트, 이미지, 도형을 자유롭게 추가하고 디자인할 수 있어요.
 
-✅ Save & Load Your Work
-
+✅ Save & Load Your Work<br />
 - Save your progress and continue editing anytime.
 
-  작업 중인 기프티콘을 언제든 저장하고 다시 불러와 수정할 수 있어요.
   
-✅ Download & Share
-
+✅ Download & Share<br />
 - Save your custom gifticon as an image and share it with friends.
 
-  완성된 기프티콘을 이미지로 저장하고 친구들과 공유하세요.
 
 
 
@@ -55,7 +47,7 @@
 ## ❓ Q & A
 - **The barcode is not being recognized.** <br />
   Currently, only black barcodes on a white background are supported. We plan to update the system to recognize various barcode colors in the future.<br />
-- **Can I use this on mobile?**<br /><br />
+- **Can I use this on mobile?**<br />
   This project is optimized for PC at the moment.<br />
   Some UI elements may be broken or overflow on mobile, but mobile support will be updated soon.<br />
 - **Can I save my eGift Card and edit it later?**<br />
