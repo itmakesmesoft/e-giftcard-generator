@@ -185,13 +185,11 @@ const Menubar = ({ className }: { className: string }) => {
         {panelType === "shape" && (
           <ShapeControlPanel
             updateSelectedShapeAttributes={updateSelectedShapeAttributes}
-            removeShapeOnCanvas={removeShapeOnCanvas}
           />
         )}
         {panelType === "text" && (
           <TextControlPanel
             updateSelectedShapeAttributes={updateSelectedShapeAttributes}
-            removeShapeOnCanvas={removeShapeOnCanvas}
           />
         )}
         {panelType === "brush" && (
@@ -199,18 +197,22 @@ const Menubar = ({ className }: { className: string }) => {
             updateSelectedShapeAttributes={updateSelectedShapeAttributes}
           />
         )}
+        <Toolbar.Separator />
+        <Toolbar.Tooltip label="삭제">
+          <Toolbar.Button onClick={removeShapeOnCanvas}>
+            <DeleteIcon width="17" height="17" />
+          </Toolbar.Button>
+        </Toolbar.Tooltip>
       </Toolbar>
     </div>
   );
 };
 interface ControlPanelProps {
   updateSelectedShapeAttributes: (newAttrs: Konva.ShapeConfig) => void;
-  removeShapeOnCanvas?: () => void;
 }
 
 const TextControlPanel = ({
   updateSelectedShapeAttributes,
-  removeShapeOnCanvas,
 }: ControlPanelProps) => {
   const { moveToForward, moveToBackward } = useShapeStore();
   const { getAttributes, setAttributes } = useControl();
@@ -343,18 +345,12 @@ const TextControlPanel = ({
           <MoveBackwardIcon width="20" height="20" />
         </Toolbar.Button>
       </Toolbar.Tooltip>
-      <Toolbar.Tooltip label="삭제">
-        <Toolbar.Button onClick={removeShapeOnCanvas}>
-          <DeleteIcon width="17" height="17" />
-        </Toolbar.Button>
-      </Toolbar.Tooltip>
     </>
   );
 };
 
 const ShapeControlPanel = ({
   updateSelectedShapeAttributes,
-  removeShapeOnCanvas,
 }: ControlPanelProps) => {
   const { getAttributes, setAttributes } = useControl();
   const { selectedNodes, selectNodesByIdList } = useCanvasContext();
@@ -474,11 +470,6 @@ const ShapeControlPanel = ({
       <Toolbar.Tooltip label="맨 뒤로 이동">
         <Toolbar.Button onClick={onMoveToBackward}>
           <MoveBackwardIcon width="20" height="20" />
-        </Toolbar.Button>
-      </Toolbar.Tooltip>
-      <Toolbar.Tooltip label="삭제">
-        <Toolbar.Button onClick={removeShapeOnCanvas}>
-          <DeleteIcon width="17" height="17" />
         </Toolbar.Button>
       </Toolbar.Tooltip>
     </>

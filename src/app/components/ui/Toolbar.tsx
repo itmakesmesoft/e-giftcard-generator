@@ -248,7 +248,7 @@ const Tooltip = ({
 };
 
 const ToolbarSeparator = () => (
-  <RadixToolbar.Separator className="ToolbarSeparator" />
+  <RadixToolbar.Separator className="border border-gray-300" />
 );
 
 const ToolbarButton = (props: ToolbarButtonProps) => {
