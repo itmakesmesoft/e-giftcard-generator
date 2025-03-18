@@ -1,3 +1,4 @@
+import { useControlStore } from "@/app/store/canvas";
 import Konva from "konva";
 import { Layer, Rect } from "react-konva";
 
@@ -11,17 +12,33 @@ const BackgroundLayer = (props: {
   y: number;
   [key: string]: unknown;
 }) => {
-  const { onPointerDown, width, height, x, y, ...restProps } = props;
+  const {
+    onPointerDown,
+    width,
+    height,
+    viewPortWidth,
+    viewPortHeight,
+    x,
+    y,
+    ...restProps
+  } = props;
+  const bgColor = useControlStore((state) => state.bgColor);
   return (
     <Layer {...restProps}>
       <Rect
         id="bg"
-        fill="white"
+        fill={bgColor}
         width={width}
         height={height}
-        onPointerDown={onPointerDown}
         x={x}
         y={y}
+        viewPortWidth={viewPortWidth}
+        viewPortHeight={viewPortHeight}
+      />
+      <Rect
+        width={viewPortWidth}
+        height={viewPortHeight}
+        onPointerDown={onPointerDown}
       />
     </Layer>
   );

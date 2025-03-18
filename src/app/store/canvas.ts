@@ -8,6 +8,7 @@ export type FontStyle = "italic" | "normal";
 
 export type State = {
   action: ActionType;
+  bgColor: string;
   fill: string;
   stroke: string;
   strokeWidth: number;
@@ -25,6 +26,7 @@ export type State = {
 
 export type Action = {
   setAction: (action: State["action"]) => void;
+  setBgColor: (fontSize: State["bgColor"]) => void;
   setFontSize: (fontSize: State["fontSize"]) => void;
   setFontWeight: (fontWeight: State["fontWeight"]) => void;
   setFontFamily: (fontFamily: State["fontFamily"]) => void;
@@ -42,6 +44,7 @@ export type Action = {
 
 const useControlStore = create<State & Action>((set) => ({
   action: "select",
+  bgColor: "#ffffff",
   fill: "#ff0000",
   stroke: "#000000",
   strokeWidth: 2,
@@ -57,6 +60,7 @@ const useControlStore = create<State & Action>((set) => ({
   fontStyle: "normal",
   textAlign: "center",
   setAction: (action) => set(() => ({ action })),
+  setBgColor: (bgColor) => set(() => ({ bgColor })),
   setFontSize: (fontSize) => set(() => ({ fontSize })),
   setFontWeight: (fontWeight) => set(() => ({ fontWeight })),
   setFontFamily: (fontFamily) => set(() => ({ fontFamily })),

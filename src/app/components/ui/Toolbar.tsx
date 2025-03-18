@@ -171,7 +171,7 @@ const ToolbarColorPicker = ({
       title={
         variant !== "custom" ? (
           <span
-            className={`w-5 h-5 rounded-full block ${className}`}
+            className={`border w-5 h-5 rounded-full block ${className}`}
             style={{
               ...(variant === "default" && {
                 backgroundColor: currentColor as string,

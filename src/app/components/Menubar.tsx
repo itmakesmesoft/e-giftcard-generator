@@ -71,6 +71,7 @@ const getProperPanelType = (nodes: Konva.Node[]) => {
 
 const Menubar = ({ className }: { className: string }) => {
   const { clearSelectNodes } = useSelect();
+  const { getAttributes, setAttributes } = useControl();
   const [panelType, setPanelType] = useState<PanelType>(null);
   const setShapes = useShapeStore((state) => state.setShapes);
   const action = useControlStore((state) => state.action);
@@ -166,29 +167,39 @@ const Menubar = ({ className }: { className: string }) => {
 
   useHotkeys("ctrl+v", pasteCopiedShape, [selectedNodes]);
 
+  const onBgColorChange = (value: ColorResult) => {
+    setAttributes.setBgColor(value.hex);
+    updateSelectedShapeAttributes({ bgColor: value.hex });
+  };
+
   return (
     <div className={className}>
-      {panelType && (
-        <Toolbar>
-          {panelType === "shape" && (
-            <ShapeControlPanel
-              updateSelectedShapeAttributes={updateSelectedShapeAttributes}
-              removeShapeOnCanvas={removeShapeOnCanvas}
-            />
-          )}
-          {panelType === "text" && (
-            <TextControlPanel
-              updateSelectedShapeAttributes={updateSelectedShapeAttributes}
-              removeShapeOnCanvas={removeShapeOnCanvas}
-            />
-          )}
-          {panelType === "brush" && (
-            <BrushControlPanel
-              updateSelectedShapeAttributes={updateSelectedShapeAttributes}
-            />
-          )}
-        </Toolbar>
-      )}
+      <Toolbar>
+        <Toolbar.ColorPicker
+          label="배경 색상"
+          color={getAttributes.bgColor}
+          className="rounded-none"
+          onValueChangeComplete={onBgColorChange}
+        />
+
+        {panelType === "shape" && (
+          <ShapeControlPanel
+            updateSelectedShapeAttributes={updateSelectedShapeAttributes}
+            removeShapeOnCanvas={removeShapeOnCanvas}
+          />
+        )}
+        {panelType === "text" && (
+          <TextControlPanel
+            updateSelectedShapeAttributes={updateSelectedShapeAttributes}
+            removeShapeOnCanvas={removeShapeOnCanvas}
+          />
+        )}
+        {panelType === "brush" && (
+          <BrushControlPanel
+            updateSelectedShapeAttributes={updateSelectedShapeAttributes}
+          />
+        )}
+      </Toolbar>
     </div>
   );
 };

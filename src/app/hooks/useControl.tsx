@@ -4,6 +4,7 @@ import { State, useControlStore } from "../store/canvas";
 
 const defaultValues: State = {
   action: "select",
+  bgColor: "#ffffff",
   fill: "#ff0000",
   stroke: "#000000",
   strokeWidth: 2,
@@ -23,6 +24,7 @@ const useControl = () => {
   const action = useControlStore((state) => state.action);
   const setAction = useControlStore((state) => state.setAction);
 
+  const bgColor = useControlStore((state) => state.bgColor);
   const fill = useControlStore((state) => state.fill);
   const stroke = useControlStore((state) => state.stroke);
   const strokeWidth = useControlStore((state) => state.strokeWidth);
@@ -36,6 +38,7 @@ const useControl = () => {
   const fontStyle = useControlStore((state) => state.fontStyle);
   const typeFace = useControlStore((state) => state.typeFace);
   const textAlign = useControlStore((state) => state.textAlign);
+  const setBgColor = useControlStore((state) => state.setBgColor);
   const setFill = useControlStore((state) => state.setFill);
   const setOpacity = useControlStore((state) => state.setOpacity);
   const setStroke = useControlStore((state) => state.setStroke);
@@ -60,6 +63,7 @@ const useControl = () => {
         undefined,
       ];
 
+      // setBgColor(attrs.bgColor ?? defaultValues.bgColor);
       setFill(attrs.barColor ?? attrs.fill ?? defaultValues.fill);
       setStroke(attrs.textColor ?? attrs.stroke ?? defaultValues.stroke);
       setStrokeWidth(attrs.strokeWidth ?? defaultValues.strokeWidth);
@@ -77,6 +81,7 @@ const useControl = () => {
   }, [
     action,
     selectedNodes,
+    // setBgColor,
     setFill,
     setFontFamily,
     setFontSize,
@@ -96,6 +101,7 @@ const useControl = () => {
     action,
     setAction,
     getAttributes: {
+      bgColor,
       fill,
       stroke,
       strokeWidth,
@@ -111,6 +117,7 @@ const useControl = () => {
       textAlign,
     },
     setAttributes: {
+      setBgColor,
       setFill,
       setStroke,
       setStrokeWidth,

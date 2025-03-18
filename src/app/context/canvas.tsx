@@ -16,6 +16,7 @@ import { Group } from "konva/lib/Group";
 import { Shape } from "konva/lib/Shape";
 import { Vector2d } from "konva/lib/types";
 import { ShapeConfig } from "../types/canvas";
+import { useControl } from "../hooks";
 
 export interface CanvasSize {
   width: number;
@@ -31,6 +32,7 @@ export interface CanvasData {
   canvas: {
     width: number;
     height: number;
+    bgColor: string;
     children: (Group | Shape<ShapeConfig>)[] | undefined;
   };
 }
@@ -79,6 +81,9 @@ export const CanvasProvider = ({ children }: { children: ReactNode }) => {
   const stageRef = useRef<Konva.Stage>(null);
   const transformerRef = useRef<Konva.Transformer>(null);
   const [selectedNodes, setSelectedNodes] = useState<Konva.Node[]>([]);
+  const { getAttributes, setAttributes } = useControl();
+  // const bgColor = useControlStore((state) => state.bgColor);
+  // const setBgColor = useControlStore((state) => state.setBgColor);
   const setShapes = useShapeStore((state) => state.setShapes);
 
   const {
@@ -217,7 +222,7 @@ export const CanvasProvider = ({ children }: { children: ReactNode }) => {
 
   const loadCanvasByJSON = (data: CanvasData) => {
     if (!stageRef.current) return;
-    const { width, height, children: childrenFromData } = data.canvas;
+    const { width, height, bgColor, children: childrenFromData } = data.canvas;
     if (!childrenFromData) return;
 
     const children = childrenFromData?.map(({ attrs }) => ({
@@ -225,6 +230,7 @@ export const CanvasProvider = ({ children }: { children: ReactNode }) => {
       ...convertToAbsolutePosition(attrs), // 절대 좌표로 변환
     })) as ShapeConfig[];
 
+    setAttributes.setBgColor(bgColor);
     setCanvasSize({ width, height });
     setShapes(children);
   };
@@ -249,6 +255,7 @@ export const CanvasProvider = ({ children }: { children: ReactNode }) => {
     return {
       canvas: {
         ...canvasSize,
+        bgColor: getAttributes.bgColor,
         children: children,
       },
     };
