@@ -1,4 +1,4 @@
-<h1 align="center" >Custom eGift Card Generator (기프티콘 만들기)</h1>
+<h1 align="center" >Custom eGift Card Generator (기프티콘 생성기)</h1>
 
 
 <p align="center">
