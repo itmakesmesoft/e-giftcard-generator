@@ -40,12 +40,14 @@ export interface CanvasData {
 interface CanvasContextValueProps {
   canvasSize: CanvasSize;
   canvasPos: Vector2d;
+  stageScale: number;
   viewportSize: ViewportSize;
   selectedNodes: Konva.Node[];
   stageRef: RefObject<Konva.Stage | null>;
   transformerRef: RefObject<Konva.Transformer | null>;
   setCanvasSize: Dispatch<SetStateAction<CanvasSize>>;
   setCanvasPos: Dispatch<SetStateAction<Vector2d>>;
+  setStageScale: Dispatch<SetStateAction<number>>;
   setSelectedNodes: (node: Konva.Node[]) => void;
   getAllSelectedNodes: () => Konva.Node[];
   getSingleSelectedNode: () => Konva.Node | undefined;
@@ -59,12 +61,14 @@ interface CanvasContextValueProps {
 const defaultValue: CanvasContextValueProps = {
   canvasSize: { width: 400, height: 600 },
   canvasPos: { x: 0, y: 0 },
+  stageScale: 1,
   viewportSize: { width: 0, height: 0 },
   selectedNodes: [],
   stageRef: { current: null },
   transformerRef: { current: null },
   setCanvasSize: () => {},
   setCanvasPos: () => {},
+  setStageScale: () => {},
   setSelectedNodes: () => {},
   getAllSelectedNodes: () => [],
   getSingleSelectedNode: () => undefined,
@@ -80,29 +84,34 @@ const CanvasContext = createContext<CanvasContextValueProps>(defaultValue);
 export const useCanvasContext = () => useContext(CanvasContext);
 
 export const CanvasProvider = ({ children }: { children: ReactNode }) => {
-  const stageRef = useRef<Konva.Stage>(null);
-  const transformerRef = useRef<Konva.Transformer>(null);
-  const [selectedNodes, setSelectedNodes] = useState<Konva.Node[]>([]);
-  const { getAttributes, setAttributes } = useControl();
-  const setShapes = useShapeStore((state) => state.setShapes);
-
-  const getPointerPosition = (): Vector2d => {
-    if (!stageRef.current) return { x: 0, y: 0 };
-    const { x: stageX, y: stageY } = stageRef.current.getPosition();
-    const { x: pointerX, y: pointerY } =
-      stageRef.current.getPointerPosition() as Vector2d;
-
-    return { x: pointerX - stageX, y: pointerY - stageY };
-  };
-
   const {
     canvasPos: cPos,
     canvasSize: cSize,
     viewportSize: vSize,
   } = defaultValue;
+
+  const stageRef = useRef<Konva.Stage>(null);
+  const transformerRef = useRef<Konva.Transformer>(null);
   const [canvasPos, setCanvasPos] = useState<Vector2d>(cPos);
   const [canvasSize, setCanvasSize] = useState<CanvasSize>(cSize);
+  const [stageScale, setStageScale] = useState<number>(defaultValue.stageScale);
   const [viewportSize, setViewportSize] = useState<ViewportSize>(vSize);
+  const [selectedNodes, setSelectedNodes] = useState<Konva.Node[]>([]);
+
+  const { getAttributes, setAttributes } = useControl();
+  const setShapes = useShapeStore((state) => state.setShapes);
+
+  const getPointerPosition = (): Vector2d => {
+    if (!stageRef.current) return { x: 0, y: 0 };
+    const stagePos = stageRef.current.getPosition();
+    const scale = stageRef.current.getAbsoluteScale();
+    const pointerPos = stageRef.current.getPointerPosition() as Vector2d;
+
+    return {
+      x: (pointerPos.x - stagePos.x) / scale.x,
+      y: (pointerPos.y - stagePos.y) / scale.y,
+    };
+  };
 
   // 위치를 절대 위치 또는 상대 위치로 바꾸는 함수
   const convertPosition = useCallback(
@@ -276,12 +285,14 @@ export const CanvasProvider = ({ children }: { children: ReactNode }) => {
       value={{
         canvasSize,
         canvasPos,
+        stageScale,
         viewportSize,
         selectedNodes,
         stageRef: stageRef as RefObject<Konva.Stage>,
         transformerRef: transformerRef as RefObject<Konva.Transformer>,
         setCanvasSize,
         setCanvasPos,
+        setStageScale,
         setSelectedNodes,
         getAllSelectedNodes,
         getSingleSelectedNode,

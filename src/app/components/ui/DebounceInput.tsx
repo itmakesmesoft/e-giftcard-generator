@@ -16,10 +16,6 @@ const DebounceInput = ({
   const [inputValue, setInputValue] = useState<string | number>(value);
   const debounced = useDebounce(inputValue, delay);
 
-  const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.target.value);
-  };
-
   useEffect(() => {
     if (debounced != value) onValueChange(debounced);
   }, [debounced, onValueChange, value]);
@@ -27,7 +23,7 @@ const DebounceInput = ({
   return (
     <Input
       value={inputValue}
-      onValueChange={handleValueChange}
+      onValueChange={setInputValue}
       className="h-5 bg-white"
       label="W"
       {...restProps}

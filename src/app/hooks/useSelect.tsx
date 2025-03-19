@@ -1,16 +1,14 @@
 import Konva from "konva";
 import { Rect } from "react-konva";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { Vector2d } from "konva/lib/types";
 import { useCanvasContext } from "../context/canvas";
-import { useControlStore } from "../store/canvas";
 
 const useSelect = () => {
   const selectionRef = useRef<Konva.Rect>(null);
   const selectBoxPositionRef = useRef<Konva.ShapeConfig>(null);
   const isSelectingRef = useRef<boolean>(false);
 
-  const action = useControlStore((state) => state.action);
   const {
     stageRef,
     transformerRef,
@@ -19,22 +17,6 @@ const useSelect = () => {
     selectNodeById,
     getPointerPosition,
   } = useCanvasContext();
-
-  useEffect(() => {
-    if (!stageRef.current) return;
-    const stage = stageRef.current;
-    switch (action) {
-      case "select":
-        stage.container().style.cursor = "default";
-        break;
-      case "pencil":
-      case "eraser":
-        stage.container().style.cursor = "default";
-        break;
-      default:
-        stage.container().style.cursor = "crosshair";
-    }
-  }, [action, stageRef]);
 
   const clearSelectNodes = () => {
     transformerRef.current?.nodes([]);

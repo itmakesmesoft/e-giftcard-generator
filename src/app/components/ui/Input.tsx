@@ -1,35 +1,78 @@
-import { ChangeEvent } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 
-export interface InputProps {
+export interface InputProps<T extends string | number = string | number> {
   type?: "text" | "number" | "file";
   id?: string;
   className?: string;
-  value?: string | number;
+  value?: T;
+  defaultValue?: T;
   label?: string;
-  onValueChange?: (e: ChangeEvent<HTMLInputElement>) => void;
+  onValueChange?: (value: T) => void;
+  onValueChangeComplete?: (value: T) => void;
+  unit?: string;
+  min?: number;
+  max?: number;
   [key: string]: unknown;
 }
 
 const Input = ({
-  type = "number",
   id,
-  className,
-  value,
+  type = "number",
+  unit,
   label,
+  value,
+  defaultValue = "",
+  className = "",
   onValueChange,
+  onValueChangeComplete,
   ...restProps
 }: InputProps) => {
+  const [isFocused, setIsFocused] = useState(false);
+  const isControlled = value !== undefined;
+  const shouldDelayChange = !!onValueChangeComplete;
+
+  const [internalValue, setInternalValue] = useState(
+    isControlled ? value : defaultValue ?? ""
+  );
+
+  useEffect(() => {
+    if (isControlled) {
+      setInternalValue(value);
+    }
+  }, [value, isControlled]);
+
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    if (!isControlled) {
+      setInternalValue(newValue);
+    } else if (shouldDelayChange && isFocused) {
+      setInternalValue(newValue);
+      return;
+    }
+    onValueChange?.(newValue);
+  };
+
+  const handleInputBlur = () => {
+    setIsFocused(false);
+    if (shouldDelayChange) {
+      onValueChangeComplete?.(internalValue);
+    }
+  };
+
   return (
-    <label className={`flex flex-row items-center ${className}`}>
-      <span>{label}</span>
+    <label className={`min-w-0 flex flex-row items-center ${className}`}>
+      {label && <span className="mr-2">{label}</span>}
       <input
-        type={type}
+        className="w-full outline-none appearance-none"
         id={id}
-        value={value}
-        className="min-w-[30px] ml-2 outline-none"
-        onChange={onValueChange}
+        type={type}
+        value={internalValue}
+        onFocus={() => setIsFocused(true)}
+        onBlur={handleInputBlur}
+        onChange={handleInputChange}
         {...restProps}
       />
+      {unit && <span>{unit}</span>}
     </label>
   );
 };

@@ -6,7 +6,7 @@ import {
   ReaderFormatType,
 } from "@/utils";
 import { useCanvasContext } from "@/app/context/canvas";
-import { ChangeEvent, ReactNode, useEffect, useState } from "react";
+import { ChangeEvent, ReactNode, useEffect, useRef, useState } from "react";
 import { generateShapeConfig } from "@/utils/canvas";
 import {
   ArrowTopLeftIcon,
@@ -20,6 +20,8 @@ import {
   ResetIcon,
   SquareIcon,
   TextIcon,
+  ZoomInIcon,
+  ZoomOutIcon,
 } from "@radix-ui/react-icons";
 import QrIcon from "./ui/QrIcon";
 import { useControl, useSelect } from "@/app/hooks";
@@ -27,10 +29,13 @@ import Image from "next/image";
 import DebounceInput from "./ui/DebounceInput";
 import { Dialog, RadioGroup } from "radix-ui";
 import Select from "./ui/Select";
+import NumberStepper from "./ui/NumberStepper";
+import Input from "./ui/Input";
 
 const Sidebar = ({ className }: { className: string }) => {
   const { clearSelectNodes } = useSelect();
-  const { canvasSize, setCanvasSize } = useCanvasContext();
+  const { canvasSize, stageScale, setCanvasSize, setStageScale } =
+    useCanvasContext();
   const { action, setAction, getAttributes } = useControl();
 
   const redo = useShapeStore((state) => state.redo);
@@ -70,6 +75,11 @@ const Sidebar = ({ className }: { className: string }) => {
   const handleSetText = () => {
     setAction("text");
     clearSelectNodes();
+  };
+
+  const handleScaleChange = (value: number) => {
+    const scale = value / 100;
+    setStageScale(scale);
   };
 
   const handleAddBarcodeWithImage = (e: ChangeEvent<HTMLInputElement>) => {
@@ -164,7 +174,7 @@ const Sidebar = ({ className }: { className: string }) => {
           <hr />
           <GenerateBarcodModal
             trigger={
-              <button className="py-2 w-full hover:bg-gray-500 active:bg-gray-600 hover:text-white cursor-pointer rounded-sm">
+              <button className="py-2 w-full hover:bg-gray-500 active:bg-gray-600 hover:text-white cursor-pointer rounded-sm border border-gray-300">
                 코드 또는 URL 입력
               </button>
             }
@@ -280,6 +290,25 @@ const Sidebar = ({ className }: { className: string }) => {
         icon={<ResetIcon className="rotate-180" width="18" height="18" />}
         className="pb-3"
       />
+      <NumberStepper
+        className="bg-white w-10 text-sm"
+        value={stageScale * 100}
+        onValueChange={handleScaleChange}
+        align="column"
+        unit="%"
+        max={150}
+        min={50}
+        slotStart={
+          <NumberStepper.IncreaseButton className="cursor-pointer py-2">
+            <ZoomInIcon width="20" height="20" />
+          </NumberStepper.IncreaseButton>
+        }
+        slotEnd={
+          <NumberStepper.DecreaseButton className="cursor-pointer py-2">
+            <ZoomOutIcon width="20" height="20" />
+          </NumberStepper.DecreaseButton>
+        }
+      />
     </Menubar>
   );
 };
@@ -315,6 +344,11 @@ const codeTypeList = [
   },
 ];
 
+const options = BARCODE_FORMAT_LIST.map((item) => ({
+  value: item,
+  label: item,
+}));
+
 const GenerateBarcodModal = ({
   trigger,
   onSubmit,
@@ -323,31 +357,27 @@ const GenerateBarcodModal = ({
   onSubmit: (data: { value: string; format: ReaderFormatType }) => void;
 }) => {
   const [open, setOpen] = useState<boolean>(false);
-  const [value, setValue] = useState<string>();
   const [codeType, setCodeType] = useState<CodeType>("qrcode");
-  const [format, setFormat] = useState<ReaderFormatType>();
+  const valueRef = useRef<string>(null);
+  const formatRef = useRef<ReaderFormatType>(null);
 
   useEffect(() => {
-    if (codeType === "qrcode") setFormat("QR_CODE");
+    if (codeType === "qrcode") formatRef.current = "QR_CODE";
   }, [codeType]);
 
-  const options = BARCODE_FORMAT_LIST.map((item) => ({
-    value: item,
-    label: item,
-  }));
-
   const handleFormatChange = (value: string) => {
-    setFormat(value as ReaderFormatType);
+    formatRef.current = value as ReaderFormatType;
   };
 
-  const handleValueChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setValue(e.target.value);
+  const handleValueChange = (value: string | number) => {
+    valueRef.current = value as string;
   };
 
   const handleClickSubmit = () => {
     setOpen(false);
-    if (!value || !format) return;
-    onSubmit({ value, format });
+    if (!valueRef.current || !formatRef.current) return;
+
+    onSubmit({ value: valueRef.current, format: formatRef.current });
   };
 
   const handleCodeTypeChange = (value: string) => {
@@ -359,62 +389,59 @@ const GenerateBarcodModal = ({
       <Dialog.Trigger asChild>{trigger}</Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed top-0 left-0 w-screen h-screen bg-black/70 z-100" />
-        <Dialog.Content className="fixed top-[50%] left-[50%] -translate-y-[50%] -translate-x-[50%] bg-white p-2 z-100 rounded-lg">
-          <Dialog.Title className="mb-4">
+        <Dialog.Content className="fixed top-[50%] left-[50%] -translate-y-[50%] -translate-x-[50%] bg-white z-100 rounded-lg p-4">
+          <Dialog.Title className="mb-4 font-semibold">
             바코드 정보를 입력해주세요
           </Dialog.Title>
           <div className="flex flex-col">
+            <RadioGroup.Root
+              defaultValue={codeType}
+              onValueChange={handleCodeTypeChange}
+              className="flex flex-row gap-2 mb-4"
+            >
+              {codeTypeList.map((item, index) => (
+                <div className="flex flex-row gap-4" key={index}>
+                  <RadioGroup.Item
+                    id={`radio-${index}`}
+                    value={item.value}
+                    className="w-4 h-4 rounded-full bg-white hover:bg-blue-200 focus:ring focus:ring-gray-400 flex items-center justify-center"
+                  >
+                    <RadioGroup.Indicator className="w-2 h-2 bg-blue-500 rounded-full" />
+                  </RadioGroup.Item>
+                  <label className="Label" htmlFor={`radio-${index}`}>
+                    {item.label}
+                  </label>
+                </div>
+              ))}
+            </RadioGroup.Root>
             <div>
-              <RadioGroup.Root
-                defaultValue={codeType}
-                onValueChange={handleCodeTypeChange}
-                className="flex flex-col gap-2"
-              >
-                {codeTypeList.map((item, index) => (
-                  <div className="flex flex-row gap-4" key={index}>
-                    <RadioGroup.Item
-                      id={`radio-${index}`}
-                      value={item.value}
-                      className="w-6 h-6 rounded-full bg-white shadow-md hover:bg-violet-300 focus:ring-2 focus:ring-black flex items-center justify-center"
-                    >
-                      <RadioGroup.Indicator className="w-3 h-3 bg-violet-700 rounded-full" />
-                    </RadioGroup.Item>
-                    <label className="Label" htmlFor={`radio-${index}`}>
-                      {item.label}
-                    </label>
-                  </div>
-                ))}
-              </RadioGroup.Root>
-            </div>
-            {codeType === "qrcode" && (
-              <label>
-                <span>url</span>
-                <input
+              {codeType === "qrcode" && (
+                <Input
+                  label="url"
                   type="text"
-                  name=""
-                  id="code-value"
-                  onChange={handleValueChange}
+                  className="text-start"
+                  onValueChange={handleValueChange}
                 />
-              </label>
-            )}
-            {codeType === "barcode" && (
-              <>
-                <Select
-                  className="z-100"
-                  options={options}
-                  onValueChange={handleFormatChange}
-                />
-                <label>
-                  <span>Code Number</span>
-                  <input
+              )}
+              {codeType === "barcode" && (
+                <div className="flex flex-col gap-2 w-full">
+                  <label>
+                    <span className="mr-2">format</span>
+                    <Select
+                      className="z-100 border border-gray-200 rounded-sm"
+                      options={options}
+                      onValueChange={handleFormatChange}
+                    />
+                  </label>
+                  <Input
+                    label="code"
                     type="text"
-                    name=""
-                    id="code-value"
-                    onChange={handleValueChange}
+                    className="text-start"
+                    onValueChange={handleValueChange}
                   />
-                </label>
-              </>
-            )}
+                </div>
+              )}
+            </div>
             <button onClick={handleClickSubmit}>확인</button>
           </div>
         </Dialog.Content>

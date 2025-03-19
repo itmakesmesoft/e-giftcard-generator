@@ -2,7 +2,7 @@ import { useCanvasContext } from "@/app/context/canvas";
 import { useControl, useSelect, useShapes } from "@/app/hooks";
 import Konva from "konva";
 import { Vector2d } from "konva/lib/types";
-import { ReactNode, useRef, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { Stage as KonvaStage, Layer, Transformer } from "react-konva";
 import BackgroundLayer from "./BackgroundLayer";
 
@@ -13,12 +13,13 @@ const Stage = ({ children }: { children: ReactNode }) => {
     canvasPos,
     stageRef,
     transformerRef,
+    stageScale,
     getPointerPosition,
   } = useCanvasContext();
-  const { action, setAction, getAttributes } = useControl();
+  const isPointerDown = useRef(false);
   const [isDraggable, setIsDraggable] = useState<boolean>(false);
 
-  const isPointerDown = useRef(false);
+  const { action, setAction, getAttributes } = useControl();
 
   const { startShapeCreation, updateShapeCreation, completeShapeCreation } =
     useShapes();
@@ -31,30 +32,62 @@ const Stage = ({ children }: { children: ReactNode }) => {
     SelectionBox,
   } = useSelect();
 
-  const onPointerDown = (e: Konva.KonvaEventObject<PointerEvent>) => {
-    if (e.evt.button === 1) {
-      setIsDraggable(true);
+  useEffect(() => {
+    if (!stageRef.current) return;
+    const stage = stageRef.current;
+
+    switch (action) {
+      case "select":
+        stage.container().style.cursor = "default";
+        break;
+      case "pencil":
+      case "eraser":
+        stage.container().style.cursor = "default";
+        break;
+      default:
+        stage.container().style.cursor = "crosshair";
+    }
+  }, [action, stageRef]);
+
+  const switchCursor = (e: Konva.KonvaEventObject<PointerEvent>) => {
+    if (!stageRef.current) return;
+    const stage = stageRef.current;
+
+    if (e.type === "pointerdown" && e.evt.button === 1) {
+      stage.container().style.cursor = "grabbing";
       return;
     }
-    if (action === "select") {
-      startSelectionBox(e);
-    } else handleCreateShapeStart();
+    switch (action) {
+      case "select":
+        stage.container().style.cursor = "default";
+        break;
+      case "pencil":
+      case "eraser":
+        stage.container().style.cursor = "default";
+        break;
+      default:
+        stage.container().style.cursor = "crosshair";
+    }
+  };
+
+  const onPointerDown = (e: Konva.KonvaEventObject<PointerEvent>) => {
+    if (e.evt.button === 1) setIsDraggable(true);
+    else if (action === "select") startSelectionBox(e);
+    else handleCreateShapeStart();
+    switchCursor(e);
   };
 
   const onPointerMove = (e: Konva.KonvaEventObject<PointerEvent>) => {
     if (e.evt.button === 1) return;
-
-    if (action === "select") updateSelectionBox();
+    else if (action === "select") updateSelectionBox();
     else handleCreateShapeUpdate();
   };
 
   const onPointerUp = (e: Konva.KonvaEventObject<PointerEvent>) => {
-    if (e.evt.button === 1) {
-      setIsDraggable(false);
-      return;
-    }
-    if (action === "select") endSelectionBox();
+    if (e.evt.button === 1) setIsDraggable(false);
+    else if (action === "select") endSelectionBox();
     else handleCreateShapeComplete();
+    switchCursor(e);
   };
 
   const handleCreateShapeStart = () => {
@@ -139,6 +172,8 @@ const Stage = ({ children }: { children: ReactNode }) => {
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       draggable={isDraggable}
+      scaleX={stageScale}
+      scaleY={stageScale}
     >
       <BackgroundLayer
         id="_bgLayer"
