@@ -63,7 +63,7 @@ const NumberStepper = ({
         <Input
           onValueChangeComplete={handleInputValueChange}
           value={internalValue}
-          className="appearance-none"
+          className="appearance-none text-center"
           unit={unit}
           min={min}
           max={max}
