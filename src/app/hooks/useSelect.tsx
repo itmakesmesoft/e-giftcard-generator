@@ -17,6 +17,7 @@ const useSelect = () => {
     setSelectedNodes,
     getSingleSelectedNode,
     selectNodeById,
+    getPointerPosition,
   } = useCanvasContext();
 
   useEffect(() => {
@@ -48,9 +49,7 @@ const useSelect = () => {
   };
 
   const startSelectionBox = (e: Konva.KonvaEventObject<PointerEvent>) => {
-    if (!stageRef.current) return;
-
-    const pointerPos = stageRef.current.getPointerPosition();
+    const pointerPos = getPointerPosition();
     if (!pointerPos) return;
 
     const selectBox = selectionRef.current;
@@ -67,9 +66,9 @@ const useSelect = () => {
   };
 
   const updateSelectionBox = () => {
-    if (!stageRef.current || getSingleSelectedNode()) return;
+    if (getSingleSelectedNode()) return;
 
-    const pointerPos = stageRef.current.getPointerPosition();
+    const pointerPos = getPointerPosition();
     if (!pointerPos) return;
 
     const selectBox = selectionRef.current;

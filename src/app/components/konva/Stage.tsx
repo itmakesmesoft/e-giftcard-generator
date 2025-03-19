@@ -2,14 +2,21 @@ import { useCanvasContext } from "@/app/context/canvas";
 import { useControl, useSelect, useShapes } from "@/app/hooks";
 import Konva from "konva";
 import { Vector2d } from "konva/lib/types";
-import { ReactNode, useRef } from "react";
+import { ReactNode, useRef, useState } from "react";
 import { Stage as KonvaStage, Layer, Transformer } from "react-konva";
 import BackgroundLayer from "./BackgroundLayer";
 
 const Stage = ({ children }: { children: ReactNode }) => {
-  const { canvasSize, viewportSize, canvasPos, stageRef, transformerRef } =
-    useCanvasContext();
+  const {
+    canvasSize,
+    viewportSize,
+    canvasPos,
+    stageRef,
+    transformerRef,
+    getPointerPosition,
+  } = useCanvasContext();
   const { action, setAction, getAttributes } = useControl();
+  const [isDraggable, setIsDraggable] = useState<boolean>(false);
 
   const isPointerDown = useRef(false);
 
@@ -25,24 +32,34 @@ const Stage = ({ children }: { children: ReactNode }) => {
   } = useSelect();
 
   const onPointerDown = (e: Konva.KonvaEventObject<PointerEvent>) => {
+    if (e.evt.button === 1) {
+      setIsDraggable(true);
+      return;
+    }
     if (action === "select") {
       startSelectionBox(e);
     } else handleCreateShapeStart();
   };
 
-  const onPointerMove = () => {
+  const onPointerMove = (e: Konva.KonvaEventObject<PointerEvent>) => {
+    if (e.evt.button === 1) return;
+
     if (action === "select") updateSelectionBox();
     else handleCreateShapeUpdate();
   };
 
-  const onPointerUp = () => {
+  const onPointerUp = (e: Konva.KonvaEventObject<PointerEvent>) => {
+    if (e.evt.button === 1) {
+      setIsDraggable(false);
+      return;
+    }
     if (action === "select") endSelectionBox();
     else handleCreateShapeComplete();
   };
 
   const handleCreateShapeStart = () => {
     if (!stageRef.current) return;
-    const { x, y } = stageRef.current.getPointerPosition() as Vector2d;
+    const { x, y } = getPointerPosition() as Vector2d;
 
     isPointerDown.current = true;
     const hasPoints = ["pencil", "eraser", "arrow"].includes(action);
@@ -56,7 +73,7 @@ const Stage = ({ children }: { children: ReactNode }) => {
   const handleCreateShapeUpdate = () => {
     if (!isPointerDown.current || !stageRef.current) return;
 
-    const { x, y } = stageRef.current.getPointerPosition() as Vector2d;
+    const { x, y } = getPointerPosition() as Vector2d;
 
     switch (action) {
       case "text":
@@ -121,6 +138,7 @@ const Stage = ({ children }: { children: ReactNode }) => {
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
+      draggable={isDraggable}
     >
       <BackgroundLayer
         id="_bgLayer"

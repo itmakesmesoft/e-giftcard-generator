@@ -53,6 +53,7 @@ interface CanvasContextValueProps {
   selectNodesByIdList: (idList: string[]) => void;
   loadCanvasByJSON: (data: CanvasData) => void;
   exportCanvasAsJSON: () => CanvasData | undefined;
+  getPointerPosition: () => Vector2d;
 }
 
 const defaultValue: CanvasContextValueProps = {
@@ -71,6 +72,7 @@ const defaultValue: CanvasContextValueProps = {
   selectNodesByIdList: () => {},
   loadCanvasByJSON: () => {},
   exportCanvasAsJSON: () => undefined,
+  getPointerPosition: () => ({ x: 0, y: 0 }),
 };
 
 const CanvasContext = createContext<CanvasContextValueProps>(defaultValue);
@@ -82,9 +84,16 @@ export const CanvasProvider = ({ children }: { children: ReactNode }) => {
   const transformerRef = useRef<Konva.Transformer>(null);
   const [selectedNodes, setSelectedNodes] = useState<Konva.Node[]>([]);
   const { getAttributes, setAttributes } = useControl();
-  // const bgColor = useControlStore((state) => state.bgColor);
-  // const setBgColor = useControlStore((state) => state.setBgColor);
   const setShapes = useShapeStore((state) => state.setShapes);
+
+  const getPointerPosition = (): Vector2d => {
+    if (!stageRef.current) return { x: 0, y: 0 };
+    const { x: stageX, y: stageY } = stageRef.current.getPosition();
+    const { x: pointerX, y: pointerY } =
+      stageRef.current.getPointerPosition() as Vector2d;
+
+    return { x: pointerX - stageX, y: pointerY - stageY };
+  };
 
   const {
     canvasPos: cPos,
@@ -280,6 +289,7 @@ export const CanvasProvider = ({ children }: { children: ReactNode }) => {
         selectNodesByIdList,
         loadCanvasByJSON,
         exportCanvasAsJSON,
+        getPointerPosition,
       }}
     >
       {children}
