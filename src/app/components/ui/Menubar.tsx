@@ -1,6 +1,7 @@
 import { Slot, Menubar as RadixMenubar } from "radix-ui";
 import { ChangeEvent, memo, ReactNode } from "react";
 import { Tooltip as RadixTooltip } from "radix-ui";
+import { clearTextSelection } from "./utils";
 
 const commonStyle =
   "p-2 w-full aspect-square flex justify-center items-center active:bg-gray-200 hover:bg-gray-100 cursor-pointer";
@@ -204,8 +205,11 @@ const Tooltip = ({
   label?: string;
   children: ReactNode;
 }) => {
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen) clearTextSelection();
+  };
   return (
-    <RadixTooltip.Root>
+    <RadixTooltip.Root onOpenChange={handleOpenChange}>
       <RadixTooltip.Trigger asChild tabIndex={-1}>
         {children}
       </RadixTooltip.Trigger>

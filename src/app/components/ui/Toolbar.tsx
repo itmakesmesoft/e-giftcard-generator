@@ -1,13 +1,18 @@
-import { ChangeEvent, ReactNode, useEffect, useState } from "react";
 import Input, { type InputProps } from "./Input";
-import { DropdownMenu, Toolbar as RadixToolbar, Select } from "radix-ui";
+import { ChangeEvent, ReactNode, useEffect, useState } from "react";
+import {
+  DropdownMenu,
+  Toolbar as RadixToolbar,
+  Select,
+  Tooltip as RadixTooltip,
+} from "radix-ui";
 import {
   ToolbarButtonProps,
   ToolbarToggleGroupMultipleProps,
   ToolbarToggleGroupSingleProps,
 } from "@radix-ui/react-toolbar";
 import { Color, ColorResult, SketchPicker } from "react-color";
-import { Tooltip as RadixTooltip } from "radix-ui";
+import { clearTextSelection } from "./utils";
 
 const Toolbar = ({
   className = "",
@@ -126,8 +131,12 @@ type ToolbarDropdownProps = DropdownMenu.DropdownMenuProps & {
   children: ReactNode;
 };
 const ToolbarDropdown = ({ title, label, children }: ToolbarDropdownProps) => {
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen) clearTextSelection();
+  };
+
   return (
-    <DropdownMenu.Root>
+    <DropdownMenu.Root onOpenChange={handleOpenChange}>
       <RadixToolbar.Button asChild>
         <Tooltip label={label}>
           <DropdownMenu.Trigger className="cursor-pointer">
@@ -226,8 +235,11 @@ const Tooltip = ({
   label?: string;
   children: ReactNode;
 }) => {
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen) clearTextSelection();
+  };
   return (
-    <RadixTooltip.Root>
+    <RadixTooltip.Root onOpenChange={handleOpenChange}>
       <RadixTooltip.Trigger asChild tabIndex={-1}>
         {children}
       </RadixTooltip.Trigger>
