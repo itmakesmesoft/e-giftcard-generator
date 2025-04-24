@@ -36,9 +36,9 @@ const CanvasImage = (props: CanvasImageProps) => {
       width={width}
       height={height}
       dataURL={dataURL}
+      {...restProps}
       x={centerX}
       y={centerY}
-      {...restProps}
     />
   );
 };
