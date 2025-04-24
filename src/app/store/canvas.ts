@@ -78,10 +78,21 @@ const useControlStore = create<State & Action>((set) => ({
 
 type StateConfig = ShapeConfig[];
 
+type CanvasOption = {
+  canvasSize: { width: number; height: number };
+  bgColor: string;
+};
+
+type CanvasState = {
+  shapes: StateConfig;
+  canvasOption: CanvasOption;
+};
+
 type Shapes = {
-  history: StateConfig[];
+  history: CanvasState[];
   historyIndex: number;
   shapes: StateConfig;
+  canvasOption: CanvasOption;
 };
 
 type FunctionableState =
@@ -90,6 +101,10 @@ type FunctionableState =
 
 type ChangeAction = {
   setShapes: (shapes: FunctionableState, logHistory?: boolean) => void;
+  setCanvasOption: (
+    option: Partial<CanvasOption>,
+    logHistory?: boolean
+  ) => void;
   redo: () => void;
   undo: () => void;
   moveToForward: (id: string) => void;
@@ -110,13 +125,43 @@ const useShapeStore = create<Shapes & ChangeAction>((set) => ({
   shapes: [],
   history: [],
   historyIndex: -1,
+  canvasOption: {
+    canvasSize: { width: 400, height: 600 },
+    bgColor: "#ffffff",
+  },
+  setCanvasOption: (option, logHistory = true) =>
+    set((state) => {
+      const newCanvasOption = {
+        ...state.canvasOption,
+        ...option,
+      };
+
+      if (logHistory) {
+        const updated = [
+          ...state.history.slice(0, state.historyIndex + 1),
+          {
+            shapes: state.shapes,
+            canvasOption: newCanvasOption,
+          },
+        ];
+        return {
+          canvasOption: newCanvasOption,
+          history: updated,
+          historyIndex: updated.length - 1,
+        };
+      }
+      return { canvasOption: newCanvasOption };
+    }),
   setShapes: (shapes, logHistory = true) =>
     set((state) => {
       const newShapes = updatestate(state.shapes, shapes);
       if (logHistory) {
         const updated = [
           ...state.history.slice(0, state.historyIndex + 1),
-          newShapes,
+          {
+            shapes: newShapes,
+            canvasOption: state.canvasOption,
+          },
         ];
         const history = updated;
         const historyIndex = updated.length - 1;
@@ -124,11 +169,17 @@ const useShapeStore = create<Shapes & ChangeAction>((set) => ({
       }
       return { shapes: newShapes };
     }),
+
   redo: () =>
     set((state) => {
       const historyIndex = state.historyIndex + 1;
       if (historyIndex < state.history.length) {
-        return { historyIndex, shapes: state.history[historyIndex] };
+        const historyItem = state.history[historyIndex];
+        return {
+          historyIndex,
+          shapes: historyItem.shapes,
+          canvasOption: historyItem.canvasOption,
+        };
       }
       return state;
     }),
@@ -136,9 +187,18 @@ const useShapeStore = create<Shapes & ChangeAction>((set) => ({
   undo: () =>
     set((state) => {
       const historyIndex = state.historyIndex - 1;
+      if (historyIndex >= 0) {
+        const historyItem = state.history[historyIndex];
+        return {
+          historyIndex,
+          shapes: historyItem.shapes,
+          canvasOption: historyItem.canvasOption,
+        };
+      }
       return {
-        historyIndex: Math.max(historyIndex, -1),
-        shapes: historyIndex >= 0 ? state.history[historyIndex] : [],
+        historyIndex: -1,
+        shapes: [],
+        canvasOption: state.canvasOption,
       };
     }),
   moveToForward: (id: string) =>
@@ -152,7 +212,10 @@ const useShapeStore = create<Shapes & ChangeAction>((set) => ({
 
       const history = [
         ...state.history.slice(0, state.historyIndex + 1),
-        newShapes,
+        {
+          shapes: newShapes,
+          canvasOption: state.canvasOption,
+        },
       ];
       const historyIndex = history.length - 1;
 
@@ -169,7 +232,10 @@ const useShapeStore = create<Shapes & ChangeAction>((set) => ({
 
       const history = [
         ...state.history.slice(0, state.historyIndex + 1),
-        newShapes,
+        {
+          shapes: newShapes,
+          canvasOption: state.canvasOption,
+        },
       ];
       const historyIndex = history.length - 1;
 
