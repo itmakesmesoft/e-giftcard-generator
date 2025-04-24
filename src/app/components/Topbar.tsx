@@ -22,7 +22,7 @@ import MoveForwardIcon from "./assets/MoveForwardIcon";
 import MoveBackwardIcon from "./assets/MoveBackwardIcon";
 import { RxTransparencyGrid } from "react-icons/rx";
 import { useHotkeys } from "react-hotkeys-hook";
-import { useControl, useFonts, useSelect, useDebounce } from "@/app/hooks";
+import { useControl, useFonts, useSelect, useDebounceValue } from "@/app/hooks";
 
 const fontStyleOptions = [
   {
@@ -69,7 +69,7 @@ const getProperPanelType = (nodes: Konva.Node[]) => {
   return type;
 };
 
-const Menubar = ({ className }: { className: string }) => {
+const Topbar = ({ className }: { className: string }) => {
   const { clearSelectNodes } = useSelect();
   const { getAttributes, setAttributes } = useControl();
   const [panelType, setPanelType] = useState<PanelType>(null);
@@ -543,7 +543,7 @@ const BrushControlPanel = ({
   );
 };
 
-export default Menubar;
+export default Topbar;
 
 const BrushRadiusControl = ({
   value,
@@ -553,7 +553,7 @@ const BrushRadiusControl = ({
   onValueChange: (value: number) => void;
 }) => {
   const [brushRadius, setBrushRadius] = useState<number>(value);
-  const debounced = useDebounce(brushRadius, 300);
+  const debounced = useDebounceValue(brushRadius, 300);
 
   const radius = 0.16 * Math.max(brushRadius, 1) + 4;
 

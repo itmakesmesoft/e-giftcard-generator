@@ -1,10 +1,10 @@
 "use client";
 
 import { CanvasProvider } from "@/app/context/canvas";
-import Sidebar from "./Sidebar";
+import LeftSidebar from "./LeftSidebar/LeftSidebar";
 import Canvas from "./konva/Canvas";
 import Stage from "./konva/Stage";
-import Menubar from "./Menubar";
+import Topbar from "./Topbar";
 import FloatingButtonGroup from "./FloatingButtonGroup";
 
 const CanvasContainer = () => {
@@ -16,8 +16,8 @@ const CanvasContainer = () => {
             Gifticon Generator
           </span>
         </div>
-        <Sidebar className="fixed left-2 z-50" />
-        <Menubar className="fixed top-2 z-50" />
+        <LeftSidebar className="fixed left-2 z-50" />
+        <Topbar className="fixed top-2 z-50" />
         <FloatingButtonGroup className="fixed bottom-2 right-2 z-50" />
         <Stage>
           <Canvas />
