@@ -4,7 +4,7 @@ import { CanvasProvider } from "@/app/context/canvas";
 import LeftSidebar from "./LeftSidebar/LeftSidebar";
 import Canvas from "./konva/Canvas";
 import Stage from "./konva/Stage";
-import Topbar from "./Topbar";
+import Topbar from "./Topbar/Topbar";
 import FloatingButtonGroup from "./FloatingButtonGroup";
 
 const CanvasContainer = () => {

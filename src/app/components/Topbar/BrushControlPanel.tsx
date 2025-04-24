@@ -1,0 +1,71 @@
+import Toolbar from "@/components/Toolbar";
+import BrushRadiusControl from "./BrushRadiusControl";
+import { Slider } from "radix-ui";
+import { RxTransparencyGrid } from "react-icons/rx";
+import { useControl } from "@/app/hooks";
+import { ColorResult } from "react-color";
+import { ControlPanelProps } from "./types";
+
+const BrushControlPanel = (props: ControlPanelProps) => {
+  const { updateSelectedShapeAttributes } = props;
+  const { getAttributes, setAttributes } = useControl();
+
+  const onBrushColorChange = (value: ColorResult) => {
+    setAttributes.setStroke(value.hex);
+    updateSelectedShapeAttributes({ stroke: value.hex });
+  };
+
+  const onBrushWidthChange = (value: number) => {
+    setAttributes.setStrokeWidth(value);
+    updateSelectedShapeAttributes({ strokeWidth: value });
+  };
+
+  const onOpacityChange = (value: number[]) => {
+    setAttributes.setOpacity(value[0]);
+    updateSelectedShapeAttributes({ opacity: value[0] });
+  };
+
+  return (
+    <>
+      <Toolbar.ColorPicker
+        label="브러쉬 색상"
+        color={getAttributes.stroke}
+        onValueChangeComplete={onBrushColorChange}
+      />
+      <Toolbar.Dropdown
+        label="불투명도"
+        title={
+          <RxTransparencyGrid
+            width="24"
+            height="24"
+            style={{ background: `rgba(0,0,0,${getAttributes.opacity})` }}
+          />
+        }
+      >
+        <p>Opacity</p>
+        <Slider.Root
+          className="relative flex items-center select-none touch-none w-[200px] h-4"
+          max={1}
+          min={0}
+          value={[getAttributes.opacity]}
+          onValueChange={onOpacityChange}
+          step={0.01}
+        >
+          <Slider.Track className="bg-black relative grow-1 h-1">
+            <Slider.Range className="absolute bg-blue-500 h-full" />
+          </Slider.Track>
+          <Slider.Thumb
+            className="block w-4 h-4 bg-red-500 rounded-full"
+            aria-label="opacity"
+          />
+        </Slider.Root>
+      </Toolbar.Dropdown>
+      <BrushRadiusControl
+        value={getAttributes.strokeWidth}
+        onValueChange={onBrushWidthChange}
+      />
+    </>
+  );
+};
+
+export default BrushControlPanel;

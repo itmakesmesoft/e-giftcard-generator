@@ -1,0 +1,172 @@
+import Konva from "konva";
+import { nanoid } from "nanoid";
+import { ColorResult } from "react-color";
+import Toolbar from "@/components/Toolbar";
+import { useHotkeys } from "react-hotkeys-hook";
+import { useEffect, useRef, useState } from "react";
+import { useControl, useSelect } from "@/app/hooks";
+import TextControlPanel from "./TextControlPanel";
+import ShapeControlPanel from "./ShapeControlPanel";
+import BrushControlPanel from "./BrushControlPanel";
+import DeleteIcon from "@/components/assets/DeleteIcon";
+import { useCanvasContext } from "@/app/context/canvas";
+import { useControlStore, useShapeStore } from "@/app/store/canvas";
+import { PanelType } from "./types";
+
+const Topbar = ({ className }: { className: string }) => {
+  const clipboardRef = useRef<Konva.Node[]>(null);
+  const [panelType, setPanelType] = useState<PanelType>(null);
+
+  const setShapes = useShapeStore((state) => state.setShapes);
+  const action = useControlStore((state) => state.action);
+
+  const { clearSelectNodes } = useSelect();
+  const { getAttributes, setAttributes } = useControl();
+  const { selectedNodes, selectNodesByIdList, getAllSelectedNodes } =
+    useCanvasContext();
+
+  useEffect(() => {
+    if (selectedNodes.length === 0) {
+      switch (action) {
+        case "text":
+          setPanelType("text");
+          break;
+        case "pencil":
+        case "eraser":
+          setPanelType("brush");
+          break;
+        case "rectangle":
+        case "circle":
+        case "arrow":
+          setPanelType("shape");
+          break;
+        default:
+          setPanelType(null);
+      }
+      return;
+    }
+
+    const type = getProperPanelType(selectedNodes);
+    switch (type) {
+      case "text":
+        setPanelType("text");
+        break;
+      case "shape":
+        setPanelType("shape");
+        break;
+      default:
+        setPanelType(null);
+    }
+  }, [selectedNodes, action]);
+
+  const copySelectedShapes = () => {
+    if (!selectedNodes) return;
+    clipboardRef.current = selectedNodes;
+  };
+
+  const pasteCopiedShape = () => {
+    if (!clipboardRef.current) return;
+    const ids: string[] = [];
+    const copied = clipboardRef.current?.map(({ attrs }) => {
+      const id = nanoid();
+      ids.push(id);
+
+      // 이전 참조값을 제거하기 위해 ref는 구조분해 후 제거
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { ref: _, ...restAttrs } = attrs;
+      return {
+        ...restAttrs,
+        id,
+        x: attrs.x + 10,
+        y: attrs.y + 10,
+      };
+    });
+    setShapes((shapes) => [...shapes, ...copied]);
+    selectNodesByIdList(ids);
+  };
+
+  const updateSelectedShapeAttributes = (newAttrs: Konva.ShapeConfig) => {
+    const ids = selectedNodes.map((node) => node.attrs.id);
+    if (ids.length === 0) return;
+
+    setShapes((shapes) =>
+      shapes.map((shape) => {
+        const shapeId = shape.id;
+        return shapeId && ids.includes(shapeId)
+          ? { ...shape, ...newAttrs }
+          : shape;
+      })
+    );
+  };
+  const removeShapeOnCanvas = () => {
+    const nodes = getAllSelectedNodes();
+    const ids = nodes.map((node) => node.attrs.id) as string[];
+    if (ids.length === 0) return;
+    setShapes((shapes) =>
+      shapes.filter((shape) => shape.id && !ids.includes(shape.id))
+    );
+    clearSelectNodes();
+  };
+
+  useHotkeys(["delete", "backspace"], () => {
+    removeShapeOnCanvas();
+  });
+
+  useHotkeys("ctrl+c", copySelectedShapes, [selectedNodes]);
+
+  useHotkeys("ctrl+v", pasteCopiedShape, [selectedNodes]);
+
+  const onBgColorChange = (value: ColorResult) => {
+    setAttributes.setCanvasOption((prev) => ({ ...prev, bgColor: value.hex }));
+    // updateSelectedShapeAttributes({ bgColor: value.hex });
+  };
+
+  return (
+    <div className={className}>
+      <Toolbar>
+        <Toolbar.ColorPicker
+          label="배경 색상"
+          color={getAttributes.bgColor}
+          className="rounded-none"
+          onValueChangeComplete={onBgColorChange}
+        />
+
+        {panelType === "shape" && (
+          <ShapeControlPanel
+            updateSelectedShapeAttributes={updateSelectedShapeAttributes}
+          />
+        )}
+        {panelType === "text" && (
+          <TextControlPanel
+            updateSelectedShapeAttributes={updateSelectedShapeAttributes}
+          />
+        )}
+        {panelType === "brush" && (
+          <BrushControlPanel
+            updateSelectedShapeAttributes={updateSelectedShapeAttributes}
+          />
+        )}
+        <Toolbar.Separator />
+        <Toolbar.Tooltip label="삭제">
+          <Toolbar.Button onClick={removeShapeOnCanvas}>
+            <DeleteIcon width="17" height="17" />
+          </Toolbar.Button>
+        </Toolbar.Tooltip>
+      </Toolbar>
+    </div>
+  );
+};
+export default Topbar;
+
+const getProperPanelType = (nodes: Konva.Node[]) => {
+  let type = null;
+  for (const node of nodes) {
+    let tmpType;
+    if (node.attrs.type === "text") tmpType = "text";
+    else tmpType = "shape";
+
+    if (!type) type = tmpType;
+    else if (type !== tmpType) return null;
+  }
+  return type;
+};

@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useCanvasContext } from "../context/canvas";
-import { State, useControlStore } from "../store/canvas";
+import { State, useShapeStore, useControlStore } from "../store/canvas";
 
 const defaultValues: State = {
   action: "select",
@@ -24,7 +24,6 @@ const useControl = () => {
   const action = useControlStore((state) => state.action);
   const setAction = useControlStore((state) => state.setAction);
 
-  const bgColor = useControlStore((state) => state.bgColor);
   const fill = useControlStore((state) => state.fill);
   const stroke = useControlStore((state) => state.stroke);
   const strokeWidth = useControlStore((state) => state.strokeWidth);
@@ -38,7 +37,6 @@ const useControl = () => {
   const fontStyle = useControlStore((state) => state.fontStyle);
   const typeFace = useControlStore((state) => state.typeFace);
   const textAlign = useControlStore((state) => state.textAlign);
-  const setBgColor = useControlStore((state) => state.setBgColor);
   const setFill = useControlStore((state) => state.setFill);
   const setOpacity = useControlStore((state) => state.setOpacity);
   const setStroke = useControlStore((state) => state.setStroke);
@@ -52,6 +50,9 @@ const useControl = () => {
   const setFontStyle = useControlStore((state) => state.setFontStyle);
   const setTypeFace = useControlStore((state) => state.setTypeFace);
   const setTextAlign = useControlStore((state) => state.setTextAlign);
+
+  const canvasOption = useShapeStore((state) => state.canvasOption);
+  const setCanvasOption = useShapeStore((state) => state.setCanvasOption);
 
   const { selectedNodes } = useCanvasContext();
 
@@ -101,7 +102,7 @@ const useControl = () => {
     action,
     setAction,
     getAttributes: {
-      bgColor,
+      canvasOption,
       fill,
       stroke,
       strokeWidth,
@@ -117,7 +118,7 @@ const useControl = () => {
       textAlign,
     },
     setAttributes: {
-      setBgColor,
+      setCanvasOption,
       setFill,
       setStroke,
       setStrokeWidth,
