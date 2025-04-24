@@ -58,6 +58,8 @@ const LeftSidebar = ({ className }: { className: string }) => {
   const redo = useShapeStore((state) => state.redo);
   const undo = useShapeStore((state) => state.undo);
   const setShapes = useShapeStore((state) => state.setShapes);
+  const isFirstHistory = useShapeStore((state) => state.isFirstHistory);
+  const isLastHistory = useShapeStore((state) => state.isLastHistory);
 
   const handleToolChange = (newAction: ActionType) => {
     setAction(newAction);
@@ -137,12 +139,25 @@ const LeftSidebar = ({ className }: { className: string }) => {
       <Menubar.MenuItem
         onClick={undo}
         label="뒤로"
-        icon={<ResetIcon width="18" height="18" />}
+        icon={
+          <ResetIcon
+            width="18"
+            height="18"
+            color={isFirstHistory ? "#a1a1a1" : "#000"}
+          />
+        }
       />
       <Menubar.MenuItem
         onClick={redo}
         label="앞으로"
-        icon={<ResetIcon className="rotate-180" width="18" height="18" />}
+        icon={
+          <ResetIcon
+            className="rotate-180"
+            width="18"
+            height="18"
+            color={isLastHistory ? "#a1a1a1" : "#000"}
+          />
+        }
         className="pb-3"
       />
 

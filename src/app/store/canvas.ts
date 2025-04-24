@@ -6,7 +6,8 @@ export type TextAlign = "center" | "left" | "right";
 export type FontWeight = string | number;
 export type FontStyle = "italic" | "normal";
 
-export type State = {
+// Control Store 타입 정의
+type ControlState = {
   action: ActionType;
   bgColor: string;
   fill: string;
@@ -24,25 +25,25 @@ export type State = {
   textAlign: TextAlign;
 };
 
-export type Action = {
-  setAction: (action: State["action"]) => void;
-  setBgColor: (fontSize: State["bgColor"]) => void;
-  setFontSize: (fontSize: State["fontSize"]) => void;
-  setFontWeight: (fontWeight: State["fontWeight"]) => void;
-  setFontFamily: (fontFamily: State["fontFamily"]) => void;
-  setFontStyle: (fontStyle: State["fontStyle"]) => void;
-  setTypeFace: (fontStyle: State["typeFace"]) => void;
-  setTextAlign: (textAlign: State["textAlign"]) => void;
-  setFill: (fill: State["fill"]) => void;
-  setStroke: (stroke: State["stroke"]) => void;
-  setStrokeWidth: (strokeWidth: State["strokeWidth"]) => void;
-  setOpacity: (opacity: State["opacity"]) => void;
-  setLineJoin: (lineJoin: State["lineJoin"]) => void;
-  setLineCap: (lineCap: State["lineCap"]) => void;
-  setRadius: (radius: State["radius"]) => void;
+type ControlActions = {
+  setAction: (action: ControlState["action"]) => void;
+  setBgColor: (bgColor: ControlState["bgColor"]) => void;
+  setFontSize: (fontSize: ControlState["fontSize"]) => void;
+  setFontWeight: (fontWeight: ControlState["fontWeight"]) => void;
+  setFontFamily: (fontFamily: ControlState["fontFamily"]) => void;
+  setFontStyle: (fontStyle: ControlState["fontStyle"]) => void;
+  setTypeFace: (typeFace: ControlState["typeFace"]) => void;
+  setTextAlign: (textAlign: ControlState["textAlign"]) => void;
+  setFill: (fill: ControlState["fill"]) => void;
+  setStroke: (stroke: ControlState["stroke"]) => void;
+  setStrokeWidth: (strokeWidth: ControlState["strokeWidth"]) => void;
+  setOpacity: (opacity: ControlState["opacity"]) => void;
+  setLineJoin: (lineJoin: ControlState["lineJoin"]) => void;
+  setLineCap: (lineCap: ControlState["lineCap"]) => void;
+  setRadius: (radius: ControlState["radius"]) => void;
 };
 
-const useControlStore = create<State & Action>((set) => ({
+const useControlStore = create<ControlState & ControlActions>((set) => ({
   action: "select",
   bgColor: "#ffffff",
   fill: "#ff0000",
@@ -52,7 +53,6 @@ const useControlStore = create<State & Action>((set) => ({
   lineJoin: "round",
   lineCap: "round",
   radius: 0,
-  image: "",
   fontSize: 16,
   fontWeight: 500,
   fontFamily: "Arial",
@@ -76,10 +76,13 @@ const useControlStore = create<State & Action>((set) => ({
   setRadius: (radius) => set(() => ({ radius })),
 }));
 
+// Canvas Store 타입 정의
 type StateConfig = ShapeConfig[];
 
+type CanvasSize = { width: number; height: number };
+
 type CanvasOption = {
-  canvasSize: { width: number; height: number };
+  canvasSize: CanvasSize;
   bgColor: string;
 };
 
@@ -88,21 +91,22 @@ type CanvasState = {
   canvasOption: CanvasOption;
 };
 
-type Shapes = {
+type CanvasStoreState = {
   history: CanvasState[];
   historyIndex: number;
+  isFirstHistory: boolean;
+  isLastHistory: boolean;
   shapes: StateConfig;
   canvasOption: CanvasOption;
 };
 
-type FunctionableState =
-  | StateConfig
-  | ((prevState: StateConfig) => StateConfig);
-
-type ChangeAction = {
-  setShapes: (shapes: FunctionableState, logHistory?: boolean) => void;
+type CanvasStoreActions = {
+  setShapes: (
+    shapes: FunctionableState<StateConfig>,
+    logHistory?: boolean
+  ) => void;
   setCanvasOption: (
-    option: Partial<CanvasOption>,
+    option: FunctionableState<CanvasOption>,
     logHistory?: boolean
   ) => void;
   redo: () => void;
@@ -111,135 +115,123 @@ type ChangeAction = {
   moveToBackward: (id: string) => void;
 };
 
-const updatestate = (
-  prevState: StateConfig,
-  newState: FunctionableState
-): StateConfig => {
-  if (typeof newState === "function") {
-    return (newState as (prevState: StateConfig) => StateConfig)(prevState);
-  }
-  return newState;
+type FunctionableState<T> = T | ((prevState: T) => T);
+
+const updateState = <T>(prevState: T, newState: FunctionableState<T>): T =>
+  typeof newState === "function"
+    ? (newState as (prevState: T) => T)(prevState)
+    : newState;
+
+const updateHistory = (
+  state: CanvasStoreState,
+  newState: { shapes: StateConfig; canvasOption: CanvasOption }
+) => {
+  const updatedHistory = [
+    ...state.history.slice(0, state.historyIndex + 1),
+    newState,
+  ];
+  return {
+    history: updatedHistory,
+    historyIndex: updatedHistory.length - 1,
+    isFirstHistory: false,
+    isLastHistory: true,
+  };
 };
 
-const useShapeStore = create<Shapes & ChangeAction>((set) => ({
+const useShapeStore = create<CanvasStoreState & CanvasStoreActions>((set) => ({
   shapes: [],
   history: [],
   historyIndex: -1,
+  isFirstHistory: true,
+  isLastHistory: true,
   canvasOption: {
     canvasSize: { width: 400, height: 600 },
     bgColor: "#ffffff",
   },
   setCanvasOption: (option, logHistory = true) =>
     set((state) => {
-      const newCanvasOption = {
-        ...state.canvasOption,
-        ...option,
-      };
-
+      const newCanvasOption = updateState(state.canvasOption, option);
       if (logHistory) {
-        const updated = [
-          ...state.history.slice(0, state.historyIndex + 1),
-          {
-            shapes: state.shapes,
-            canvasOption: newCanvasOption,
-          },
-        ];
         return {
           canvasOption: newCanvasOption,
-          history: updated,
-          historyIndex: updated.length - 1,
+          ...updateHistory(state, {
+            shapes: state.shapes,
+            canvasOption: newCanvasOption,
+          }),
         };
       }
       return { canvasOption: newCanvasOption };
     }),
   setShapes: (shapes, logHistory = true) =>
     set((state) => {
-      const newShapes = updatestate(state.shapes, shapes);
+      const newShapes = updateState(state.shapes, shapes);
       if (logHistory) {
-        const updated = [
-          ...state.history.slice(0, state.historyIndex + 1),
-          {
+        return {
+          shapes: newShapes,
+          ...updateHistory(state, {
             shapes: newShapes,
             canvasOption: state.canvasOption,
-          },
-        ];
-        const history = updated;
-        const historyIndex = updated.length - 1;
-        return { shapes: newShapes, history, historyIndex };
+          }),
+        };
       }
       return { shapes: newShapes };
     }),
-
   redo: () =>
     set((state) => {
-      const historyIndex = state.historyIndex + 1;
-      if (historyIndex < state.history.length) {
-        const historyItem = state.history[historyIndex];
-        return {
-          historyIndex,
-          shapes: historyItem.shapes,
-          canvasOption: historyItem.canvasOption,
-        };
-      }
-      return state;
+      const nextIndex = Math.min(
+        state.historyIndex + 1,
+        state.history.length - 1
+      );
+      const nextHistoryItem = state.history[nextIndex];
+      return {
+        historyIndex: nextIndex,
+        isFirstHistory: nextIndex === -1,
+        isLastHistory: nextIndex === state.history.length - 1,
+        shapes: nextIndex !== -1 ? nextHistoryItem.shapes : [],
+        canvasOption:
+          nextIndex !== -1 ? nextHistoryItem.canvasOption : state.canvasOption,
+      };
     }),
-
   undo: () =>
     set((state) => {
-      const historyIndex = state.historyIndex - 1;
-      if (historyIndex >= 0) {
-        const historyItem = state.history[historyIndex];
-        return {
-          historyIndex,
-          shapes: historyItem.shapes,
-          canvasOption: historyItem.canvasOption,
-        };
-      }
+      const prevIndex = Math.max(state.historyIndex - 1, -1);
+      const prevHistoryItem = state.history[prevIndex];
       return {
-        historyIndex: -1,
-        shapes: [],
-        canvasOption: state.canvasOption,
+        shapes: prevIndex !== -1 ? prevHistoryItem.shapes : [],
+        canvasOption:
+          prevIndex !== -1 ? prevHistoryItem.canvasOption : state.canvasOption,
+        historyIndex: prevIndex,
+        isFirstHistory: prevIndex === -1,
+        isLastHistory: prevIndex === state.history.length - 1,
       };
     }),
   moveToForward: (id: string) =>
     set((state) => {
-      const shape = state.shapes.find((shape) => shape.id === id);
+      const shape = state.shapes.find((s) => s.id === id);
       if (!shape) return state;
-      const newShapes = [...state.shapes];
-      const index = newShapes.indexOf(shape);
-      newShapes.splice(index, 1);
+      const newShapes = state.shapes.filter((s) => s.id !== id);
       newShapes.push(shape);
-
-      const history = [
-        ...state.history.slice(0, state.historyIndex + 1),
-        {
+      return {
+        shapes: newShapes,
+        ...updateHistory(state, {
           shapes: newShapes,
           canvasOption: state.canvasOption,
-        },
-      ];
-      const historyIndex = history.length - 1;
-
-      return { shapes: newShapes, history, historyIndex };
+        }),
+      };
     }),
   moveToBackward: (id: string) =>
     set((state) => {
-      const shape = state.shapes.find((shape) => shape.id === id);
+      const shape = state.shapes.find((s) => s.id === id);
       if (!shape) return state;
-      const newShapes = [...state.shapes];
-      const index = newShapes.indexOf(shape);
-      newShapes.splice(index, 1);
+      const newShapes = state.shapes.filter((s) => s.id !== id);
       newShapes.unshift(shape);
-
-      const history = [
-        ...state.history.slice(0, state.historyIndex + 1),
-        {
+      return {
+        shapes: newShapes,
+        ...updateHistory(state, {
           shapes: newShapes,
           canvasOption: state.canvasOption,
-        },
-      ];
-      const historyIndex = history.length - 1;
-
-      return { shapes: newShapes, history, historyIndex };
+        }),
+      };
     }),
 }));
 

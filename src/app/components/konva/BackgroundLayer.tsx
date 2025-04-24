@@ -1,4 +1,4 @@
-import { useControlStore } from "@/app/store/canvas";
+import { useShapeStore } from "@/app/store/canvas";
 import Konva from "konva";
 import { Layer, Rect } from "react-konva";
 
@@ -22,7 +22,7 @@ const BackgroundLayer = (props: {
     y,
     ...restProps
   } = props;
-  const bgColor = useControlStore((state) => state.bgColor);
+  const bgColor = useShapeStore((state) => state.canvasOption.bgColor);
   return (
     <Layer {...restProps}>
       <Rect

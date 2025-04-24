@@ -126,7 +126,7 @@ const Topbar = ({ className }: { className: string }) => {
       <Toolbar>
         <Toolbar.ColorPicker
           label="배경 색상"
-          color={getAttributes.bgColor}
+          color={getAttributes.canvasOption.bgColor}
           className="rounded-none"
           onValueChangeComplete={onBgColorChange}
         />

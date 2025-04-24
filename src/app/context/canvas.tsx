@@ -101,7 +101,14 @@ export const CanvasProvider = ({ children }: { children: ReactNode }) => {
   const { getAttributes, setAttributes } = useControl();
   const setShapes = useShapeStore((state) => state.setShapes);
 
-  const getPointerPosition = (): Vector2d => {
+  // useEffect(() => {
+  //   const { width, height } = getAttributes.canvasOption.canvasSize;
+  //   if (width === canvasSize.width && height === canvasSize.height) return;
+
+  //   setAttributes.setCanvasOption((prev) => ({ ...prev, canvasSize }));
+  // }, [setAttributes, canvasSize, getAttributes]);
+
+  const getPointerPosition = useCallback((): Vector2d => {
     if (!stageRef.current) return { x: 0, y: 0 };
     const stagePos = stageRef.current.getPosition();
     const scale = stageRef.current.getAbsoluteScale();
@@ -111,7 +118,7 @@ export const CanvasProvider = ({ children }: { children: ReactNode }) => {
       x: (pointerPos.x - stagePos.x) / scale.x,
       y: (pointerPos.y - stagePos.y) / scale.y,
     };
-  };
+  }, []);
 
   // 위치를 절대 위치 또는 상대 위치로 바꾸는 함수
   const convertPosition = useCallback(
@@ -161,11 +168,42 @@ export const CanvasProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (selectedNodes.length > 0) {
       transformerRef.current?.nodes([...selectedNodes]);
-      console.log(selectedNodes);
       return;
     }
     transformerRef.current?.nodes([]);
   }, [selectedNodes]);
+
+  const resize = useCallback(() => {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const posX = (width - canvasSize.width) / 2;
+    const posY = (height - canvasSize.height) / 2;
+    console.log(width, height, posX, posY);
+
+    setShapes(
+      (shapes) =>
+        shapes.map((shape) => ({
+          ...shape,
+          ...convertToAbsolutePosition(
+            convertToRelativePosition(shape),
+            posX,
+            posY
+          ),
+        })),
+      false
+    );
+    setViewportSize({ width, height });
+    setCanvasPos({
+      x: posX,
+      y: posY,
+    });
+  }, [
+    canvasSize.height,
+    canvasSize.width,
+    convertToAbsolutePosition,
+    convertToRelativePosition,
+    setShapes,
+  ]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -174,42 +212,42 @@ export const CanvasProvider = ({ children }: { children: ReactNode }) => {
         height: window.innerHeight,
       });
     }
-
-    const resize = () => {
-      setViewportSize({ width: window.innerWidth, height: window.innerHeight });
-    };
+    resize();
     window.addEventListener("resize", resize);
 
     return () => window.removeEventListener("resize", resize);
-  }, []);
+  }, [resize]);
 
   const canvasPosRef = useRef<Vector2d>(null);
 
-  useEffect(() => {
-    setCanvasPos({
-      x: (viewportSize.width - canvasSize.width) / 2,
-      y: (viewportSize.height - canvasSize.height) / 2,
-    });
-  }, [canvasSize, setCanvasPos, viewportSize]);
+  // useEffect(() => {}, [
+  //   canvasSize.height,
+  //   canvasSize.width,
+  //   convertToAbsolutePosition,
+  //   convertToRelativePosition,
+  //   setShapes,
+  //   viewportSize.height,
+  //   viewportSize.width,
+  // ]);
 
-  useEffect(() => {
-    setShapes((shapes) =>
-      shapes.map((shape) => ({
-        ...shape,
-        ...convertToAbsolutePosition(
-          convertToRelativePosition(shape),
-          canvasPos.x,
-          canvasPos.y
-        ),
-      }))
-    );
-    canvasPosRef.current = canvasPos;
-  }, [
-    canvasPos,
-    convertToAbsolutePosition,
-    convertToRelativePosition,
-    setShapes,
-  ]);
+  // useEffect(() => {
+  //   setShapes((shapes) =>
+  //     shapes.map((shape) => ({
+  //       ...shape,
+  //       ...convertToAbsolutePosition(
+  //         convertToRelativePosition(shape),
+  //         canvasPos.x,
+  //         canvasPos.y
+  //       ),
+  //     }))
+  //   );
+  //   canvasPosRef.current = canvasPos;
+  // }, [
+  //   canvasPos,
+  //   convertToAbsolutePosition,
+  //   convertToRelativePosition,
+  //   setShapes,
+  // ]);
 
   const selectNodeById = (id: string) => {
     if (!transformerRef.current || !stageRef.current) return;
@@ -222,7 +260,7 @@ export const CanvasProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const selectNodesByIdList = (idList: string[]) => {
+  const selectNodesByIdList = useCallback((idList: string[]) => {
     if (!transformerRef.current || !stageRef.current) return;
 
     const stage = stageRef.current;
@@ -231,7 +269,7 @@ export const CanvasProvider = ({ children }: { children: ReactNode }) => {
       idList.includes(attrs.id)
     );
     if (nodes && nodes.length > 0) setSelectedNodes(nodes);
-  };
+  }, []);
 
   const getSingleSelectedNode = (): Konva.Node | undefined =>
     transformerRef.current?.getNode();
@@ -249,9 +287,14 @@ export const CanvasProvider = ({ children }: { children: ReactNode }) => {
       ...convertToAbsolutePosition(attrs), // 절대 좌표로 변환
     })) as ShapeConfig[];
 
-    setAttributes.setBgColor(bgColor);
-    setCanvasSize({ width, height });
-    setShapes(children);
+    setAttributes.setCanvasOption(
+      () => ({
+        canvasSize: { width, height },
+        bgColor,
+      }),
+      false
+    );
+    setShapes(children, false);
   };
 
   const exportCanvasAsJSON = () => {
@@ -274,7 +317,7 @@ export const CanvasProvider = ({ children }: { children: ReactNode }) => {
     return {
       canvas: {
         ...canvasSize,
-        bgColor: getAttributes.bgColor,
+        bgColor: getAttributes.canvasOption.bgColor,
         children: children,
       },
     };
