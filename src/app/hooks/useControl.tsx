@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import { useCanvasContext } from "../context/canvas";
-import { State, useShapeStore, useControlStore } from "../store/canvas";
+import { ControlState, useShapeStore, useControlStore } from "../store/canvas";
 
-const defaultValues: State = {
+const defaultValues: ControlState = {
   action: "select",
   bgColor: "#ffffff",
   fill: "#ff0000",

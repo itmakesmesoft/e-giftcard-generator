@@ -7,7 +7,7 @@ export type FontWeight = string | number;
 export type FontStyle = "italic" | "normal";
 
 // Control Store 타입 정의
-type ControlState = {
+export type ControlState = {
   action: ActionType;
   bgColor: string;
   fill: string;
