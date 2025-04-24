@@ -34,7 +34,7 @@
 
 
 ## 🖥️ Built with
-- Next.js 14
+- Next.js 15
 - react-konva
 - radix-ui
 - TailwindCSS
