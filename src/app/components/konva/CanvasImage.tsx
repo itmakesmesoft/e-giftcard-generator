@@ -23,21 +23,18 @@ const CanvasImage = (props: CanvasImageProps) => {
       setImage(img);
     };
   }, [dataURL]);
+  const [width, height] = getProperImageSize(canvasSize, image);
 
-  const centerX = Math.floor(
-    canvasPos.x + (canvasSize.width - (image?.width ?? 1)) / 2
-  );
-  const centerY = Math.floor(
-    canvasPos.y + (canvasSize.height - (image?.height ?? 1)) / 2
-  );
+  const centerX = Math.floor(canvasPos.x + (canvasSize.width - width) / 2);
+  const centerY = Math.floor(canvasPos.y + (canvasSize.height - height) / 2);
 
   if (!image) return null;
 
   return (
     <KonvaImage
       image={image}
-      width={image?.width}
-      height={image?.height}
+      width={width}
+      height={height}
       dataURL={dataURL}
       x={centerX}
       y={centerY}
@@ -47,3 +44,28 @@ const CanvasImage = (props: CanvasImageProps) => {
 };
 
 export default CanvasImage;
+
+// 이미지의 사이즈가 캔버스보다 큰 경우를 대비해 캔버스 사이즈로 맞춰주는 함수
+const getProperImageSize = (
+  canvasSize: { width: number; height: number },
+  image: HTMLImageElement | null
+) => {
+  if (!image) return [1, 1];
+
+  let newWidth = image.width;
+  let newHeight = image.height;
+
+  // xHeight = canvasSize.width * height / width
+  if (newWidth > canvasSize.width) {
+    newHeight = (canvasSize.width * newHeight) / newWidth;
+    newWidth = canvasSize.width;
+  }
+
+  // xWidth = canvasSize.height * width / height
+  if (newHeight > canvasSize.height) {
+    newWidth = (canvasSize.height * newWidth) / newHeight;
+    newHeight = canvasSize.height;
+  }
+
+  return [newWidth, newHeight];
+};
