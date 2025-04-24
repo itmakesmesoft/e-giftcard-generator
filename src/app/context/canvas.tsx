@@ -91,6 +91,7 @@ export const CanvasProvider = ({ children }: { children: ReactNode }) => {
   } = defaultValue;
 
   const stageRef = useRef<Konva.Stage>(null);
+  const canvasPosRef = useRef<Vector2d>(null);
   const transformerRef = useRef<Konva.Transformer>(null);
   const [canvasPos, setCanvasPos] = useState<Vector2d>(cPos);
   const [canvasSize, setCanvasSize] = useState<CanvasSize>(cSize);
@@ -196,9 +197,9 @@ export const CanvasProvider = ({ children }: { children: ReactNode }) => {
       x: posX,
       y: posY,
     });
+    canvasPosRef.current = { x: posX, y: posY };
   }, [
-    canvasSize.height,
-    canvasSize.width,
+    canvasSize,
     convertToAbsolutePosition,
     convertToRelativePosition,
     setShapes,
@@ -216,8 +217,6 @@ export const CanvasProvider = ({ children }: { children: ReactNode }) => {
 
     return () => window.removeEventListener("resize", resize);
   }, [resize]);
-
-  const canvasPosRef = useRef<Vector2d>(null);
 
   const selectNodeById = (id: string) => {
     if (!transformerRef.current || !stageRef.current) return;
