@@ -1,5 +1,5 @@
 import Konva from "konva";
-import StrokeWidthIcon from "./ui/StrokeWidthIcon";
+import StrokeWidthIcon from "./assets/StrokeWidthIcon";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { useCanvasContext } from "@/app/context/canvas";
 import { TextAlign, useControlStore, useShapeStore } from "@/app/store/canvas";
@@ -17,9 +17,9 @@ import {
 import { nanoid } from "nanoid";
 import Toolbar from "./ui/Toolbar";
 import { ColorResult } from "react-color";
-import DeleteIcon from "./ui/DeleteIcon";
-import MoveForwardIcon from "./ui/MoveForwardIcon";
-import MoveBackwardIcon from "./ui/MoveBackwardIcon";
+import DeleteIcon from "./assets/DeleteIcon";
+import MoveForwardIcon from "./assets/MoveForwardIcon";
+import MoveBackwardIcon from "./assets/MoveBackwardIcon";
 import { RxTransparencyGrid } from "react-icons/rx";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useControl, useFonts, useSelect, useDebounce } from "@/app/hooks";

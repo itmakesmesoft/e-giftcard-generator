@@ -23,7 +23,7 @@ import {
   ZoomInIcon,
   ZoomOutIcon,
 } from "@radix-ui/react-icons";
-import QrIcon from "./ui/QrIcon";
+import QrIcon from "./assets/QrIcon";
 import { useControl, useSelect } from "@/app/hooks";
 import Image from "next/image";
 import DebounceInput from "./ui/DebounceInput";
