@@ -1,4 +1,4 @@
-import Menubar from "../../../components/Menubar";
+import Menubar from "@/components/Menubar";
 import { useShapeStore } from "@/app/store/canvas";
 import {
   readCodeByImage,
@@ -13,7 +13,6 @@ import {
   CircleIcon,
   CursorArrowIcon,
   EraserIcon,
-  FrameIcon,
   ImageIcon,
   MixIcon,
   Pencil1Icon,
@@ -238,17 +237,7 @@ const LeftSidebar = ({ className }: { className: string }) => {
       >
         <ImageIcon />
       </Menubar.MenuInputFileItem>
-      <Menubar.MenuGroup
-        label="Frame"
-        className="p-2 text-center w-[220px]"
-        trigger={
-          <Menubar.MenuGroupTrigger
-            icon={<FrameIcon width="18" height="18" />}
-          />
-        }
-      >
-        <FrameSize />
-      </Menubar.MenuGroup>
+      <FrameSize />
       <Menubar.Separator />
       <Menubar.MenuItem
         onClick={undo}

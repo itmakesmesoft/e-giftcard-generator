@@ -1,6 +1,6 @@
 import Input from "./Input";
 import { useState, useEffect } from "react";
-import useDebounce from "@/app/hooks/useDebounceValue";
+import useDebounceValue from "@/app/hooks/useDebounceValue";
 
 const DebounceInput = ({
   value,
@@ -14,7 +14,7 @@ const DebounceInput = ({
   [key: string]: unknown;
 }) => {
   const [inputValue, setInputValue] = useState<string | number>(value);
-  const debounced = useDebounce(inputValue, delay);
+  const debounced = useDebounceValue(inputValue, delay);
 
   useEffect(() => {
     if (debounced != value) onValueChange(debounced);

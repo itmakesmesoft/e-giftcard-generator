@@ -2,6 +2,8 @@ import Input from "../../../components/Input";
 import { useDebounce } from "@/app/hooks";
 import { useEffect, useState } from "react";
 import { useCanvasContext } from "@/app/context/canvas";
+import { FrameIcon } from "@radix-ui/react-icons";
+import Menubar from "@/components/Menubar";
 
 const FrameSize = () => {
   const { canvasSize, setCanvasSize } = useCanvasContext();
@@ -43,7 +45,13 @@ const FrameSize = () => {
     });
 
   return (
-    <>
+    <Menubar.MenuGroup
+      label="Frame"
+      className="p-2 text-center w-[220px]"
+      trigger={
+        <Menubar.MenuGroupTrigger icon={<FrameIcon width="18" height="18" />} />
+      }
+    >
       <p className="text-sm font-semibold">프레임 크기 조절</p>
       <div className="grid grid-cols-2 gap-4 px-2 py-1">
         <Input value={frameSize.width} onValueChange={handleWidthChange} />
@@ -55,7 +63,7 @@ const FrameSize = () => {
           비율 유지
         </button>
       </div>
-    </>
+    </Menubar.MenuGroup>
   );
 };
 
