@@ -6,16 +6,15 @@ import { Arrow, Circle, Layer, Line, Rect } from "react-konva";
 import { useControlStore, useShapeStore } from "@/app/store/canvas";
 import { KonvaEventObject, NodeConfig, Node } from "konva/lib/Node";
 import { useCanvasContext } from "@/app/context/canvas";
-import React from "react";
+import React, { useCallback } from "react";
 
 const Canvas = () => {
-  const action = useControlStore((state) => state.action);
   const { canvasSize, canvasPos } = useCanvasContext();
 
   return (
     <>
       <Layer id="_shapeLayer" clip={{ ...canvasSize, ...canvasPos }}>
-        <ShapesRenderer isDraggable={action === "select"} />
+        <ShapesRenderer />
       </Layer>
       <Layer id="_drawLayer" clip={{ ...canvasSize, ...canvasPos }}>
         <DrawingRenderer />
@@ -45,24 +44,31 @@ const DrawingRenderer = React.memo(() => {
   });
 });
 
-const ShapesRenderer = React.memo((props: { isDraggable: boolean }) => {
-  const { isDraggable } = props;
+const ShapesRenderer = React.memo(() => {
+  const action = useControlStore((state) => state.action);
+
   const shapes = useShapeStore((state) => state.shapes);
   const setShapes = useShapeStore((state) => state.setShapes);
 
-  const onDragEnd = (e: KonvaEventObject<DragEvent, Node<NodeConfig>>) => {
-    const position = e.target.getPosition() as Vector2d;
-    const id = e.target.attrs.id;
-    const updated = shapes.map((shape) => {
-      return shape.id === id
-        ? {
-            ...shape,
-            ...position,
-          }
-        : shape;
-    });
-    setShapes(updated);
-  };
+  const isDraggable = action === "select";
+
+  const onDragEnd = useCallback(
+    (e: KonvaEventObject<DragEvent, Node<NodeConfig>>) => {
+      const position = e.target.getPosition() as Vector2d;
+      const id = e.target.attrs.id;
+      setShapes((shapes) =>
+        shapes.map((shape) => {
+          return shape.id === id
+            ? {
+                ...shape,
+                ...position,
+              }
+            : shape;
+        })
+      );
+    },
+    [setShapes]
+  );
 
   return (
     <>
@@ -72,35 +78,34 @@ const ShapesRenderer = React.memo((props: { isDraggable: boolean }) => {
             return (
               <Rect
                 key={index}
-                strokeWidth={2}
-                draggable={isDraggable}
                 strokeScaleEnabled={false}
                 perfectDrawEnabled={false}
-                onDragEnd={onDragEnd}
                 {...node}
+                draggable={isDraggable}
+                onDragEnd={onDragEnd}
               />
             );
           case "circle":
             return (
               <Circle
                 key={index}
-                draggable={isDraggable}
                 strokeScaleEnabled={false}
                 perfectDrawEnabled={false}
-                onDragEnd={onDragEnd}
                 {...node}
+                draggable={isDraggable}
+                onDragEnd={onDragEnd}
               />
             );
           case "arrow":
             return (
               <Arrow
                 key={index}
-                draggable={isDraggable}
                 strokeScaleEnabled={false}
                 perfectDrawEnabled={false}
-                onDragEnd={onDragEnd}
-                points={node.points}
                 {...node}
+                points={node.points}
+                draggable={isDraggable}
+                onDragEnd={onDragEnd}
               />
             );
           case "image":
@@ -108,21 +113,21 @@ const ShapesRenderer = React.memo((props: { isDraggable: boolean }) => {
               <CanvasImage
                 key={index}
                 alt="이미지"
-                draggable={isDraggable}
                 perfectDrawEnabled={false}
-                onDragEnd={onDragEnd}
                 dataURL={node.dataURL}
                 {...node}
+                draggable={isDraggable}
+                onDragEnd={onDragEnd}
               />
             );
           case "text":
             return (
               <EditableText
                 key={index}
-                draggable={isDraggable}
                 perfectDrawEnabled={false}
-                onDragEnd={onDragEnd}
                 {...node}
+                draggable={isDraggable}
+                onDragEnd={onDragEnd}
               />
             );
           case "barcode":
@@ -132,10 +137,10 @@ const ShapesRenderer = React.memo((props: { isDraggable: boolean }) => {
                 key={index}
                 text={text}
                 codeFormat={codeFormat}
-                draggable={isDraggable}
                 perfectDrawEnabled={false}
-                onDragEnd={onDragEnd}
                 {...restProps}
+                draggable={isDraggable}
+                onDragEnd={onDragEnd}
               />
             );
         }
