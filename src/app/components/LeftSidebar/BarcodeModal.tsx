@@ -75,61 +75,81 @@ const BarcodeModal = ({ trigger, onSubmit }: BarcodeModalProps) => {
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Trigger asChild>{trigger}</Dialog.Trigger>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed top-0 left-0 w-screen h-screen bg-black/70 z-100" />
-        <Dialog.Content className="fixed top-[50%] left-[50%] -translate-y-[50%] -translate-x-[50%] bg-white z-100 rounded-lg p-4">
-          <Dialog.Title className="mb-4 font-semibold">
+        <Dialog.Overlay className="fixed top-0 left-0 w-screen h-screen bg-black/70 z-100 backdrop-blur-sm" />
+        <Dialog.Content className="fixed top-[50%] left-[50%] -translate-y-[50%] -translate-x-[50%] bg-white z-100 rounded-lg p-6 w-[400px] shadow-xl">
+          <Dialog.Title className="text-xl font-semibold mb-6 text-gray-800">
             바코드 정보를 입력해주세요
           </Dialog.Title>
-          <div className="flex flex-col">
+          <div className="flex flex-col gap-6">
             <RadioGroup.Root
               defaultValue={codeType}
               onValueChange={handleCodeTypeChange}
-              className="flex flex-row gap-2 mb-4"
+              className="flex flex-row gap-6 p-4 bg-gray-50 rounded-lg"
             >
               {codeTypeList.map((item, index) => (
-                <div className="flex flex-row gap-4" key={index}>
+                <div className="flex flex-row items-center gap-2" key={index}>
                   <RadioGroup.Item
                     id={`radio-${index}`}
                     value={item.value}
-                    className="w-4 h-4 rounded-full bg-white hover:bg-blue-200 focus:ring focus:ring-gray-400 flex items-center justify-center"
+                    className="w-5 h-5 rounded-full border-2 border-gray-300 bg-white hover:bg-blue-50 focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 flex items-center justify-center transition-all"
                   >
-                    <RadioGroup.Indicator className="w-2 h-2 bg-blue-500 rounded-full" />
+                    <RadioGroup.Indicator className="w-2.5 h-2.5 bg-blue-500 rounded-full" />
                   </RadioGroup.Item>
-                  <label className="Label" htmlFor={`radio-${index}`}>
+                  <label
+                    className="text-gray-700 font-medium cursor-pointer select-none"
+                    htmlFor={`radio-${index}`}
+                  >
                     {item.label}
                   </label>
                 </div>
               ))}
             </RadioGroup.Root>
-            <div>
+            <div className="space-y-4">
               {codeType === "qrcode" && (
                 <Input
-                  label="url"
+                  label="URL"
                   type="text"
-                  className="text-start"
+                  className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                   onValueChange={handleValueChange}
+                  placeholder="https://example.com"
                 />
               )}
               {codeType === "barcode" && (
-                <div className="flex flex-col gap-2 w-full">
-                  <label>
-                    <span className="mr-2">format</span>
+                <div className="flex flex-col gap-4">
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700">
+                      Format
+                    </label>
                     <Select
-                      className="z-100 border border-gray-200 rounded-sm"
+                      className="w-full border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                       options={options}
                       onValueChange={handleFormatChange}
                     />
-                  </label>
+                  </div>
                   <Input
-                    label="code"
+                    label="Code"
                     type="text"
-                    className="text-start"
+                    className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                     onValueChange={handleValueChange}
+                    placeholder="바코드 값을 입력하세요"
                   />
                 </div>
               )}
             </div>
-            <button onClick={handleClickSubmit}>확인</button>
+            <div className="flex justify-end gap-2 mt-2">
+              <button
+                onClick={() => setOpen(false)}
+                className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+              >
+                취소
+              </button>
+              <button
+                onClick={handleClickSubmit}
+                className="px-4 py-2 text-white bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors"
+              >
+                확인
+              </button>
+            </div>
           </div>
         </Dialog.Content>
       </Dialog.Portal>
