@@ -1,5 +1,5 @@
 import Canvas from "./components/CanvasContainer";
-import Toast from "./components/ui/Toast";
+import Toast from "../components/Toast";
 
 export default function Page() {
   return (

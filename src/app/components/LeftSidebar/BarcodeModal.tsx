@@ -1,8 +1,8 @@
 import { ReaderFormatType } from "@/utils";
 import { ReactNode, useEffect, useRef, useState } from "react";
 import { Dialog, RadioGroup } from "radix-ui";
-import Select from "../ui/Select";
-import Input from "../ui/Input";
+import Select from "../../../components/Select";
+import Input from "../../../components/Input";
 
 const BARCODE_FORMAT_LIST = [
   "AZTEC",

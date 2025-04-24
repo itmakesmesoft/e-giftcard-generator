@@ -1,4 +1,4 @@
-import Menubar from "../ui/Menubar";
+import Menubar from "../../../components/Menubar";
 import { useShapeStore } from "@/app/store/canvas";
 import {
   readCodeByImage,
@@ -23,10 +23,10 @@ import {
   ZoomInIcon,
   ZoomOutIcon,
 } from "@radix-ui/react-icons";
-import QrIcon from "../assets/QrIcon";
+import QrIcon from "../../../components/assets/QrIcon";
 import { useControl, useSelect } from "@/app/hooks";
 import Image from "next/image";
-import NumberStepper from "../ui/NumberStepper";
+import NumberStepper from "../../../components/NumberStepper";
 import BarcodeModal from "./BarcodeModal";
 import FrameSize from "./FrameSize";
 

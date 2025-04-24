@@ -1,4 +1,4 @@
-import Input from "../ui/Input";
+import Input from "../../../components/Input";
 import { useDebounce } from "@/app/hooks";
 import { useEffect, useState } from "react";
 import { useCanvasContext } from "@/app/context/canvas";

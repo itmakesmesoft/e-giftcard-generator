@@ -1,11 +1,11 @@
 import { useCanvasContext } from "@/app/context/canvas";
 import { loadFromLocalStorage, saveToLocalStorage } from "@/utils";
 import { DownloadIcon } from "@radix-ui/react-icons";
-import SaveIcon from "./assets/SaveIcon";
-import LoadIcon from "./assets/LoadIcon";
+import SaveIcon from "../../components/assets/SaveIcon";
+import LoadIcon from "../../components/assets/LoadIcon";
 import { useHotkeys } from "react-hotkeys-hook";
-import Menubar from "./ui/Menubar";
-import Toast from "./ui/Toast";
+import Menubar from "../../components/Menubar";
+import Toast from "../../components/Toast";
 
 const FloatingButtonGroup = ({ className }: { className?: string }) => {
   const {
