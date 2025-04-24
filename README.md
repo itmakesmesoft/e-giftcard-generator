@@ -1,5 +1,6 @@
-<h1 align="center" >Custom eGift Card Generator (기프티콘 생성기)</h1>
 
+
+<h1 align="center" >Custom eGift Card Generator (기프티콘 생성기)</h1>
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/d9cfba31-976d-4921-8d47-1e8e60f07077" width="500" height="500" alt="img" style="display: block; margin: 0 auto;"/>
@@ -8,7 +9,10 @@
 <p align="center">Add text, images, and customize the design to create your very own unique eGift Card!</p>
 <p align="center">원하는 텍스트와 이미지를 추가해 세상에 단 하나뿐인 기프티콘을 만들어보세요!</p>
 
+
 ## 🔗 Demo
+
+![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/itmakesmesoft/e-giftcard-generator?utm_source=oss&utm_medium=github&utm_campaign=itmakesmesoft%2Fe-giftcard-generator&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
 
   [Gifticon Generator](https://gifticon-generator.vercel.app/)
 
@@ -34,6 +38,7 @@
 
 
 ## 🖥️ Built with
+
 - Next.js 15
 - react-konva
 - radix-ui
