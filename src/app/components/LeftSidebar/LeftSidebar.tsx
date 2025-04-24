@@ -146,6 +146,7 @@ const LeftSidebar = ({ className }: { className: string }) => {
             color={isFirstHistory ? "#a1a1a1" : "#000"}
           />
         }
+        disabled={isFirstHistory}
       />
       <Menubar.MenuItem
         onClick={redo}
@@ -158,6 +159,7 @@ const LeftSidebar = ({ className }: { className: string }) => {
             color={isLastHistory ? "#a1a1a1" : "#000"}
           />
         }
+        disabled={isLastHistory}
         className="pb-3"
       />
 

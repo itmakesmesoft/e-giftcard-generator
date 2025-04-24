@@ -3,8 +3,9 @@ import { ChangeEvent, memo, ReactNode } from "react";
 import { Tooltip as RadixTooltip } from "radix-ui";
 import { clearTextSelection } from "./utils";
 
-const commonStyle =
-  "p-2 w-full aspect-square flex justify-center items-center active:bg-gray-200 hover:bg-gray-100 cursor-pointer";
+const commonStyle = "p-2 w-full aspect-square flex justify-center items-center";
+
+const enabledStyle = "active:bg-gray-200 hover:bg-gray-100 cursor-pointer";
 
 interface MenuProps {
   children?: ReactNode;
@@ -23,6 +24,7 @@ interface MenuItemProps {
   onClick?: () => void;
   children?: ReactNode;
   active?: boolean;
+  disabled?: boolean;
   [key: string]: unknown;
 }
 const MenuItem = (props: MenuItemProps) => {
@@ -34,6 +36,7 @@ const MenuItem = (props: MenuItemProps) => {
     onClick,
     children,
     active = false,
+    disabled = false,
     ...restProps
   } = props;
   const Component = asChild ? Slot.Root : "button";
@@ -42,12 +45,12 @@ const MenuItem = (props: MenuItemProps) => {
     <RadixMenubar.Menu>
       <Tooltip label={label}>
         <Component
-          className={`${commonStyle} ${active ? "bg-gray-200" : ""} ${
-            classNameFromProps ?? ""
-          }`}
+          className={`${commonStyle} ${!disabled ? enabledStyle : ""} ${
+            active ? "bg-gray-200" : ""
+          } ${classNameFromProps ?? ""}`}
           {...restProps}
           aria-label={label}
-          onClick={onClick}
+          onClick={!disabled ? onClick : undefined}
         >
           {icon}
           <Slot.Slottable>{children}</Slot.Slottable>
@@ -105,7 +108,7 @@ const MenuGroupTrigger = (props: MenuGroupTriggerProps) => {
   const { icon, ...restProps } = props;
   return (
     <div
-      className={`${commonStyle} data-[state="open"]:bg-gray-200`}
+      className={`${commonStyle} ${enabledStyle} data-[state="open"]:bg-gray-200`}
       {...restProps}
     >
       {icon}
@@ -162,7 +165,10 @@ const MenuInputFileItem = ({
   return (
     <RadixMenubar.Menu>
       <Tooltip label={label}>
-        <label className={`${commonStyle} ${className}`} aria-label={label}>
+        <label
+          className={`${commonStyle} ${enabledStyle} ${className}`}
+          aria-label={label}
+        >
           {children}
           <input
             type="file"

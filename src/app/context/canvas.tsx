@@ -178,7 +178,6 @@ export const CanvasProvider = ({ children }: { children: ReactNode }) => {
     const height = window.innerHeight;
     const posX = (width - canvasSize.width) / 2;
     const posY = (height - canvasSize.height) / 2;
-    console.log(width, height, posX, posY);
 
     setShapes(
       (shapes) =>
@@ -219,35 +218,6 @@ export const CanvasProvider = ({ children }: { children: ReactNode }) => {
   }, [resize]);
 
   const canvasPosRef = useRef<Vector2d>(null);
-
-  // useEffect(() => {}, [
-  //   canvasSize.height,
-  //   canvasSize.width,
-  //   convertToAbsolutePosition,
-  //   convertToRelativePosition,
-  //   setShapes,
-  //   viewportSize.height,
-  //   viewportSize.width,
-  // ]);
-
-  // useEffect(() => {
-  //   setShapes((shapes) =>
-  //     shapes.map((shape) => ({
-  //       ...shape,
-  //       ...convertToAbsolutePosition(
-  //         convertToRelativePosition(shape),
-  //         canvasPos.x,
-  //         canvasPos.y
-  //       ),
-  //     }))
-  //   );
-  //   canvasPosRef.current = canvasPos;
-  // }, [
-  //   canvasPos,
-  //   convertToAbsolutePosition,
-  //   convertToRelativePosition,
-  //   setShapes,
-  // ]);
 
   const selectNodeById = (id: string) => {
     if (!transformerRef.current || !stageRef.current) return;
