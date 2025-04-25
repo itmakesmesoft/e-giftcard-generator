@@ -3,12 +3,11 @@ import {
   SquareIcon,
   CircleIcon,
   ArrowTopLeftIcon,
-  TriangleUpIcon,
-  DotFilledIcon,
-  StarFilledIcon,
+  StarIcon,
 } from "@radix-ui/react-icons";
 import Menubar from "@/components/Menubar";
 import { ShapeAction } from "./types";
+import TriangleIcon from "@/components/assets/TriangleIcon";
 
 interface ShapeMenuGroupProps {
   onToolChange: (action: ShapeAction) => void;
@@ -32,17 +31,17 @@ const SHAPE_CONFIGS = {
   },
   triangle: {
     action: "triangle" as const,
-    icon: <TriangleUpIcon width="16" height="16" />,
+    icon: <TriangleIcon width="16" height="16" />,
     label: "삼각형",
   },
   ellipse: {
     action: "ellipse" as const,
-    icon: <DotFilledIcon width="16" height="16" />,
+    icon: <CircleIcon width="16" height="16" />,
     label: "타원",
   },
   star: {
     action: "star" as const,
-    icon: <StarFilledIcon width="16" height="16" />,
+    icon: <StarIcon width="16" height="16" />,
     label: "별",
   },
 };
