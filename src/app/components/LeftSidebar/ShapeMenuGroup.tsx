@@ -3,6 +3,9 @@ import {
   SquareIcon,
   CircleIcon,
   ArrowTopLeftIcon,
+  TriangleUpIcon,
+  DotFilledIcon,
+  StarFilledIcon,
 } from "@radix-ui/react-icons";
 import Menubar from "@/components/Menubar";
 import { ShapeAction } from "./types";
@@ -26,6 +29,21 @@ const SHAPE_CONFIGS = {
     action: "arrow" as const,
     icon: <ArrowTopLeftIcon width="16" height="16" />,
     label: "화살표",
+  },
+  triangle: {
+    action: "triangle" as const,
+    icon: <TriangleUpIcon width="16" height="16" />,
+    label: "삼각형",
+  },
+  ellipse: {
+    action: "ellipse" as const,
+    icon: <DotFilledIcon width="16" height="16" />,
+    label: "타원",
+  },
+  star: {
+    action: "star" as const,
+    icon: <StarFilledIcon width="16" height="16" />,
+    label: "별",
   },
 };
 

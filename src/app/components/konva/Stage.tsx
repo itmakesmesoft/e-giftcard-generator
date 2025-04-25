@@ -131,6 +131,50 @@ const Stage = ({ children }: { children: ReactNode }) => {
           };
         });
         break;
+      case "ellipse":
+        updateShapeCreation((shape) => {
+          const dx = shape.x ?? 0;
+          const dy = shape.y ?? 0;
+          return {
+            ...shape,
+            radiusX: Math.abs(Math.floor(x - dx)),
+            radiusY: Math.abs(Math.floor(y - dy)),
+          };
+        });
+        break;
+      case "triangle":
+        updateShapeCreation((shape) => {
+          const dx = shape.x ?? 0;
+          const dy = shape.y ?? 0;
+          const width = Math.floor(x - dx);
+          const height = Math.floor(y - dy);
+          return {
+            ...shape,
+            width,
+            height,
+            points: [width / 2, 0, width, height, 0, height],
+          };
+        });
+        break;
+      case "star":
+        updateShapeCreation((shape) => {
+          const dx = shape.x ?? 0;
+          const dy = shape.y ?? 0;
+
+          const width = Math.abs(Math.floor(x - dx));
+          const height = Math.abs(Math.floor(y - dy));
+
+          const outerRadius = Math.max(width, height);
+          const innerRadius = outerRadius / 2.6;
+
+          return {
+            ...shape,
+            numPoints: 5, // 별의 꼭지점 수는 고정
+            outerRadius,
+            innerRadius,
+          };
+        });
+        break;
       case "arrow":
         updateShapeCreation((shape) => {
           const initialPoints = shape.points.slice(0, 2) ?? [x, y];

@@ -7,7 +7,10 @@ export type ActionType =
   | "pencil"
   | "eraser"
   | "arrow"
-  | "text";
+  | "text"
+  | "triangle"
+  | "ellipse"
+  | "star";
 
 export interface Controls {
   fill: string;

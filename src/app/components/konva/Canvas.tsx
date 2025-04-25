@@ -2,7 +2,7 @@ import Barcode from "./Barcode";
 import CanvasImage from "./CanvasImage";
 import EditableText from "./EditableText";
 import { Vector2d } from "konva/lib/types";
-import { Arrow, Circle, Layer, Line, Rect } from "react-konva";
+import { Arrow, Circle, Layer, Line, Rect, Ellipse, Star } from "react-konva";
 import { useControlStore, useShapeStore } from "@/app/store/canvas";
 import { KonvaEventObject, NodeConfig, Node } from "konva/lib/Node";
 import { useCanvasContext } from "@/app/context/canvas";
@@ -104,6 +104,46 @@ const ShapesRenderer = React.memo(() => {
                 perfectDrawEnabled={false}
                 {...node}
                 points={node.points}
+                draggable={isDraggable}
+                onDragEnd={onDragEnd}
+              />
+            );
+          case "triangle":
+            return (
+              <Line
+                key={index}
+                strokeScaleEnabled={false}
+                perfectDrawEnabled={false}
+                closed={true}
+                points={node.points ?? [0, 0, 100, 100, 0, 100]}
+                {...node}
+                draggable={isDraggable}
+                onDragEnd={onDragEnd}
+              />
+            );
+          case "ellipse":
+            return (
+              <Ellipse
+                key={index}
+                strokeScaleEnabled={false}
+                perfectDrawEnabled={false}
+                radiusX={node.radiusX ?? 0}
+                radiusY={node.radiusY ?? 0}
+                {...node}
+                draggable={isDraggable}
+                onDragEnd={onDragEnd}
+              />
+            );
+          case "star":
+            return (
+              <Star
+                key={index}
+                strokeScaleEnabled={false}
+                perfectDrawEnabled={false}
+                numPoints={node.numPoints ?? 5}
+                innerRadius={node.innerRadius}
+                outerRadius={node.outerRadius}
+                {...node}
                 draggable={isDraggable}
                 onDragEnd={onDragEnd}
               />

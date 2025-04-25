@@ -24,8 +24,12 @@ export const generateShapeConfig = (
 ): ShapeConfig => {
   const { type, ...restConfig } = shapeConfig;
   const id = nanoid();
+
+  // 도형 유형별 특성 정의
   const hasRadius = type === "circle";
-  const hasPoints = type === "arrow";
+  const hasRadiusXY = type === "ellipse";
+  const hasPoints = ["arrow", "triangle", "star"].includes(type as string);
+
   const isShape = type !== "pencil" && type !== "eraser";
   const compositeOperation =
     type === "pencil" ? "source-over" : "destination-out";
@@ -35,6 +39,7 @@ export const generateShapeConfig = (
     type,
     isDrawing: false,
     ...(hasRadius && { radius: 0 }),
+    ...(hasRadiusXY && { radiusX: 0, radiusY: 0 }),
     ...(hasPoints && { points: [] }),
     ...(isShape
       ? { name: "shape" }
