@@ -16,8 +16,9 @@ export interface CanvasData {
 }
 
 const useCanvasData = () => {
-  const { stageRef, canvasPos, canvasSize } = useCanvasContext();
+  const { stageRef, canvasPos } = useCanvasContext();
   const { getAttributes, setAttributes } = useControl();
+  const canvasSize = useShapeStore((state) => state.canvasOption.canvasSize);
 
   const setShapes = useShapeStore((state) => state.setShapes);
 
@@ -54,10 +55,10 @@ const useCanvasData = () => {
       ...convertToAbsolutePosition(attrs), // 절대 좌표로 변환
     })) as ShapeConfig[];
     setAttributes.setCanvasOption(
-      () => ({
+      {
         canvasSize: { width, height },
         bgColor,
-      }),
+      },
       false
     );
     setShapes(children, false);

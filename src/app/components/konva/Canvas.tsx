@@ -9,7 +9,8 @@ import { useCanvasContext } from "@/app/context/canvas";
 import React, { useCallback } from "react";
 
 const Canvas = () => {
-  const { canvasSize, canvasPos } = useCanvasContext();
+  const { canvasPos } = useCanvasContext();
+  const canvasSize = useShapeStore((state) => state.canvasOption.canvasSize);
 
   return (
     <>

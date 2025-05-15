@@ -7,10 +7,12 @@ import Toast from "../../components/Toast";
 import Menubar from "../../components/Menubar";
 import SaveIcon from "../../components/assets/SaveIcon";
 import LoadIcon from "../../components/assets/LoadIcon";
+import { useShapeStore } from "../store/canvas";
 
 const FloatingButtonGroup = ({ className }: { className?: string }) => {
-  const { stageRef, canvasSize, canvasPos } = useCanvasContext();
+  const { stageRef, canvasPos } = useCanvasContext();
   const { exportCanvasAsJSON, loadCanvasByJSON } = useCanvasData();
+  const canvasSize = useShapeStore((state) => state.canvasOption.canvasSize);
 
   const handleExportAsImage = () => {
     if (!stageRef.current) return;

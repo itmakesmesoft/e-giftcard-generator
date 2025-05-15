@@ -1,32 +1,50 @@
 import Input from "../../../components/Input";
 import { useDebounce } from "@/app/hooks";
-import { useEffect, useState } from "react";
-import { useCanvasContext } from "@/app/context/canvas";
+import { useEffect, useRef, useState } from "react";
 import { FrameIcon } from "@radix-ui/react-icons";
 import Menubar from "@/components/Menubar";
+import { useShapeStore } from "@/app/store/canvas";
 
 const FrameSize = () => {
-  const { canvasSize, setCanvasSize } = useCanvasContext();
+  const canvasSize = useShapeStore((state) => state.canvasOption.canvasSize);
+  const setCanvasOption = useShapeStore((state) => state.setCanvasOption);
+  const prevSizeRef = useRef(canvasSize);
+
   const [isFrameRatioLock, setIsFrameRatioLock] = useState<boolean>(true);
   const [frameSize, setFrameSize] = useState<{
     width: number;
     height: number;
   }>(canvasSize);
 
-  const debounce = useDebounce();
+  const { debounce } = useDebounce();
 
   useEffect(() => {
-    const { width: cWeight, height: cHeight } = canvasSize;
+    if (
+      canvasSize.width !== prevSizeRef.current.width ||
+      canvasSize.height !== prevSizeRef.current.height
+    ) {
+      setFrameSize(canvasSize);
+    }
+  }, [canvasSize]);
+
+  useEffect(() => {
+    const { width: cWeight, height: cHeight } = prevSizeRef.current;
     const { width: fWeight, height: fHeight } = frameSize;
     if (fWeight === cWeight && fHeight === cHeight) return;
 
+    prevSizeRef.current = frameSize;
+
     const callback = debounce(
-      () => setCanvasSize({ width: fWeight ?? 1, height: fHeight ?? 1 }),
+      () =>
+        setCanvasOption((prev) => ({
+          ...prev,
+          canvasSize: { width: fWeight ?? 1, height: fHeight ?? 1 },
+        })),
       50
     );
 
     callback();
-  }, [canvasSize, debounce, frameSize, setCanvasSize]);
+  }, [canvasSize, debounce, frameSize, setCanvasOption]);
 
   const handleWidthChange = (value: string | number) =>
     setFrameSize((prev) => {

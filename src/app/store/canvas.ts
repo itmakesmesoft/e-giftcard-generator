@@ -197,6 +197,7 @@ const useShapeStore = create<CanvasStoreState & CanvasStoreActions>((set) => ({
   setCanvasOption: (option, logHistory = true) =>
     set((state) => {
       const newCanvasOption = updateState(state.canvasOption, option);
+
       if (logHistory) {
         return {
           canvasOption: newCanvasOption,

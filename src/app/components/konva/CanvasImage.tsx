@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Image as KonvaImage } from "react-konva";
 import { useCanvasContext } from "@/app/context/canvas";
 import { Vector2d } from "konva/lib/types";
+import { useShapeStore } from "@/app/store/canvas";
 
 interface CanvasImageProps extends Omit<Konva.ImageConfig, "image"> {
   dataURL: string;
@@ -13,9 +14,10 @@ const CanvasImage = (props: CanvasImageProps) => {
   const { dataURL, x, y, image: _, ...restProps } = props;
   const [image, setImage] = useState<HTMLImageElement | null>(null);
   const [position, setPosition] = useState<Vector2d>({ x, y });
-  const { canvasSize, canvasPos } = useCanvasContext();
+  const { canvasPos } = useCanvasContext();
   const loadedImage = useRef<HTMLImageElement | null>(null);
   const loadedURL = useRef<string | null>(null);
+  const canvasSize = useShapeStore((state) => state.canvasOption.canvasSize);
 
   const [width, height] = getProperImageSize(canvasSize, image);
 
