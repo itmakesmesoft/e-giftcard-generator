@@ -1,49 +1,8 @@
 import { create } from "zustand";
-import { ActionType, ShapeConfig } from "../types/canvas";
-import { LineCap, LineJoin } from "konva/lib/Shape";
+import { ShapeConfig } from "../types/canvas";
+import { ControlState, ControlActions } from "./types";
 
-export type TextAlign = "center" | "left" | "right";
-export type FontWeight = string | number;
-export type FontStyle = "italic" | "normal";
-
-// Control Store 타입 정의
-export type ControlState = {
-  action: ActionType;
-  bgColor: string;
-  fill: string;
-  stroke: string;
-  strokeWidth: number;
-  opacity: number;
-  lineJoin: LineJoin;
-  lineCap: LineCap;
-  radius: number;
-  fontSize: number;
-  fontWeight: FontWeight;
-  fontStyle: FontStyle;
-  fontFamily: string;
-  typeFace: string;
-  textAlign: TextAlign;
-};
-
-type ControlActions = {
-  setAction: (action: ControlState["action"]) => void;
-  setBgColor: (bgColor: ControlState["bgColor"]) => void;
-  setFontSize: (fontSize: ControlState["fontSize"]) => void;
-  setFontWeight: (fontWeight: ControlState["fontWeight"]) => void;
-  setFontFamily: (fontFamily: ControlState["fontFamily"]) => void;
-  setFontStyle: (fontStyle: ControlState["fontStyle"]) => void;
-  setTypeFace: (typeFace: ControlState["typeFace"]) => void;
-  setTextAlign: (textAlign: ControlState["textAlign"]) => void;
-  setFill: (fill: ControlState["fill"]) => void;
-  setStroke: (stroke: ControlState["stroke"]) => void;
-  setStrokeWidth: (strokeWidth: ControlState["strokeWidth"]) => void;
-  setOpacity: (opacity: ControlState["opacity"]) => void;
-  setLineJoin: (lineJoin: ControlState["lineJoin"]) => void;
-  setLineCap: (lineCap: ControlState["lineCap"]) => void;
-  setRadius: (radius: ControlState["radius"]) => void;
-};
-
-const useControlStore = create<ControlState & ControlActions>((set) => ({
+export const defaultValues: ControlState = {
   action: "select",
   bgColor: "#ffffff",
   fill: "#ff0000",
@@ -59,6 +18,10 @@ const useControlStore = create<ControlState & ControlActions>((set) => ({
   typeFace: "sans-serif",
   fontStyle: "normal",
   textAlign: "center",
+};
+
+const useControlStore = create<ControlState & ControlActions>((set) => ({
+  ...defaultValues,
   setAction: (action) => set(() => ({ action })),
   setBgColor: (bgColor) => set(() => ({ bgColor })),
   setFontSize: (fontSize) => set(() => ({ fontSize })),

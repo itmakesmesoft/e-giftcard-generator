@@ -1,24 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useCanvasContext } from "../context/canvas";
-import { ControlState, useShapeStore, useControlStore } from "../store/canvas";
-
-const defaultValues: ControlState = {
-  action: "select",
-  bgColor: "#ffffff",
-  fill: "#ff0000",
-  stroke: "#000000",
-  strokeWidth: 2,
-  opacity: 1,
-  lineJoin: "round",
-  lineCap: "round",
-  radius: 0,
-  fontSize: 16,
-  fontWeight: "500",
-  fontFamily: "Arial",
-  fontStyle: "normal",
-  typeFace: "sans-serif",
-  textAlign: "center",
-};
+import { useShapeStore, useControlStore, defaultValues } from "../store/canvas";
 
 const useControl = () => {
   const action = useControlStore((state) => state.action);
@@ -98,10 +80,8 @@ const useControl = () => {
     setTypeFace,
   ]);
 
-  return {
-    action,
-    setAction,
-    getAttributes: {
+  const getAttributes = useMemo(
+    () => ({
       canvasOption,
       fill,
       stroke,
@@ -116,8 +96,27 @@ const useControl = () => {
       lineJoin,
       radius,
       textAlign,
-    },
-    setAttributes: {
+    }),
+    [
+      canvasOption,
+      fill,
+      fontFamily,
+      fontSize,
+      fontStyle,
+      fontWeight,
+      lineCap,
+      lineJoin,
+      opacity,
+      radius,
+      stroke,
+      strokeWidth,
+      textAlign,
+      typeFace,
+    ]
+  );
+
+  const setAttributes = useMemo(
+    () => ({
       setCanvasOption,
       setFill,
       setStroke,
@@ -132,7 +131,30 @@ const useControl = () => {
       setTypeFace,
       setFontStyle,
       setTextAlign,
-    },
+    }),
+    [
+      setCanvasOption,
+      setFill,
+      setFontFamily,
+      setFontSize,
+      setFontStyle,
+      setFontWeight,
+      setLineCap,
+      setLineJoin,
+      setOpacity,
+      setRadius,
+      setStroke,
+      setStrokeWidth,
+      setTextAlign,
+      setTypeFace,
+    ]
+  );
+
+  return {
+    action,
+    setAction,
+    getAttributes,
+    setAttributes,
   };
 };
 
