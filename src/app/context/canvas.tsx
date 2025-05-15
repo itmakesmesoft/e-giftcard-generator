@@ -12,11 +12,9 @@ import {
   useState,
 } from "react";
 import { useShapeStore } from "../store/canvas";
-import { Group } from "konva/lib/Group";
-import { Shape } from "konva/lib/Shape";
 import { Vector2d } from "konva/lib/types";
 import { ShapeConfig } from "../types/canvas";
-import { useControl } from "../hooks";
+import { convertPosition } from "@/utils/canvas";
 
 export interface CanvasSize {
   width: number;
@@ -26,15 +24,6 @@ export interface CanvasSize {
 export interface ViewportSize {
   width: number;
   height: number;
-}
-
-export interface CanvasData {
-  canvas: {
-    width: number;
-    height: number;
-    bgColor: string;
-    children: (Group | Shape<ShapeConfig>)[] | undefined;
-  };
 }
 
 interface CanvasContextValueProps {
@@ -53,8 +42,6 @@ interface CanvasContextValueProps {
   getSingleSelectedNode: () => Konva.Node | undefined;
   selectNodeById: (id: string) => void;
   selectNodesByIdList: (idList: string[]) => void;
-  loadCanvasByJSON: (data: CanvasData) => void;
-  exportCanvasAsJSON: () => CanvasData | undefined;
   getPointerPosition: () => Vector2d;
 }
 
@@ -74,8 +61,6 @@ const defaultValue: CanvasContextValueProps = {
   getSingleSelectedNode: () => undefined,
   selectNodeById: () => {},
   selectNodesByIdList: () => {},
-  loadCanvasByJSON: () => {},
-  exportCanvasAsJSON: () => undefined,
   getPointerPosition: () => ({ x: 0, y: 0 }),
 };
 
@@ -99,15 +84,7 @@ export const CanvasProvider = ({ children }: { children: ReactNode }) => {
   const [viewportSize, setViewportSize] = useState<ViewportSize>(vSize);
   const [selectedNodes, setSelectedNodes] = useState<Konva.Node[]>([]);
 
-  const { getAttributes, setAttributes } = useControl();
   const setShapes = useShapeStore((state) => state.setShapes);
-
-  // useEffect(() => {
-  //   const { width, height } = getAttributes.canvasOption.canvasSize;
-  //   if (width === canvasSize.width && height === canvasSize.height) return;
-
-  //   setAttributes.setCanvasOption((prev) => ({ ...prev, canvasSize }));
-  // }, [setAttributes, canvasSize, getAttributes]);
 
   const getPointerPosition = useCallback((): Vector2d => {
     if (!stageRef.current) return { x: 0, y: 0 };
@@ -122,23 +99,6 @@ export const CanvasProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   // 위치를 절대 위치 또는 상대 위치로 바꾸는 함수
-  const convertPosition = useCallback(
-    (props: ShapeConfig, parentX = 0, parentY = 0, isAbsolute = true) => {
-      const { x, y, points } = props;
-      return {
-        ...(x && { x: x + (isAbsolute ? parentX : -parentX) }),
-        ...(y && { y: y + (isAbsolute ? parentY : -parentY) }),
-        ...(points && {
-          points: points?.map((point: number, index: number) =>
-            index % 2
-              ? point + (isAbsolute ? parentY : -parentY)
-              : point + (isAbsolute ? parentX : -parentX)
-          ),
-        }),
-      };
-    },
-    []
-  );
 
   const convertToAbsolutePosition = useCallback(
     (props: ShapeConfig, parentX?: number, parentY?: number) => {
@@ -150,7 +110,7 @@ export const CanvasProvider = ({ children }: { children: ReactNode }) => {
         true
       );
     },
-    [convertPosition]
+    []
   );
 
   const convertToRelativePosition = useCallback(
@@ -163,7 +123,7 @@ export const CanvasProvider = ({ children }: { children: ReactNode }) => {
         false
       );
     },
-    [convertPosition]
+    []
   );
 
   useEffect(() => {
@@ -246,52 +206,6 @@ export const CanvasProvider = ({ children }: { children: ReactNode }) => {
   const getAllSelectedNodes = (): Konva.Node[] =>
     transformerRef.current?.getNodes() ?? [];
 
-  const loadCanvasByJSON = (data: CanvasData) => {
-    if (!stageRef.current) return;
-    const { width, height, bgColor, children: childrenFromData } = data.canvas;
-    if (!childrenFromData) return;
-
-    const children = childrenFromData?.map(({ attrs }) => ({
-      ...attrs,
-      ...convertToAbsolutePosition(attrs), // 절대 좌표로 변환
-    })) as ShapeConfig[];
-
-    setAttributes.setCanvasOption(
-      () => ({
-        canvasSize: { width, height },
-        bgColor,
-      }),
-      false
-    );
-    setShapes(children, false);
-  };
-
-  const exportCanvasAsJSON = () => {
-    if (!stageRef.current) return;
-    const stagedChildren = stageRef.current.getChildren();
-    const extractIds = ["_shapeLayer", "_drawLayer"];
-    const children = stagedChildren
-      .filter(({ attrs }) => extractIds.includes(attrs.id))
-      .map(({ children }) =>
-        children.map((child) => ({
-          ...child,
-          attrs: {
-            ...child.attrs,
-            ...convertToRelativePosition(child.attrs), // 상대 좌표로 변환
-          },
-        }))
-      )
-      .flat() as (Group | Shape<ShapeConfig>)[];
-
-    return {
-      canvas: {
-        ...canvasSize,
-        bgColor: getAttributes.canvasOption.bgColor,
-        children: children,
-      },
-    };
-  };
-
   return (
     <CanvasContext.Provider
       value={{
@@ -310,8 +224,6 @@ export const CanvasProvider = ({ children }: { children: ReactNode }) => {
         getSingleSelectedNode,
         selectNodeById,
         selectNodesByIdList,
-        loadCanvasByJSON,
-        exportCanvasAsJSON,
         getPointerPosition,
       }}
     >

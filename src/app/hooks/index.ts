@@ -4,6 +4,7 @@ import useShapes from "./useShapes";
 import useFonts from "./useFonts";
 import useDebounce from "./useDebounce";
 import useDebounceValue from "./useDebounceValue";
+import useCanvasData from "./useCanvasData";
 
 export {
   useControl,
@@ -12,4 +13,5 @@ export {
   useFonts,
   useDebounce,
   useDebounceValue,
+  useCanvasData,
 };

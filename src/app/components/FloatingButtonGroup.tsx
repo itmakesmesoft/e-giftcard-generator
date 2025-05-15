@@ -1,20 +1,16 @@
+import { useCanvasData } from "../hooks";
+import { useHotkeys } from "react-hotkeys-hook";
+import { DownloadIcon } from "@radix-ui/react-icons";
 import { useCanvasContext } from "@/app/context/canvas";
 import { loadFromLocalStorage, saveToLocalStorage } from "@/utils";
-import { DownloadIcon } from "@radix-ui/react-icons";
+import Toast from "../../components/Toast";
+import Menubar from "../../components/Menubar";
 import SaveIcon from "../../components/assets/SaveIcon";
 import LoadIcon from "../../components/assets/LoadIcon";
-import { useHotkeys } from "react-hotkeys-hook";
-import Menubar from "../../components/Menubar";
-import Toast from "../../components/Toast";
 
 const FloatingButtonGroup = ({ className }: { className?: string }) => {
-  const {
-    stageRef,
-    canvasSize,
-    canvasPos,
-    exportCanvasAsJSON,
-    loadCanvasByJSON,
-  } = useCanvasContext();
+  const { stageRef, canvasSize, canvasPos } = useCanvasContext();
+  const { exportCanvasAsJSON, loadCanvasByJSON } = useCanvasData();
 
   const handleExportAsImage = () => {
     if (!stageRef.current) return;

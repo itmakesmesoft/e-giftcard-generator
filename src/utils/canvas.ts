@@ -47,3 +47,18 @@ export const generateShapeConfig = (
     ...restConfig,
   };
 };
+
+export const convertPosition = (props: ShapeConfig, parentX = 0, parentY = 0, isAbsolute = true) => {
+  const { x, y, points } = props;
+  return {
+    ...(x && { x: x + (isAbsolute ? parentX : -parentX) }),
+    ...(y && { y: y + (isAbsolute ? parentY : -parentY) }),
+    ...(points && {
+      points: points?.map((point: number, index: number) =>
+        index % 2
+          ? point + (isAbsolute ? parentY : -parentY)
+          : point + (isAbsolute ? parentX : -parentX)
+      ),
+    }),
+  };
+}
