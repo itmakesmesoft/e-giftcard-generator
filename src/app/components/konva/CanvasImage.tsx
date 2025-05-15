@@ -3,17 +3,21 @@ import Konva from "konva";
 import { useEffect, useRef, useState } from "react";
 import { Image as KonvaImage } from "react-konva";
 import { useCanvasContext } from "@/app/context/canvas";
+import { Vector2d } from "konva/lib/types";
 
 interface CanvasImageProps extends Omit<Konva.ImageConfig, "image"> {
   dataURL: string;
 }
 
 const CanvasImage = (props: CanvasImageProps) => {
-  const { dataURL, image: _, ...restProps } = props;
+  const { dataURL, x, y, image: _, ...restProps } = props;
   const [image, setImage] = useState<HTMLImageElement | null>(null);
+  const [position, setPosition] = useState<Vector2d>({ x, y });
   const { canvasSize, canvasPos } = useCanvasContext();
   const loadedImage = useRef<HTMLImageElement | null>(null);
   const loadedURL = useRef<string | null>(null);
+
+  const [width, height] = getProperImageSize(canvasSize, image);
 
   useEffect(() => {
     if (!dataURL) return;
@@ -33,10 +37,24 @@ const CanvasImage = (props: CanvasImageProps) => {
     };
   }, [dataURL]);
 
-  const [width, height] = getProperImageSize(canvasSize, image);
-
-  const centerX = Math.floor(canvasPos.x + (canvasSize.width - width) / 2);
-  const centerY = Math.floor(canvasPos.y + (canvasSize.height - height) / 2);
+  useEffect(() => {
+    if (!x || !y) {
+      const centerX = Math.floor(canvasPos.x + (canvasSize.width - width) / 2);
+      const centerY = Math.floor(
+        canvasPos.y + (canvasSize.height - height) / 2
+      );
+      setPosition({ x: centerX, y: centerY });
+    }
+  }, [
+    canvasPos.x,
+    canvasPos.y,
+    canvasSize.height,
+    canvasSize.width,
+    height,
+    width,
+    x,
+    y,
+  ]);
 
   if (!image) return null;
 
@@ -46,9 +64,9 @@ const CanvasImage = (props: CanvasImageProps) => {
       width={width}
       height={height}
       dataURL={dataURL}
+      x={position.x}
+      y={position.y}
       {...restProps}
-      x={centerX}
-      y={centerY}
     />
   );
 };
