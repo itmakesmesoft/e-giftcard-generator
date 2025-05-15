@@ -65,7 +65,6 @@ const useCanvasData = () => {
 
   const exportCanvasAsJSON = () => {
     if (!stageRef.current) return;
-    console.log(stageRef.current);
     const stagedChildren = stageRef.current.getChildren();
     const extractIds = ["_shapeLayer", "_drawLayer"];
     const children = stagedChildren
