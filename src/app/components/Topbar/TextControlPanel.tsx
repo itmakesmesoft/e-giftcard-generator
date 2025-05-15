@@ -17,7 +17,8 @@ import { ColorResult } from "react-color";
 import { ControlPanelProps } from "./types";
 import { useControl, useFonts } from "@/app/hooks";
 import { useCanvasContext } from "@/app/context/canvas";
-import { useShapeStore, TextAlign } from "@/app/store/canvas";
+import { useShapeStore } from "@/app/store/canvas";
+import { TextAlign } from "@/app/store/types";
 
 const fontStyleOptions = [
   {
@@ -67,7 +68,7 @@ const TextControlPanel = (props: ControlPanelProps) => {
   };
 
   const onTextAlignChange = (textAlign: string) => {
-    setAttributes.setTextAlign(textAlign as TextAlign);
+    setAttributes.setFontTextAlign(textAlign as TextAlign);
     updateSelectedShapeAttributes({ textAlign });
   };
 
@@ -84,12 +85,12 @@ const TextControlPanel = (props: ControlPanelProps) => {
     const typeFace = fontDict[fontFamily].category;
 
     setAttributes.setFontFamily(fontFamily);
-    setAttributes.setTypeFace(typeFace);
+    setAttributes.setFontTypeFace(typeFace);
     updateSelectedShapeAttributes({ fontFamily, typeFace });
   };
 
   const onFontColorChange = (value: ColorResult) => {
-    setAttributes.setFill(value.hex);
+    setAttributes.setFontFill(value.hex);
     updateSelectedShapeAttributes({ fill: value.hex });
   };
 
@@ -118,7 +119,7 @@ const TextControlPanel = (props: ControlPanelProps) => {
       <Toolbar.ToggleGroup
         type="single"
         items={textAlignOptions}
-        value={getAttributes.textAlign}
+        value={getAttributes.fontTextAlign}
         onValueChange={onTextAlignChange}
       />
       <Toolbar.Separator />
@@ -160,7 +161,7 @@ const TextControlPanel = (props: ControlPanelProps) => {
       />
       <Toolbar.ColorPicker
         label="텍스트 색상"
-        color={getAttributes.fill}
+        color={getAttributes.fontFill}
         onValueChangeComplete={onFontColorChange}
         variant="custom"
         customTitle={(currentColor) => (

@@ -5,23 +5,24 @@ import { RxTransparencyGrid } from "react-icons/rx";
 import { useControl } from "@/app/hooks";
 import { ColorResult } from "react-color";
 import { ControlPanelProps } from "./types";
+import React from "react";
 
-const BrushControlPanel = (props: ControlPanelProps) => {
+const BrushControlPanel = React.memo((props: ControlPanelProps) => {
   const { updateSelectedShapeAttributes } = props;
   const { getAttributes, setAttributes } = useControl();
 
   const onBrushColorChange = (value: ColorResult) => {
-    setAttributes.setStroke(value.hex);
+    setAttributes.setBrushStroke(value.hex);
     updateSelectedShapeAttributes({ stroke: value.hex });
   };
 
   const onBrushWidthChange = (value: number) => {
-    setAttributes.setStrokeWidth(value);
+    setAttributes.setBrushStrokeWidth(value);
     updateSelectedShapeAttributes({ strokeWidth: value });
   };
 
   const onOpacityChange = (value: number[]) => {
-    setAttributes.setOpacity(value[0]);
+    setAttributes.setBrushOpacity(value[0]);
     updateSelectedShapeAttributes({ opacity: value[0] });
   };
 
@@ -29,7 +30,7 @@ const BrushControlPanel = (props: ControlPanelProps) => {
     <>
       <Toolbar.ColorPicker
         label="브러쉬 색상"
-        color={getAttributes.stroke}
+        color={getAttributes.brushStroke}
         onValueChangeComplete={onBrushColorChange}
       />
       <Toolbar.Dropdown
@@ -38,7 +39,7 @@ const BrushControlPanel = (props: ControlPanelProps) => {
           <RxTransparencyGrid
             width="24"
             height="24"
-            style={{ background: `rgba(0,0,0,${getAttributes.opacity})` }}
+            style={{ background: `rgba(0,0,0,${getAttributes.brushOpacity})` }}
           />
         }
       >
@@ -47,7 +48,7 @@ const BrushControlPanel = (props: ControlPanelProps) => {
           className="relative flex items-center select-none touch-none w-[200px] h-4"
           max={1}
           min={0}
-          value={[getAttributes.opacity]}
+          value={[getAttributes.brushOpacity]}
           onValueChange={onOpacityChange}
           step={0.01}
         >
@@ -61,11 +62,11 @@ const BrushControlPanel = (props: ControlPanelProps) => {
         </Slider.Root>
       </Toolbar.Dropdown>
       <BrushRadiusControl
-        value={getAttributes.strokeWidth}
+        value={getAttributes.brushStrokeWidth}
         onValueChange={onBrushWidthChange}
       />
     </>
   );
-};
-
+});
+BrushControlPanel.displayName = "BrushControlPanel";
 export default BrushControlPanel;

@@ -1,7 +1,7 @@
 import { Slider } from "radix-ui";
 import Toolbar from "@/components/Toolbar";
-import { useEffect, useState } from "react";
-import { useDebounceValue } from "@/app/hooks";
+import { useState } from "react";
+// import { useDebounceValue } from "@/app/hooks";
 
 const BrushRadiusControl = ({
   value,
@@ -11,13 +11,14 @@ const BrushRadiusControl = ({
   onValueChange: (value: number) => void;
 }) => {
   const [brushRadius, setBrushRadius] = useState<number>(value);
-  const debounced = useDebounceValue(brushRadius, 300);
+  // const debounced = useDebounceValue(brushRadius, 300);
 
   const radius = 0.16 * Math.max(brushRadius, 1) + 4;
 
-  useEffect(() => {
-    onValueChange(debounced);
-  }, [debounced, onValueChange]);
+  const handleRadiusChange = (v: number[]) => {
+    setBrushRadius(v[0]);
+    onValueChange(v[0]);
+  };
 
   return (
     <Toolbar.Dropdown
@@ -41,7 +42,7 @@ const BrushRadiusControl = ({
         max={100}
         min={1}
         value={[brushRadius]}
-        onValueChange={(v) => setBrushRadius(v[0])}
+        onValueChange={handleRadiusChange}
         step={1}
       >
         <Slider.Track className="bg-black relative grow-1 h-1">

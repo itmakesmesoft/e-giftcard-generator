@@ -17,22 +17,22 @@ const ShapeControlPanel = (props: ControlPanelProps) => {
   const { moveToForward, moveToBackward } = useShapeStore();
 
   const onFillChange = (value: ColorResult) => {
-    setAttributes.setFill(value.hex);
+    setAttributes.setShapeFill(value.hex);
     updateSelectedShapeAttributes({ fill: value.hex });
   };
 
   const onStrokeChange = (value: ColorResult) => {
-    setAttributes.setStroke(value.hex);
+    setAttributes.setShapeStroke(value.hex);
     updateSelectedShapeAttributes({ stroke: value.hex });
   };
 
   const onStrokeWidthChange = (value: number[]) => {
-    setAttributes.setStrokeWidth(value[0]);
+    setAttributes.setShapeStrokeWidth(value[0]);
     updateSelectedShapeAttributes({ strokeWidth: value[0] });
   };
 
   const onOpacityChange = (value: number[]) => {
-    setAttributes.setOpacity(value[0]);
+    setAttributes.setShapeOpacity(value[0]);
     updateSelectedShapeAttributes({ opacity: value[0] });
   };
 
@@ -54,13 +54,13 @@ const ShapeControlPanel = (props: ControlPanelProps) => {
     <>
       <Toolbar.ColorPicker
         label="채우기 색상"
-        color={getAttributes.fill}
+        color={getAttributes.shapeFill}
         onValueChangeComplete={onFillChange}
       />
       <Toolbar.ColorPicker
         label="선 색상"
         variant="border"
-        color={getAttributes.stroke}
+        color={getAttributes.shapeStroke}
         onValueChangeComplete={onStrokeChange}
       />
       <Toolbar.Dropdown
@@ -69,7 +69,7 @@ const ShapeControlPanel = (props: ControlPanelProps) => {
           <RxTransparencyGrid
             width="24"
             height="24"
-            style={{ background: `rgba(0,0,0,${getAttributes.opacity})` }}
+            style={{ background: `rgba(0,0,0,${getAttributes.shapeOpacity})` }}
           />
         }
       >
@@ -78,7 +78,7 @@ const ShapeControlPanel = (props: ControlPanelProps) => {
           className="relative flex items-center select-none touch-none w-[200px] h-4"
           max={1}
           min={0}
-          value={[getAttributes.opacity]}
+          value={[getAttributes.shapeOpacity]}
           onValueChange={onOpacityChange}
           step={0.01}
         >
@@ -100,7 +100,7 @@ const ShapeControlPanel = (props: ControlPanelProps) => {
               height="24"
               className="group-hover:fill-red-600"
             />
-            <span>{getAttributes.strokeWidth}</span>
+            <span>{getAttributes.shapeStrokeWidth}</span>
           </span>
         }
       >
@@ -109,7 +109,7 @@ const ShapeControlPanel = (props: ControlPanelProps) => {
           className="relative flex items-center select-none touch-none w-[200px] h-4"
           max={100}
           min={0}
-          value={[getAttributes.strokeWidth]}
+          value={[getAttributes.shapeStrokeWidth]}
           onValueChange={onStrokeWidthChange}
           step={1}
         >

@@ -101,8 +101,8 @@ const LeftSidebar = ({ className }: { className: string }) => {
       name: "shape",
       code: data.value,
       codeFormat: format,
-      fill: getAttributes.fill,
-      stroke: getAttributes.stroke,
+      fill: getAttributes.shape.fill,
+      stroke: getAttributes.shape.stroke,
     });
     setShapes((shapes) => [...shapes, newShape]);
     setAction("select");

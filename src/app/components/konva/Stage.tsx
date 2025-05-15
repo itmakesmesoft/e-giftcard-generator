@@ -96,9 +96,14 @@ const Stage = ({ children }: { children: ReactNode }) => {
 
     isPointerDown.current = true;
     const hasPoints = ["pencil", "eraser", "arrow"].includes(action);
+    const isFont = action === "text";
+    const isBrush = action === "pencil" || action === "eraser";
+    const isShape = !isFont && !isBrush;
     startShapeCreation({
       type: action,
-      ...getAttributes,
+      ...(isFont && { ...getAttributes.font }),
+      ...(isBrush && { ...getAttributes.brush }),
+      ...(isShape && { ...getAttributes.shape }),
       ...(hasPoints ? { points: [x, y] } : { x, y }),
     });
   };

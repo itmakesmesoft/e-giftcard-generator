@@ -26,38 +26,34 @@ const Topbar = ({ className }: { className: string }) => {
     useCanvasContext();
 
   useEffect(() => {
-    if (selectedNodes.length === 0) {
-      switch (action) {
+    if (selectedNodes.length > 0) {
+      const type = getProperPanelType(selectedNodes);
+      switch (type) {
         case "text":
           setPanelType("text");
           break;
+        case "shape":
+          setPanelType("shape");
+      }
+    } else {
+      switch (action) {
+        case "text":
+          if (panelType !== "text") setPanelType("text");
+          break;
         case "pencil":
         case "eraser":
-          setPanelType("brush");
+          if (panelType !== "brush") setPanelType("brush");
           break;
         case "rectangle":
         case "circle":
         case "arrow":
-          setPanelType("shape");
+          if (panelType !== "shape") setPanelType("shape");
           break;
         default:
-          setPanelType(null);
+          if (panelType !== null) setPanelType(null);
       }
-      return;
     }
-
-    const type = getProperPanelType(selectedNodes);
-    switch (type) {
-      case "text":
-        setPanelType("text");
-        break;
-      case "shape":
-        setPanelType("shape");
-        break;
-      default:
-        setPanelType(null);
-    }
-  }, [selectedNodes, action]);
+  }, [selectedNodes, action, panelType]);
 
   const copySelectedShapes = () => {
     if (!selectedNodes) return;
@@ -158,10 +154,10 @@ const Topbar = ({ className }: { className: string }) => {
 };
 export default Topbar;
 
-const getProperPanelType = (nodes: Konva.Node[]) => {
-  let type = null;
+const getProperPanelType = (nodes: Konva.Node[]): PanelType | null => {
+  let type: PanelType | null = null;
   for (const node of nodes) {
-    let tmpType;
+    let tmpType: PanelType;
     if (node.attrs.type === "text") tmpType = "text";
     else tmpType = "shape";
 
