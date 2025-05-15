@@ -3,6 +3,7 @@ import { generateCode, type GeneraterFormatType } from "@/utils";
 import { useCallback, useEffect, useState } from "react";
 import { Image as KonvaImage } from "react-konva";
 import { useCanvasContext } from "@/app/context/canvas";
+import { useShapeStore } from "@/app/store/canvas";
 
 interface BarcodeProps extends Konva.ShapeConfig {
   code?: string;
@@ -37,7 +38,8 @@ const Barcode = (props: BarcodeProps) => {
 
   const [image, setImage] = useState<HTMLImageElement | null>(null);
   const [imageSize, setImageSize] = useState<ImageSize>({ width, height });
-  const { canvasSize, canvasPos } = useCanvasContext();
+  const { canvasPos } = useCanvasContext();
+  const canvasSize = useShapeStore((state) => state.canvasOption.canvasSize);
   const [textColor, setTextColor] = useState<string>(textColorFromProps);
   const [barColor, setBarColor] = useState<string>(barColorFromProps);
   // props에 textColor와 barColor가 존재할 경우, 해당 값으로 초기화
