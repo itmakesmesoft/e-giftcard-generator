@@ -3,7 +3,7 @@ import { useCanvasContext } from "../context/canvas";
 import { useCallback, useEffect, useRef } from "react";
 import { useShapeStore } from "../store/canvas";
 import { ShapeConfig } from "@/app/types/canvas";
-import { generateShapeConfig } from "@/utils/canvas";
+import { generateShapeConfig, omitKeysFromObject } from "@/utils/canvas";
 
 const useShapes = () => {
   const currentShapeRef = useRef<ShapeConfig>(null);
@@ -15,9 +15,12 @@ const useShapes = () => {
     const target = transformerRef.current?.getNode();
     if (!target) return;
 
+    // NOTE! target.attrs에 ref가 존재함
+    // 이를 shapes에 주입 시 useRef가 null이 되는 문제 발생 => 구조 분해로 'ref' 제거
+    const attrs = omitKeysFromObject(target.attrs, ["ref"]);
     setShapes((shapes) =>
       shapes.map((shape: Konva.ShapeConfig) =>
-        shape.id === target.attrs.id ? { ...shape, ...target.attrs } : shape
+        shape.id === target.attrs.id ? { ...shape, ...attrs } : shape
       )
     );
   }, [setShapes, transformerRef]);

@@ -62,3 +62,12 @@ export const convertPosition = (props: ShapeConfig, parentX = 0, parentY = 0, is
     }),
   };
 }
+
+export const omitKeysFromObject = (obj: Record<string, unknown>, keys: string[]) => {
+  const result: Record<string, unknown> = {};
+  for (const key of Object.keys(obj)) {
+    if (keys.includes(key)) continue;
+    result[key] = obj[key];
+  }
+  return result;
+};

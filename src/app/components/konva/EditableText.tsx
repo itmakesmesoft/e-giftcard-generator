@@ -1,7 +1,13 @@
 import Konva from "konva";
 import { Text } from "react-konva";
 import { Html } from "react-konva-utils";
-import { ChangeEvent, CSSProperties, useEffect, useRef, useState } from "react";
+import React, {
+  ChangeEvent,
+  CSSProperties,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { useCanvasContext } from "@/app/context/canvas";
 import { ShapeHelper, ShapeHelperConfig } from "./ShapeHelper";
 
@@ -23,7 +29,7 @@ const EditableText = (props: Konva.TextConfig) => {
 
   const textRef = useRef<Konva.Text>(null);
   const [value, setValue] = useState<string>(text);
-  const [isFocus, setIsFocus] = useState<boolean>(true);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
   const [helperConfig, setHelperConfig] = useState<ShapeHelperConfig>();
   const fontStyle = fontStyleFromProps?.split(" ")[0] ?? "normal";
 
@@ -38,10 +44,7 @@ const EditableText = (props: Konva.TextConfig) => {
   useEffect(() => {
     if (!textRef.current || selectedNodes.includes(textRef.current)) return;
 
-    // Note. Text 컴포넌트의 props로 넘기는 경우,
-    // 간헐적으로 visible이 먹지 않는 경우가 발생하여, setAttrs을 통해 설정
-    textRef.current.setAttrs({ visible: true });
-    setIsFocus(false);
+    setIsEditing(false);
   }, [selectedNodes]);
 
   const handleTransform = () => {
@@ -60,16 +63,13 @@ const EditableText = (props: Konva.TextConfig) => {
   };
 
   const handleDoubleClick = () => {
-    setIsFocus(true);
-    textRef.current?.setAttrs({ visible: false });
+    setIsEditing(true);
   };
 
   return (
     <>
       <Text
-        ref={(node) => {
-          textRef.current = node;
-        }}
+        ref={textRef}
         id={id}
         text={value}
         strokeEnabled={false}
@@ -81,9 +81,10 @@ const EditableText = (props: Konva.TextConfig) => {
         fontStyle={`${fontStyle}${fontWeight ? ` ${fontWeight}` : ""}`}
         fontFamily={fontFamily}
         typeFace={typeFace}
+        visible={!isEditing}
       />
       {isDrawing && <ShapeHelper config={helperConfig} />}
-      {isFocus && (
+      {isEditing && (
         <Html>
           <textarea
             value={value}
