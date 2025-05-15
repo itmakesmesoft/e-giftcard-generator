@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import Konva from "konva";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Image as KonvaImage } from "react-konva";
 import { useCanvasContext } from "@/app/context/canvas";
 
@@ -8,21 +9,30 @@ interface CanvasImageProps extends Omit<Konva.ImageConfig, "image"> {
 }
 
 const CanvasImage = (props: CanvasImageProps) => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { dataURL, image: _, ...restProps } = props;
   const [image, setImage] = useState<HTMLImageElement | null>(null);
   const { canvasSize, canvasPos } = useCanvasContext();
+  const loadedImage = useRef<HTMLImageElement | null>(null);
+  const loadedURL = useRef<string | null>(null);
 
   useEffect(() => {
     if (!dataURL) return;
+
+    if (dataURL === loadedURL.current && loadedImage.current) {
+      setImage(loadedImage.current);
+      return;
+    }
 
     const img = new Image();
     img.crossOrigin = "anonymous";
     img.src = dataURL;
     img.onload = () => {
       setImage(img);
+      loadedImage.current = img;
+      loadedURL.current = dataURL;
     };
   }, [dataURL]);
+
   const [width, height] = getProperImageSize(canvasSize, image);
 
   const centerX = Math.floor(canvasPos.x + (canvasSize.width - width) / 2);

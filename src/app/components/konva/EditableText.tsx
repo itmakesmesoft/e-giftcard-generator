@@ -69,7 +69,10 @@ const EditableText = (props: Konva.TextConfig) => {
   return (
     <>
       <Text
-        ref={textRef}
+        ref={(node) => {
+          // NOTE. 캔버스 저장 이후 ref 참조가 끊어지는 문제가 있어 동적으로 ref 연결
+          textRef.current = node;
+        }}
         id={id}
         text={value}
         strokeEnabled={false}

@@ -54,6 +54,7 @@ const ShapesRenderer = React.memo(() => {
 
   const onDragEnd = useCallback(
     (e: KonvaEventObject<DragEvent, Node<NodeConfig>>) => {
+      console.log("changed");
       const position = e.target.getPosition() as Vector2d;
       const id = e.target.attrs.id;
       setShapes((shapes) =>

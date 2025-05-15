@@ -2,7 +2,7 @@ import { Group } from "konva/lib/Group";
 import { Shape, ShapeConfig } from "konva/lib/Shape";
 import { useCanvasContext } from "../context/canvas";
 import { useCallback } from "react";
-import { convertPosition } from "@/utils/canvas";
+import { convertPosition, omitKeysFromObject } from "@/utils/canvas";
 import useControl from "./useControl";
 import { useShapeStore } from "../store/canvas";
 
@@ -50,7 +50,7 @@ const useCanvasData = () => {
     const { width, height, bgColor, children: childrenFromData } = data.canvas;
     if (!childrenFromData) return;
     const children = childrenFromData?.map(({ attrs }) => ({
-      ...attrs,
+      ...omitKeysFromObject(attrs, ["ref"]),
       ...convertToAbsolutePosition(attrs), // 절대 좌표로 변환
     })) as ShapeConfig[];
     setAttributes.setCanvasOption(
@@ -65,6 +65,7 @@ const useCanvasData = () => {
 
   const exportCanvasAsJSON = () => {
     if (!stageRef.current) return;
+    console.log(stageRef.current);
     const stagedChildren = stageRef.current.getChildren();
     const extractIds = ["_shapeLayer", "_drawLayer"];
     const children = stagedChildren
@@ -73,7 +74,7 @@ const useCanvasData = () => {
         children.map((child) => ({
           ...child,
           attrs: {
-            ...child.attrs,
+            ...omitKeysFromObject(child.attrs, ["ref"]),
             ...convertToRelativePosition(child.attrs), // 상대 좌표로 변환
           },
         }))
