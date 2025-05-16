@@ -7,15 +7,10 @@ import {
   SetStateAction,
   useCallback,
   useContext,
-  useEffect,
   useRef,
   useState,
 } from "react";
-import { useShapeStore } from "../store/canvas";
 import { Vector2d } from "konva/lib/types";
-import { ShapeConfig } from "../types/canvas";
-import { convertPosition } from "@/utils/canvas";
-
 export interface CanvasSize {
   width: number;
   height: number;
@@ -43,6 +38,7 @@ interface CanvasContextValueProps {
   selectNodeById: (id: string) => void;
   selectNodesByIdList: (idList: string[]) => void;
   getPointerPosition: () => Vector2d;
+  setViewportSize: Dispatch<SetStateAction<ViewportSize>>;
 }
 
 const defaultValue: CanvasContextValueProps = {
@@ -62,6 +58,7 @@ const defaultValue: CanvasContextValueProps = {
   selectNodeById: () => {},
   selectNodesByIdList: () => {},
   getPointerPosition: () => ({ x: 0, y: 0 }),
+  setViewportSize: () => {},
 };
 
 const CanvasContext = createContext<CanvasContextValueProps>(defaultValue);
@@ -71,18 +68,13 @@ export const useCanvasContext = () => useContext(CanvasContext);
 export const CanvasProvider = ({ children }: { children: ReactNode }) => {
   const { canvasPos: cPos, viewportSize: vSize } = defaultValue;
 
-  const canvasSize = useShapeStore((state) => state.canvasOption.canvasSize);
-
   const stageRef = useRef<Konva.Stage>(null);
-  const canvasPosRef = useRef<Vector2d>(null);
   const transformerRef = useRef<Konva.Transformer>(null);
   const [canvasPos, setCanvasPos] = useState<Vector2d>(cPos);
   // const [canvasSize, setCanvasSize] = useState<CanvasSize>(canvasSizeFromStore);
   const [stageScale, setStageScale] = useState<number>(defaultValue.stageScale);
   const [viewportSize, setViewportSize] = useState<ViewportSize>(vSize);
   const [selectedNodes, setSelectedNodes] = useState<Konva.Node[]>([]);
-
-  const setShapes = useShapeStore((state) => state.setShapes);
 
   const getPointerPosition = useCallback((): Vector2d => {
     if (!stageRef.current) return { x: 0, y: 0 };
@@ -95,86 +87,6 @@ export const CanvasProvider = ({ children }: { children: ReactNode }) => {
       y: (pointerPos.y - stagePos.y) / scale.y,
     };
   }, []);
-
-  // 위치를 절대 위치 또는 상대 위치로 바꾸는 함수
-
-  const convertToAbsolutePosition = useCallback(
-    (props: ShapeConfig, parentX?: number, parentY?: number) => {
-      const canvasPos = canvasPosRef.current || { x: 0, y: 0 };
-      return convertPosition(
-        props,
-        parentX ?? canvasPos.x,
-        parentY ?? canvasPos.y,
-        true
-      );
-    },
-    []
-  );
-
-  const convertToRelativePosition = useCallback(
-    (props: ShapeConfig, parentX?: number, parentY?: number) => {
-      const canvasPos = canvasPosRef.current || { x: 0, y: 0 };
-      return convertPosition(
-        props,
-        parentX ?? canvasPos.x,
-        parentY ?? canvasPos.y,
-        false
-      );
-    },
-    []
-  );
-
-  useEffect(() => {
-    if (selectedNodes.length > 0) {
-      transformerRef.current?.nodes([...selectedNodes]);
-      return;
-    }
-    transformerRef.current?.nodes([]);
-  }, [selectedNodes]);
-
-  const resize = useCallback(() => {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    const posX = (width - canvasSize.width) / 2;
-    const posY = (height - canvasSize.height) / 2;
-
-    setShapes(
-      (shapes) =>
-        shapes.map((shape) => ({
-          ...shape,
-          ...convertToAbsolutePosition(
-            convertToRelativePosition(shape),
-            posX,
-            posY
-          ),
-        })),
-      false
-    );
-    setViewportSize({ width, height });
-    setCanvasPos({
-      x: posX,
-      y: posY,
-    });
-    canvasPosRef.current = { x: posX, y: posY };
-  }, [
-    canvasSize,
-    convertToAbsolutePosition,
-    convertToRelativePosition,
-    setShapes,
-  ]);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setViewportSize({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
-    }
-    resize();
-    window.addEventListener("resize", resize);
-
-    return () => window.removeEventListener("resize", resize);
-  }, [resize]);
 
   const selectNodeById = (id: string) => {
     if (!transformerRef.current || !stageRef.current) return;
@@ -223,6 +135,7 @@ export const CanvasProvider = ({ children }: { children: ReactNode }) => {
         selectNodeById,
         selectNodesByIdList,
         getPointerPosition,
+        setViewportSize,
       }}
     >
       {children}

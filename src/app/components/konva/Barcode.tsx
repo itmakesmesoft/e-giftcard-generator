@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import Konva from "konva";
 import { generateCode, type GeneraterFormatType } from "@/utils";
 import { useCallback, useEffect, useState } from "react";
@@ -31,7 +32,6 @@ const Barcode = (props: BarcodeProps) => {
     barColor: barColorFromProps, // 불러온 객체 내부에 barColor가 존재하는 경우를 대비
     width = 100,
     height = 100,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     image: _,
     ...restProps
   } = props;

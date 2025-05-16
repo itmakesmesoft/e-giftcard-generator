@@ -46,17 +46,10 @@ const CanvasImage = (props: CanvasImageProps) => {
         canvasPos.y + (canvasSize.height - height) / 2
       );
       setPosition({ x: centerX, y: centerY });
+    } else {
+      setPosition({ x, y });
     }
-  }, [
-    canvasPos.x,
-    canvasPos.y,
-    canvasSize.height,
-    canvasSize.width,
-    height,
-    width,
-    x,
-    y,
-  ]);
+  }, [canvasPos, canvasSize.height, canvasSize.width, height, width, x, y]);
 
   if (!image) return null;
 

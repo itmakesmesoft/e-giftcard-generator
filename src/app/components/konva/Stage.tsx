@@ -5,7 +5,6 @@ import { Vector2d } from "konva/lib/types";
 import { ReactNode, useEffect, useRef, useState } from "react";
 import { Stage as KonvaStage, Layer, Transformer } from "react-konva";
 import BackgroundLayer from "./BackgroundLayer";
-import { useShapeStore } from "@/app/store/canvas";
 
 const Stage = ({ children }: { children: ReactNode }) => {
   const {
@@ -18,7 +17,6 @@ const Stage = ({ children }: { children: ReactNode }) => {
   } = useCanvasContext();
   const isPointerDown = useRef(false);
   const [isDraggable, setIsDraggable] = useState<boolean>(false);
-  const canvasSize = useShapeStore((state) => state.canvasOption.canvasSize);
 
   const { action, setAction, getAttributes } = useControl();
 
@@ -230,7 +228,6 @@ const Stage = ({ children }: { children: ReactNode }) => {
         onPointerDown={clearSelectNodes}
         viewPortWidth={viewportSize.width}
         viewPortHeight={viewportSize.height}
-        {...canvasSize}
         {...canvasPos}
       />
       {children}

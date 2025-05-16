@@ -69,8 +69,8 @@ const EditableText = (props: Konva.TextConfig) => {
   return (
     <>
       <Text
+        // NOTE. 캔버스 저장 이후 ref 참조가 끊어지는 문제가 있어 동적으로 ref 연결
         ref={(node) => {
-          // NOTE. 캔버스 저장 이후 ref 참조가 끊어지는 문제가 있어 동적으로 ref 연결
           textRef.current = node;
         }}
         id={id}
@@ -94,24 +94,24 @@ const EditableText = (props: Konva.TextConfig) => {
             onChange={handleValueChange}
             style={{
               ...(restProps as CSSProperties),
-              fontFamily: `"${fontFamily}", ${typeFace}`,
-              position: "absolute",
-              top: props.y,
-              left: props.x,
-              lineHeight: props.lineHeight ?? 1,
-              color: props.fill as string,
-              width: props.width,
-              height: props.height,
-              transformOrigin: "left top",
-              transform: `rotateZ(${props.rotation}deg)`,
-              fontWeight: fontWeight,
-              fontStyle: fontStyle,
-              textAlign,
-              zIndex: 10,
               resize: "none",
               outline: "none",
               border: "none",
               overflow: "hidden",
+              position: "absolute",
+              top: props.y,
+              left: props.x,
+              color: props.fill as string,
+              width: props.width,
+              height: props.height,
+              zIndex: 10,
+              textAlign,
+              fontStyle: fontStyle,
+              fontWeight: fontWeight,
+              fontFamily: `"${fontFamily}", ${typeFace}`,
+              lineHeight: props.lineHeight ?? 1,
+              transform: `rotateZ(${props.rotation}deg)`,
+              transformOrigin: "left top",
             }}
           />
         </Html>

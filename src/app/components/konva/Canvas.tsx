@@ -6,18 +6,55 @@ import { Arrow, Circle, Layer, Line, Rect, Ellipse, Star } from "react-konva";
 import { useControlStore, useShapeStore } from "@/app/store/canvas";
 import { KonvaEventObject, NodeConfig, Node } from "konva/lib/Node";
 import { useCanvasContext } from "@/app/context/canvas";
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 
 const Canvas = () => {
-  const { canvasPos } = useCanvasContext();
-  const canvasSize = useShapeStore((state) => state.canvasOption.canvasSize);
+  const {
+    canvasPos,
+    selectedNodes,
+    transformerRef,
+    setViewportSize,
+    setCanvasPos,
+  } = useCanvasContext();
+  const canvasOption = useShapeStore((state) => state.canvasOption);
+
+  useEffect(() => {
+    if (selectedNodes.length > 0) {
+      transformerRef.current?.nodes([...selectedNodes]);
+      return;
+    }
+    transformerRef.current?.nodes([]);
+  }, [selectedNodes, transformerRef]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      setViewportSize({
+        width,
+        height,
+      });
+      const posX = (width - canvasOption.canvasSize.width) / 2;
+      const posY = (height - canvasOption.canvasSize.height) / 2;
+      setCanvasPos({
+        x: posX,
+        y: posY,
+      });
+    }
+  }, [canvasOption, setCanvasPos, setViewportSize]);
 
   return (
     <>
-      <Layer id="_shapeLayer" clip={{ ...canvasSize, ...canvasPos }}>
+      <Layer
+        id="_shapeLayer"
+        clip={{ ...canvasOption.canvasSize, ...canvasPos }}
+      >
         <ShapesRenderer />
       </Layer>
-      <Layer id="_drawLayer" clip={{ ...canvasSize, ...canvasPos }}>
+      <Layer
+        id="_drawLayer"
+        clip={{ ...canvasOption.canvasSize, ...canvasPos }}
+      >
         <DrawingRenderer />
       </Layer>
     </>

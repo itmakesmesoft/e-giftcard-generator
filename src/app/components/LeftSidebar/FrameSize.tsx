@@ -1,66 +1,15 @@
 import Input from "../../../components/Input";
-import { useDebounce } from "@/app/hooks";
-import { useEffect, useRef, useState } from "react";
+import { useControl, useDebounce } from "@/app/hooks";
+import { useEffect, useState } from "react";
 import { FrameIcon } from "@radix-ui/react-icons";
 import Menubar from "@/components/Menubar";
+import { CanvasSize } from "@/app/context/canvas";
 import { useShapeStore } from "@/app/store/canvas";
 
-const FrameSize = () => {
-  const canvasSize = useShapeStore((state) => state.canvasOption.canvasSize);
+const FrameSizeWrapper = () => {
+  const { getAttributes } = useControl();
+  const canvasOption = getAttributes.canvasOption;
   const setCanvasOption = useShapeStore((state) => state.setCanvasOption);
-  const prevSizeRef = useRef(canvasSize);
-
-  const [isFrameRatioLock, setIsFrameRatioLock] = useState<boolean>(true);
-  const [frameSize, setFrameSize] = useState<{
-    width: number;
-    height: number;
-  }>(canvasSize);
-
-  const { debounce } = useDebounce();
-
-  useEffect(() => {
-    if (
-      canvasSize.width !== prevSizeRef.current.width ||
-      canvasSize.height !== prevSizeRef.current.height
-    ) {
-      setFrameSize(canvasSize);
-    }
-  }, [canvasSize]);
-
-  useEffect(() => {
-    const { width: cWeight, height: cHeight } = prevSizeRef.current;
-    const { width: fWeight, height: fHeight } = frameSize;
-    if (fWeight === cWeight && fHeight === cHeight) return;
-
-    prevSizeRef.current = frameSize;
-
-    const callback = debounce(
-      () =>
-        setCanvasOption((prev) => ({
-          ...prev,
-          canvasSize: { width: fWeight ?? 1, height: fHeight ?? 1 },
-        })),
-      50
-    );
-
-    callback();
-  }, [canvasSize, debounce, frameSize, setCanvasOption]);
-
-  const handleWidthChange = (value: string | number) =>
-    setFrameSize((prev) => {
-      const ratio = prev.height > 0 ? prev.height / prev.width : 1;
-      const width = Number(value);
-      const height = isFrameRatioLock ? Number(value) * ratio : prev.height;
-      return { width, height };
-    });
-
-  const handleHeightChange = (value: string | number) =>
-    setFrameSize((prev) => {
-      const ratio = prev.width > 0 ? prev.width / prev.height : 1;
-      const height = Number(value);
-      const width = isFrameRatioLock ? Number(value) * ratio : prev.width;
-      return { width, height };
-    });
 
   return (
     <Menubar.MenuGroup
@@ -71,18 +20,67 @@ const FrameSize = () => {
       }
     >
       <p className="text-sm font-semibold">프레임 크기 조절</p>
-      <div className="grid grid-cols-2 gap-4 px-2 py-1">
-        <Input value={frameSize.width} onValueChange={handleWidthChange} />
-        <Input value={frameSize.height} onValueChange={handleHeightChange} />
-        <button
-          onClick={() => setIsFrameRatioLock((prev) => !prev)}
-          className={isFrameRatioLock ? "bg-black text-white" : ""}
-        >
-          비율 유지
-        </button>
-      </div>
+      <FrameSize
+        canvasSize={canvasOption.canvasSize}
+        onValueChange={(value) =>
+          setCanvasOption((prev) => ({ ...prev, canvasSize: value }))
+        }
+      />
     </Menubar.MenuGroup>
   );
 };
 
-export default FrameSize;
+export default FrameSizeWrapper;
+
+interface FrameSizeProps {
+  canvasSize: CanvasSize;
+  onValueChange: (value: CanvasSize) => void;
+}
+
+const FrameSize = ({ canvasSize, onValueChange }: FrameSizeProps) => {
+  const [frameSize, setFrameSize] = useState<CanvasSize>(canvasSize);
+  const [isFrameRatioLock, setIsFrameRatioLock] = useState<boolean>(true);
+
+  const { debounce } = useDebounce();
+
+  useEffect(() => {
+    const { width: width, height: height } = canvasSize;
+    const { width: innerWidth, height: innerHeight } = frameSize;
+
+    if (innerWidth !== width || innerHeight !== height) {
+      const callback = debounce(() => {
+        onValueChange(frameSize);
+      }, 50);
+      callback();
+    }
+  }, [canvasSize, debounce, frameSize, onValueChange]);
+
+  const handleWidthChange = (value: string | number) => {
+    const ratio = frameSize.height > 0 ? frameSize.height / frameSize.width : 1;
+    const width = Number(value);
+    const height = isFrameRatioLock ? Number(value) * ratio : frameSize.height;
+
+    setFrameSize({ width, height });
+  };
+
+  const handleHeightChange = (value: string | number) => {
+    const ratio = frameSize.width > 0 ? frameSize.width / frameSize.height : 1;
+    const height = Number(value);
+    const width = isFrameRatioLock ? Number(value) * ratio : frameSize.width;
+
+    setFrameSize({ width, height });
+  };
+
+  return (
+    <div className="grid grid-cols-2 gap-4 px-2 py-1">
+      <Input value={frameSize.width} onValueChange={handleWidthChange} />
+      <Input value={frameSize.height} onValueChange={handleHeightChange} />
+      <button
+        onClick={() => setIsFrameRatioLock((prev) => !prev)}
+        className={isFrameRatioLock ? "bg-black text-white" : ""}
+      >
+        비율 유지
+      </button>
+    </div>
+  );
+};
