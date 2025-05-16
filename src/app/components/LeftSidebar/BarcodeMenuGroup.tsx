@@ -2,7 +2,7 @@ import QrIcon from "@/components/assets/QrIcon";
 import Menubar from "@/components/Menubar";
 import NextImage from "next/image";
 import BarcodeModal from "./BarcodeModal";
-import { ChangeEvent, useEffect } from "react";
+import { ChangeEvent } from "react";
 import { ReaderFormatType, readCodeByImage } from "@/utils";
 
 interface BarcodeMenuGroupProps {
