@@ -1,8 +1,8 @@
 import QrIcon from "@/components/assets/QrIcon";
 import Menubar from "@/components/Menubar";
-import Image from "next/image";
+import NextImage from "next/image";
 import BarcodeModal from "./BarcodeModal";
-import { ChangeEvent } from "react";
+import { ChangeEvent, useEffect } from "react";
 import { ReaderFormatType, readCodeByImage } from "@/utils";
 
 interface BarcodeMenuGroupProps {
@@ -35,7 +35,13 @@ const BarcodeMenuGroup = ({ onAddBarcode }: BarcodeMenuGroupProps) => {
     >
       <div className="flex flex-col items-center gap-3">
         <div className="rounded-sm overflow-hidden">
-          <Image src="/example.png" width="300" height="300" alt="barcode" />
+          <NextImage
+            src="/example.webp"
+            width="300"
+            height="300"
+            alt="barcode"
+            priority
+          />
         </div>
         <p className="text-sm break-keep text-center">
           <strong className="font-semibold">
