@@ -2,28 +2,35 @@ import Toolbar from "@/components/Toolbar";
 import BrushRadiusControl from "./BrushRadiusControl";
 import { Slider } from "radix-ui";
 import { RxTransparencyGrid } from "react-icons/rx";
-import { useControl } from "@/app/hooks";
+import { useSyncControl } from "@/app/hooks";
 import { ColorResult } from "react-color";
 import { ControlPanelProps } from "./types";
 import React from "react";
+import { useControlStore } from "@/app/store/canvas";
 
 const BrushControlPanel = React.memo((props: ControlPanelProps) => {
   const { updateSelectedShapeAttributes } = props;
-  const { getAttributes, setAttributes } = useControl();
+  const { getAttributes } = useSyncControl();
+
+  const setBrushStroke = useControlStore((state) => state.brush.setStroke);
+  const setBrushOpacity = useControlStore((state) => state.brush.setOpacity);
+  const setBrushStrokeWidth = useControlStore(
+    (state) => state.brush.setStrokeWidth
+  );
 
   const onBrushColorChange = (value: ColorResult) => {
-    setAttributes.setBrushStroke(value.hex);
+    setBrushStroke(value.hex);
     updateSelectedShapeAttributes({ stroke: value.hex });
   };
 
-  const onBrushWidthChange = (value: number) => {
-    setAttributes.setBrushStrokeWidth(value);
-    updateSelectedShapeAttributes({ strokeWidth: value });
+  const onOpacityChange = (value: number[]) => {
+    setBrushOpacity(value[0]);
+    updateSelectedShapeAttributes({ opacity: value[0] });
   };
 
-  const onOpacityChange = (value: number[]) => {
-    setAttributes.setBrushOpacity(value[0]);
-    updateSelectedShapeAttributes({ opacity: value[0] });
+  const onBrushWidthChange = (value: number) => {
+    setBrushStrokeWidth(value);
+    updateSelectedShapeAttributes({ strokeWidth: value });
   };
 
   return (

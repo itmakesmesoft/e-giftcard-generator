@@ -1,7 +1,6 @@
 import Menubar from "@/components/Menubar";
-import { useShapeStore } from "@/app/store/canvas";
+import { useControlStore, useShapeStore } from "@/app/store/canvas";
 import { convertBarcodeFormat, ReaderFormatType } from "@/utils";
-import { useCanvasContext } from "@/app/context/canvas";
 import { ChangeEvent } from "react";
 import { generateShapeConfig } from "@/utils/canvas";
 import {
@@ -14,7 +13,7 @@ import {
   ZoomInIcon,
   ZoomOutIcon,
 } from "@radix-ui/react-icons";
-import { useControl, useSelect } from "@/app/hooks";
+import { useSyncControl, useSelect } from "@/app/hooks";
 import NumberStepper from "../../../components/NumberStepper";
 import FrameSize from "./FrameSize";
 import ShapeMenuGroup from "./ShapeMenuGroup";
@@ -52,8 +51,11 @@ const TOOL_CONFIGS: Record<ToolAction, ToolConfig> = {
 
 const LeftSidebar = ({ className }: { className: string }) => {
   const { clearSelectNodes } = useSelect();
-  const { stageScale, setStageScale } = useCanvasContext();
-  const { action, setAction, getAttributes } = useControl();
+  const { getAttributes } = useSyncControl();
+  const action = useControlStore((state) => state.action);
+  const setAction = useControlStore((state) => state.setAction);
+  const stageScale = useControlStore((state) => state.stageScale);
+  const setStageScale = useControlStore((state) => state.setStageScale);
 
   const redo = useShapeStore((state) => state.redo);
   const undo = useShapeStore((state) => state.undo);

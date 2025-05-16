@@ -1,9 +1,9 @@
 import { Slider } from "radix-ui";
-import { useControl } from "@/app/hooks";
+import { useSyncControl } from "@/app/hooks";
 import { ColorResult } from "react-color";
 import Toolbar from "@/components/Toolbar";
 import { ControlPanelProps } from "./types";
-import { useShapeStore } from "@/app/store/canvas";
+import { useControlStore, useShapeStore } from "@/app/store/canvas";
 import { RxTransparencyGrid } from "react-icons/rx";
 import { useCanvasContext } from "@/app/context/canvas";
 import MoveBackwardIcon from "@/components/assets/MoveBackwardIcon";
@@ -12,27 +12,34 @@ import StrokeWidthIcon from "@/components/assets/StrokeWidthIcon";
 
 const ShapeControlPanel = (props: ControlPanelProps) => {
   const { updateSelectedShapeAttributes } = props;
-  const { getAttributes, setAttributes } = useControl();
+  const { getAttributes } = useSyncControl();
   const { selectedNodes, selectNodesByIdList } = useCanvasContext();
   const { moveToForward, moveToBackward } = useShapeStore();
 
+  const setShapeFill = useControlStore((state) => state.shape.setFill);
+  const setShapeStroke = useControlStore((state) => state.shape.setStroke);
+  const setShapeOpacity = useControlStore((state) => state.shape.setOpacity);
+  const setShapeStrokeWidth = useControlStore(
+    (state) => state.shape.setStrokeWidth
+  );
+
   const onFillChange = (value: ColorResult) => {
-    setAttributes.setShapeFill(value.hex);
+    setShapeFill(value.hex);
     updateSelectedShapeAttributes({ fill: value.hex });
   };
 
   const onStrokeChange = (value: ColorResult) => {
-    setAttributes.setShapeStroke(value.hex);
+    setShapeStroke(value.hex);
     updateSelectedShapeAttributes({ stroke: value.hex });
   };
 
   const onStrokeWidthChange = (value: number[]) => {
-    setAttributes.setShapeStrokeWidth(value[0]);
+    setShapeStrokeWidth(value[0]);
     updateSelectedShapeAttributes({ strokeWidth: value[0] });
   };
 
   const onOpacityChange = (value: number[]) => {
-    setAttributes.setShapeOpacity(value[0]);
+    setShapeOpacity(value[0]);
     updateSelectedShapeAttributes({ opacity: value[0] });
   };
 

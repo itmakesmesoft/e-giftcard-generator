@@ -1,25 +1,33 @@
 import { useCanvasContext } from "@/app/context/canvas";
-import { useControl, useSelect, useShapes } from "@/app/hooks";
+import { useSyncControl, useSelect, useShapes } from "@/app/hooks";
 import Konva from "konva";
 import { Vector2d } from "konva/lib/types";
 import { ReactNode, useEffect, useRef, useState } from "react";
 import { Stage as KonvaStage, Layer, Transformer } from "react-konva";
 import BackgroundLayer from "./BackgroundLayer";
+import { NodeSize } from "@/app/types/canvas";
+import { useControlStore } from "@/app/store/canvas";
 
 const Stage = ({ children }: { children: ReactNode }) => {
   const {
-    viewportSize,
     canvasPos,
     stageRef,
     transformerRef,
-    stageScale,
+    selectedNodes,
     getPointerPosition,
+    setCanvasPos,
   } = useCanvasContext();
   const isPointerDown = useRef(false);
+  const stageScale = useControlStore((state) => state.stageScale);
   const [isDraggable, setIsDraggable] = useState<boolean>(false);
+  const [viewportSize, setViewportSize] = useState<NodeSize>({
+    width: 0,
+    height: 0,
+  });
 
-  const { action, setAction, getAttributes } = useControl();
-
+  const { getAttributes } = useSyncControl();
+  const action = useControlStore((state) => state.action);
+  const setAction = useControlStore((state) => state.setAction);
   const { startShapeCreation, updateShapeCreation, completeShapeCreation } =
     useShapes();
   const {
@@ -30,6 +38,32 @@ const Stage = ({ children }: { children: ReactNode }) => {
     endSelectionBox,
     SelectionBox,
   } = useSelect();
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const canvasOption = getAttributes.canvasOption;
+      setViewportSize({
+        width,
+        height,
+      });
+      const posX = (width - canvasOption.canvasSize.width) / 2;
+      const posY = (height - canvasOption.canvasSize.height) / 2;
+      setCanvasPos({
+        x: posX,
+        y: posY,
+      });
+    }
+  }, [getAttributes, setCanvasPos, setViewportSize]);
+
+  useEffect(() => {
+    if (selectedNodes.length > 0) {
+      transformerRef.current?.nodes([...selectedNodes]);
+      return;
+    }
+    transformerRef.current?.nodes([]);
+  }, [selectedNodes, transformerRef]);
 
   useEffect(() => {
     if (!stageRef.current) return;

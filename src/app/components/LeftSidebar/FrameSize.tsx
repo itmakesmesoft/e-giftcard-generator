@@ -1,13 +1,13 @@
 import Input from "../../../components/Input";
-import { useControl, useDebounce } from "@/app/hooks";
+import { useSyncControl, useDebounce } from "@/app/hooks";
 import { useEffect, useState } from "react";
 import { FrameIcon } from "@radix-ui/react-icons";
 import Menubar from "@/components/Menubar";
-import { CanvasSize } from "@/app/context/canvas";
 import { useShapeStore } from "@/app/store/canvas";
+import { NodeSize } from "@/app/types/canvas";
 
 const FrameSizeWrapper = () => {
-  const { getAttributes } = useControl();
+  const { getAttributes } = useSyncControl();
   const canvasOption = getAttributes.canvasOption;
   const setCanvasOption = useShapeStore((state) => state.setCanvasOption);
 
@@ -33,12 +33,12 @@ const FrameSizeWrapper = () => {
 export default FrameSizeWrapper;
 
 interface FrameSizeProps {
-  canvasSize: CanvasSize;
-  onValueChange: (value: CanvasSize) => void;
+  canvasSize: NodeSize;
+  onValueChange: (value: NodeSize) => void;
 }
 
 const FrameSize = ({ canvasSize, onValueChange }: FrameSizeProps) => {
-  const [frameSize, setFrameSize] = useState<CanvasSize>(canvasSize);
+  const [frameSize, setFrameSize] = useState<NodeSize>(canvasSize);
   const [isFrameRatioLock, setIsFrameRatioLock] = useState<boolean>(true);
 
   const { debounce } = useDebounce();

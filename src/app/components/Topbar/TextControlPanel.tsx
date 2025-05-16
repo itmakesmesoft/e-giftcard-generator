@@ -15,9 +15,9 @@ import { Select } from "radix-ui";
 import { ChangeEvent } from "react";
 import { ColorResult } from "react-color";
 import { ControlPanelProps } from "./types";
-import { useControl, useFonts } from "@/app/hooks";
+import { useSyncControl, useFonts } from "@/app/hooks";
 import { useCanvasContext } from "@/app/context/canvas";
-import { useShapeStore } from "@/app/store/canvas";
+import { useControlStore, useShapeStore } from "@/app/store/canvas";
 import { TextAlign } from "@/app/store/types";
 
 const fontStyleOptions = [
@@ -53,28 +53,37 @@ const textAlignOptions = [
 
 const TextControlPanel = (props: ControlPanelProps) => {
   const { updateSelectedShapeAttributes } = props;
-  const { moveToForward, moveToBackward } = useShapeStore();
-  const { getAttributes, setAttributes } = useControl();
+  const { getAttributes } = useSyncControl();
   const { fontList, loadFontFamily, fontDict } = useFonts();
   const { selectedNodes, selectNodesByIdList } = useCanvasContext();
+
+  const { moveToForward, moveToBackward } = useShapeStore();
+
+  const setFontStyle = useControlStore((state) => state.font.setFontStyle);
+  const setFontWeight = useControlStore((state) => state.font.setFontWeight);
+  const setFontTextAlign = useControlStore((state) => state.font.setTextAlign);
+  const setFontSize = useControlStore((state) => state.font.setFontSize);
+  const setFontFamily = useControlStore((state) => state.font.setFontFamily);
+  const setFontTypeFace = useControlStore((state) => state.font.setTypeFace);
+  const setFontFill = useControlStore((state) => state.font.setFill);
 
   const onFontStylesChange = (values: string[]) => {
     const fontStyle = values.includes("italic") ? "italic" : "normal";
     const fontWeight = values.includes("900") ? "900" : "400";
 
-    setAttributes.setFontStyle(fontStyle);
-    setAttributes.setFontWeight(fontWeight);
+    setFontStyle(fontStyle);
+    setFontWeight(fontWeight);
     updateSelectedShapeAttributes({ fontStyle, fontWeight });
   };
 
   const onTextAlignChange = (textAlign: string) => {
-    setAttributes.setFontTextAlign(textAlign as TextAlign);
+    setFontTextAlign(textAlign as TextAlign);
     updateSelectedShapeAttributes({ textAlign });
   };
 
   const onFontSizeChange = (e: ChangeEvent<HTMLSelectElement>) => {
     const size = Number(e.target.value);
-    setAttributes.setFontSize(size);
+    setFontSize(size);
     updateSelectedShapeAttributes({ fontSize: size });
   };
 
@@ -84,13 +93,13 @@ const TextControlPanel = (props: ControlPanelProps) => {
     if (!res) return;
     const typeFace = fontDict[fontFamily].category;
 
-    setAttributes.setFontFamily(fontFamily);
-    setAttributes.setFontTypeFace(typeFace);
+    setFontFamily(fontFamily);
+    setFontTypeFace(typeFace);
     updateSelectedShapeAttributes({ fontFamily, typeFace });
   };
 
   const onFontColorChange = (value: ColorResult) => {
-    setAttributes.setFontFill(value.hex);
+    setFontFill(value.hex);
     updateSelectedShapeAttributes({ fill: value.hex });
   };
 

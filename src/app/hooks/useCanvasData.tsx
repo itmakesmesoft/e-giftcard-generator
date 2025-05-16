@@ -3,8 +3,8 @@ import { Shape, ShapeConfig } from "konva/lib/Shape";
 import { useCanvasContext } from "../context/canvas";
 import { useCallback } from "react";
 import { convertPosition, omitKeysFromObject } from "@/utils/canvas";
-import useControl from "./useControl";
 import { useShapeStore } from "../store/canvas";
+import { useSyncControl } from ".";
 
 export interface CanvasData {
   canvas: {
@@ -17,10 +17,11 @@ export interface CanvasData {
 
 const useCanvasData = () => {
   const { stageRef, canvasPos } = useCanvasContext();
-  const { getAttributes, setAttributes } = useControl();
-  const canvasSize = useShapeStore((state) => state.canvasOption.canvasSize);
+  const { getAttributes } = useSyncControl();
 
+  const canvasSize = useShapeStore((state) => state.canvasOption.canvasSize);
   const setShapes = useShapeStore((state) => state.setShapes);
+  const setCanvasOption = useShapeStore((state) => state.setCanvasOption);
 
   const convertToAbsolutePosition = useCallback(
     (props: ShapeConfig, parentX?: number, parentY?: number) => {
@@ -54,7 +55,7 @@ const useCanvasData = () => {
       ...omitKeysFromObject(attrs, ["ref"]),
       ...convertToAbsolutePosition(attrs), // 절대 좌표로 변환
     })) as ShapeConfig[];
-    setAttributes.setCanvasOption(
+    setCanvasOption(
       {
         canvasSize: { width, height },
         bgColor,

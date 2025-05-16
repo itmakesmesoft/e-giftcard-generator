@@ -1,4 +1,4 @@
-import useControl from "./useControl";
+import useSyncControl from "./useSyncControl";
 import useSelect from "./useSelect";
 import useShapes from "./useShapes";
 import useFonts from "./useFonts";
@@ -7,11 +7,11 @@ import useDebounceValue from "./useDebounceValue";
 import useCanvasData from "./useCanvasData";
 
 export {
-  useControl,
   useSelect,
   useShapes,
   useFonts,
   useDebounce,
+  useSyncControl,
   useDebounceValue,
   useCanvasData,
 };

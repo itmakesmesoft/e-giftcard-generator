@@ -1,7 +1,6 @@
 import { Slider } from "radix-ui";
 import Toolbar from "@/components/Toolbar";
 import { useState } from "react";
-// import { useDebounceValue } from "@/app/hooks";
 
 const BrushRadiusControl = ({
   value,
@@ -11,7 +10,6 @@ const BrushRadiusControl = ({
   onValueChange: (value: number) => void;
 }) => {
   const [brushRadius, setBrushRadius] = useState<number>(value);
-  // const debounced = useDebounceValue(brushRadius, 300);
 
   const radius = 0.16 * Math.max(brushRadius, 1) + 4;
 

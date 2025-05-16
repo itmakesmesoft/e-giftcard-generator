@@ -4,10 +4,7 @@ import { useShapeStore, useControlStore, defaultValues } from "../store/canvas";
 import { ActionType } from "../types/canvas";
 import Konva from "konva";
 
-const useControl = () => {
-  const action = useControlStore((state) => state.action);
-  const setAction = useControlStore((state) => state.setAction);
-
+const useSyncControl = () => {
   // shape 관련  개별 속성
   const shape = useControlStore((state) => state.shape);
   const shapeFill = useControlStore((state) => state.shape.fill);
@@ -74,7 +71,7 @@ const useControl = () => {
   const setBrushRadius = useControlStore((state) => state.brush.setRadius);
 
   const canvasOption = useShapeStore((state) => state.canvasOption);
-  const setCanvasOption = useShapeStore((state) => state.setCanvasOption);
+  // const setCanvasOption = useShapeStore((state) => state.setCanvasOption);
 
   const { selectedNodes } = useCanvasContext();
 
@@ -234,74 +231,12 @@ const useControl = () => {
       brushRadius,
     ]
   );
-
-  const setAttributes = useMemo(
-    () => ({
-      setCanvasOption,
-      // shape 속성 setter
-      setShapeFill,
-      setShapeStroke,
-      setShapeStrokeWidth,
-      setShapeOpacity,
-      setShapeLineJoin,
-      setShapeLineCap,
-      setShapeRadius,
-      // font 속성 setter
-      setFontFill,
-      setFontStroke,
-      setFontSize,
-      setFontWeight,
-      setFontFamily,
-      setFontStyle,
-      setFontTypeFace,
-      setFontTextAlign,
-      setFontOpacity,
-      // shape 속성 setter
-      setBrushFill,
-      setBrushStroke,
-      setBrushStrokeWidth,
-      setBrushOpacity,
-      setBrushLineJoin,
-      setBrushLineCap,
-      setBrushRadius,
-    }),
-    [
-      setCanvasOption,
-      setShapeFill,
-      setShapeStroke,
-      setShapeStrokeWidth,
-      setShapeOpacity,
-      setShapeLineJoin,
-      setShapeLineCap,
-      setShapeRadius,
-      setFontFill,
-      setFontStroke,
-      setFontSize,
-      setFontWeight,
-      setFontFamily,
-      setFontStyle,
-      setFontTypeFace,
-      setFontTextAlign,
-      setFontOpacity,
-      setBrushFill,
-      setBrushStroke,
-      setBrushStrokeWidth,
-      setBrushOpacity,
-      setBrushLineJoin,
-      setBrushLineCap,
-      setBrushRadius,
-    ]
-  );
-
   return {
-    action,
-    setAction,
     getAttributes,
-    setAttributes,
   };
 };
 
-export default useControl;
+export default useSyncControl;
 
 const getNodeType = (selectedNodes: Konva.Node[]): Set<ActionType> | null => {
   if (selectedNodes.length === 0) return null;

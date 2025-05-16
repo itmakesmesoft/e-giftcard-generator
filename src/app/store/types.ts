@@ -5,9 +5,11 @@ export type TextAlign = "center" | "left" | "right";
 export type FontWeight = string | number;
 export type FontStyle = "italic" | "normal";
 
+
 export type ControlState = {
   action: ActionType;
   bgColor: string;
+  stageScale: number;
   font: FontState,
   shape: ShapeState,
   brush: BrushState
@@ -50,6 +52,7 @@ export type ControlAction = DefaultControlActions & {shape: ShapeControlActions;
 export type DefaultControlActions = {
   setAction: (action: ActionType) => void;
   setBgColor: (bgColor: string) => void;
+  setStageScale: (stageScale:number) => void;
 }
 export type FontControlActions = {
   setFontSize: (fontSize: FontState['fontSize']) => void;

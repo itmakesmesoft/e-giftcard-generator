@@ -1,10 +1,11 @@
 import { create } from "zustand";
-import { ShapeConfig } from "../types/canvas";
+import { NodeSize, ShapeConfig } from "../types/canvas";
 import { ControlState, ControlAction } from "./types";
 
 export const defaultValues: ControlState = {
   action: "select",
   bgColor: "#ffffff",
+  stageScale: 1,
   brush: {
     fill: "#000000",
     stroke: "#000000",
@@ -39,10 +40,14 @@ export const defaultValues: ControlState = {
 const useControlStore = create<ControlState & ControlAction>((set) => ({
   action: defaultValues.action,
   bgColor: defaultValues.bgColor,
+  stageScale: defaultValues.stageScale,
+
 
   // 기본 액션 (변경 없음)
   setAction: (action) => set(() => ({ action })),
   setBgColor: (bgColor) => set(() => ({ bgColor })),
+  setStageScale: (stageScale) => set(() => ({ stageScale })),
+
   font: {
     ...defaultValues.font,
     setFontSize: (fontSize) => set((state) => ({
@@ -125,10 +130,9 @@ const useControlStore = create<ControlState & ControlAction>((set) => ({
 // Canvas Store 타입 정의
 type StateConfig = ShapeConfig[];
 
-type CanvasSize = { width: number; height: number };
 
 type CanvasOption = {
-  canvasSize: CanvasSize;
+  canvasSize: NodeSize;
   bgColor: string;
 };
 

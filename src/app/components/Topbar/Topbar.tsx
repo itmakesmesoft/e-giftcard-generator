@@ -4,7 +4,6 @@ import { ColorResult } from "react-color";
 import Toolbar from "@/components/Toolbar";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useEffect, useRef, useState } from "react";
-import { useControl, useSelect } from "@/app/hooks";
 import TextControlPanel from "./TextControlPanel";
 import ShapeControlPanel from "./ShapeControlPanel";
 import BrushControlPanel from "./BrushControlPanel";
@@ -12,16 +11,18 @@ import DeleteIcon from "@/components/assets/DeleteIcon";
 import { useCanvasContext } from "@/app/context/canvas";
 import { useControlStore, useShapeStore } from "@/app/store/canvas";
 import { PanelType } from "./types";
+import { useSelect, useSyncControl } from "@/app/hooks";
 
 const Topbar = ({ className }: { className: string }) => {
   const clipboardRef = useRef<Konva.Node[]>(null);
   const [panelType, setPanelType] = useState<PanelType>(null);
 
-  const setShapes = useShapeStore((state) => state.setShapes);
   const action = useControlStore((state) => state.action);
+  const setShapes = useShapeStore((state) => state.setShapes);
+  const setCanvasOption = useShapeStore((state) => state.setCanvasOption);
 
+  const { getAttributes } = useSyncControl();
   const { clearSelectNodes } = useSelect();
-  const { getAttributes, setAttributes } = useControl();
   const { selectedNodes, selectNodesByIdList, getAllSelectedNodes } =
     useCanvasContext();
 
@@ -113,7 +114,7 @@ const Topbar = ({ className }: { className: string }) => {
   useHotkeys("ctrl+v", pasteCopiedShape, [selectedNodes]);
 
   const onBgColorChange = (value: ColorResult) => {
-    setAttributes.setCanvasOption((prev) => ({ ...prev, bgColor: value.hex }));
+    setCanvasOption((prev) => ({ ...prev, bgColor: value.hex }));
     // updateSelectedShapeAttributes({ bgColor: value.hex });
   };
 

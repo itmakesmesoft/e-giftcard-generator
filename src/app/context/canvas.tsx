@@ -11,54 +11,37 @@ import {
   useState,
 } from "react";
 import { Vector2d } from "konva/lib/types";
-export interface CanvasSize {
-  width: number;
-  height: number;
-}
-
-export interface ViewportSize {
-  width: number;
-  height: number;
-}
 
 interface CanvasContextValueProps {
-  // canvasSize: CanvasSize;
   canvasPos: Vector2d;
-  stageScale: number;
-  viewportSize: ViewportSize;
+  // stageScale: number;
   selectedNodes: Konva.Node[];
   stageRef: RefObject<Konva.Stage | null>;
   transformerRef: RefObject<Konva.Transformer | null>;
-  // setCanvasSize: Dispatch<SetStateAction<CanvasSize>>;
   setCanvasPos: Dispatch<SetStateAction<Vector2d>>;
-  setStageScale: Dispatch<SetStateAction<number>>;
+  // setStageScale: Dispatch<SetStateAction<number>>;
   setSelectedNodes: (node: Konva.Node[]) => void;
   getAllSelectedNodes: () => Konva.Node[];
   getSingleSelectedNode: () => Konva.Node | undefined;
   selectNodeById: (id: string) => void;
   selectNodesByIdList: (idList: string[]) => void;
   getPointerPosition: () => Vector2d;
-  setViewportSize: Dispatch<SetStateAction<ViewportSize>>;
 }
 
 const defaultValue: CanvasContextValueProps = {
-  // canvasSize: { width: 0, height: 0 },
   canvasPos: { x: 0, y: 0 },
-  stageScale: 1,
-  viewportSize: { width: 0, height: 0 },
+  // stageScale: 1,
   selectedNodes: [],
   stageRef: { current: null },
   transformerRef: { current: null },
-  // setCanvasSize: () => {},
   setCanvasPos: () => {},
-  setStageScale: () => {},
+  // setStageScale: () => {},
   setSelectedNodes: () => {},
   getAllSelectedNodes: () => [],
   getSingleSelectedNode: () => undefined,
   selectNodeById: () => {},
   selectNodesByIdList: () => {},
   getPointerPosition: () => ({ x: 0, y: 0 }),
-  setViewportSize: () => {},
 };
 
 const CanvasContext = createContext<CanvasContextValueProps>(defaultValue);
@@ -66,14 +49,12 @@ const CanvasContext = createContext<CanvasContextValueProps>(defaultValue);
 export const useCanvasContext = () => useContext(CanvasContext);
 
 export const CanvasProvider = ({ children }: { children: ReactNode }) => {
-  const { canvasPos: cPos, viewportSize: vSize } = defaultValue;
+  const { canvasPos: cPos } = defaultValue;
 
   const stageRef = useRef<Konva.Stage>(null);
   const transformerRef = useRef<Konva.Transformer>(null);
   const [canvasPos, setCanvasPos] = useState<Vector2d>(cPos);
-  // const [canvasSize, setCanvasSize] = useState<CanvasSize>(canvasSizeFromStore);
-  const [stageScale, setStageScale] = useState<number>(defaultValue.stageScale);
-  const [viewportSize, setViewportSize] = useState<ViewportSize>(vSize);
+  // const [stageScale, setStageScale] = useState<number>(defaultValue.stageScale);
   const [selectedNodes, setSelectedNodes] = useState<Konva.Node[]>([]);
 
   const getPointerPosition = useCallback((): Vector2d => {
@@ -119,23 +100,19 @@ export const CanvasProvider = ({ children }: { children: ReactNode }) => {
   return (
     <CanvasContext.Provider
       value={{
-        // canvasSize,
         canvasPos,
-        stageScale,
-        viewportSize,
+        // stageScale,
         selectedNodes,
         stageRef: stageRef as RefObject<Konva.Stage>,
         transformerRef: transformerRef as RefObject<Konva.Transformer>,
-        // setCanvasSize,
         setCanvasPos,
-        setStageScale,
+        // setStageScale,
         setSelectedNodes,
         getAllSelectedNodes,
         getSingleSelectedNode,
         selectNodeById,
         selectNodesByIdList,
         getPointerPosition,
-        setViewportSize,
       }}
     >
       {children}

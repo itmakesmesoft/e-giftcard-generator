@@ -29,3 +29,8 @@ export interface Controls {
 }
 
 export type ShapeConfig = Konva.ShapeConfig & { isDrawing?: boolean };
+
+export interface NodeSize {
+  width: number;
+  height: number;
+}
