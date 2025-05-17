@@ -103,7 +103,9 @@ const ToolbarDropdown = ({
     <DropdownMenu.Root onOpenChange={handleOpenChange}>
       <RadixToolbar.Button asChild>
         <Tooltip label={label}>
-          <DropdownMenu.Trigger className="cursor-pointer">
+          <DropdownMenu.Trigger
+            className={`${disabled ? "cursor-not-allowed" : "cursor-pointer"}`}
+          >
             {title}
           </DropdownMenu.Trigger>
         </Tooltip>

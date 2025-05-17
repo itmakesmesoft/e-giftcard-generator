@@ -26,8 +26,13 @@ const Topbar = ({ className }: { className: string }) => {
   const { clearSelectNodes } = useSelect();
   const { selectedNodes, selectNodesByIdList, getAllSelectedNodes } =
     useCanvasContext();
+
   const actionType: ActionType | null =
-    selectedNodes.length === 1 ? selectedNodes[0].attrs.type : null;
+    selectedNodes.length === 0
+      ? action
+      : selectedNodes.length === 1
+      ? selectedNodes[0].attrs.type
+      : null;
 
   useEffect(() => {
     if (selectedNodes.length > 0) {

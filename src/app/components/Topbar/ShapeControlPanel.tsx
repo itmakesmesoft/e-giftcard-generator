@@ -8,7 +8,7 @@ import { useCanvasContext } from "@/app/context/canvas";
 import MoveBackwardIcon from "@/components/assets/MoveBackwardIcon";
 import MoveForwardIcon from "@/components/assets/MoveForwardIcon";
 import StrokeWidthIcon from "@/components/assets/StrokeWidthIcon";
-import { Blend, Square, SquareRoundCorner } from "lucide-react";
+import { Blend, Square, SquareDashed, SquareRoundCorner } from "lucide-react";
 
 const ShapeControlPanel = (props: ControlPanelProps) => {
   const { updateSelectedShapeAttributes, actionType } = props;
@@ -116,15 +116,17 @@ const ShapeControlPanel = (props: ControlPanelProps) => {
           />
         </Slider.Root>
       </Toolbar.Dropdown>
-      <Toolbar.Tooltip label="테두리">
-        <Toolbar.Button onClick={onHasStrokeChange}>
-          <Square
-            width="20"
-            height="20"
-            color={hasStroke ? "black" : "#959595"}
-          />
-        </Toolbar.Button>
-      </Toolbar.Tooltip>
+      {actionType !== "line" && (
+        <Toolbar.Tooltip label="테두리">
+          <Toolbar.Button onClick={onHasStrokeChange}>
+            {hasStroke ? (
+              <Square width="20" height="20" />
+            ) : (
+              <SquareDashed width="20" height="20" />
+            )}
+          </Toolbar.Button>
+        </Toolbar.Tooltip>
+      )}
       <Toolbar.Dropdown
         label="선 굵기"
         disabled={!hasStroke}
@@ -133,9 +135,9 @@ const ShapeControlPanel = (props: ControlPanelProps) => {
             <StrokeWidthIcon
               width="24"
               height="24"
-              className={hasStroke ? "text-black" : "text-[#959595]"}
+              className={hasStroke ? "text-black" : "text-[#acacac]"}
             />
-            <span className={hasStroke ? "text-black" : "text-[#959595]"}>
+            <span className={hasStroke ? "text-black" : "text-[#acacac]"}>
               {getAttributes.shapeStrokeWidth}
             </span>
           </span>

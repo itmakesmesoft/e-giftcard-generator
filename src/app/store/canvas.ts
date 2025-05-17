@@ -30,14 +30,14 @@ export const defaultValues: ControlState = {
     fill: "#000000",
     hasStroke: true,
     stroke: "#000000",
-    strokeWidth: 0,
+    strokeWidth: 1,
     opacity: 1,
     lineJoin: "round",
     lineCap: "round",
     cornerRadius: 0,
   }
 };
-
+let prevShapeHasStroke: boolean;
 const useControlStore = create<ControlState & ControlAction>((set) => ({
   action: defaultValues.action,
   bgColor: defaultValues.bgColor,
@@ -45,7 +45,16 @@ const useControlStore = create<ControlState & ControlAction>((set) => ({
 
 
   // 기본 액션 (변경 없음)
-  setAction: (action) => set(() => ({ action })),
+  setAction: (action) => set((state) => {
+    if (action === 'line') {
+      prevShapeHasStroke = state.shape.hasStroke
+    }
+    return {
+      action,
+      shape: {
+        ...state.shape,
+        hasStroke: action ==='line' ? true: prevShapeHasStroke
+    }}}),
   setBgColor: (bgColor) => set(() => ({ bgColor })),
   setStageScale: (stageScale) => set(() => ({ stageScale })),
 
