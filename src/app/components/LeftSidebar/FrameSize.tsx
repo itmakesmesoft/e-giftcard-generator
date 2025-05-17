@@ -74,7 +74,7 @@ const FrameSize = ({ canvasSize, onValueChange }: FrameSizeProps) => {
   return (
     <div className="flex flex-row justify-between gap-4 px-2 py-1">
       <Input
-        value={frameSize.width}
+        value={Math.round(frameSize.width)}
         onValueChange={handleWidthChange}
         className="bg-gray-100 rounded-lg"
       />
