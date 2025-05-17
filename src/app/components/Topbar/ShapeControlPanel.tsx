@@ -52,7 +52,6 @@ const ShapeControlPanel = (props: ControlPanelProps) => {
   };
 
   const onRadiusChange = (value: number[]) => {
-    console.log(value[0]);
     setShapeCornerRadius(value[0]);
     updateSelectedShapeAttributes({ cornerRadius: value[0] });
   };
