@@ -9,7 +9,7 @@ export const saveToLocalStorage = (key: string, data: unknown) => {
 
 export const loadFromLocalStorage = (key: string) => {
   const dataAsString = window.localStorage.getItem(key);
-  if (dataAsString) {
+  if (dataAsString && isPossibleToParseJson(dataAsString)) {
     const converted = JSON.parse(dataAsString);
     if (!Array.isArray(converted)) return converted;
     return converted.map((item: string) =>
@@ -71,3 +71,12 @@ export const omitKeysFromObject = (obj: Record<string, unknown>, keys: string[])
   }
   return result;
 };
+
+export const isPossibleToParseJson = (str: string): boolean => {
+  try {
+    const parsed = JSON.parse(str);
+    return typeof parsed === 'object'
+  } catch {
+    return false
+  }
+}

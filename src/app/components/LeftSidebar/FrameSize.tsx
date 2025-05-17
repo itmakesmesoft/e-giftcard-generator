@@ -1,10 +1,10 @@
-import Input from "../../../components/Input";
+import Input from "@/components/Input";
 import { useSyncControl, useDebounce } from "@/app/hooks";
 import { useEffect, useState } from "react";
-import { FrameIcon } from "@radix-ui/react-icons";
 import Menubar from "@/components/Menubar";
 import { useShapeStore } from "@/app/store/canvas";
 import { NodeSize } from "@/app/types/canvas";
+import { Frame, Link2, Unlink2 } from "lucide-react";
 
 const FrameSizeWrapper = () => {
   const { getAttributes } = useSyncControl();
@@ -16,7 +16,7 @@ const FrameSizeWrapper = () => {
       label="Frame"
       className="p-2 text-center w-[220px]"
       trigger={
-        <Menubar.MenuGroupTrigger icon={<FrameIcon width="18" height="18" />} />
+        <Menubar.MenuGroupTrigger icon={<Frame width="18" height="18" />} />
       }
     >
       <p className="text-sm font-semibold">프레임 크기 조절</p>
@@ -72,15 +72,24 @@ const FrameSize = ({ canvasSize, onValueChange }: FrameSizeProps) => {
   };
 
   return (
-    <div className="grid grid-cols-2 gap-4 px-2 py-1">
-      <Input value={frameSize.width} onValueChange={handleWidthChange} />
-      <Input value={frameSize.height} onValueChange={handleHeightChange} />
-      <button
-        onClick={() => setIsFrameRatioLock((prev) => !prev)}
-        className={isFrameRatioLock ? "bg-black text-white" : ""}
-      >
-        비율 유지
+    <div className="flex flex-row justify-between gap-4 px-2 py-1">
+      <Input
+        value={frameSize.width}
+        onValueChange={handleWidthChange}
+        className="bg-gray-100 rounded-lg"
+      />
+      <button onClick={() => setIsFrameRatioLock((prev) => !prev)}>
+        {isFrameRatioLock ? (
+          <Link2 width="18" height="18" />
+        ) : (
+          <Unlink2 width="18" height="18" />
+        )}
       </button>
+      <Input
+        value={Math.round(frameSize.height)}
+        onValueChange={handleHeightChange}
+        className="bg-gray-100 rounded-lg"
+      />
     </div>
   );
 };

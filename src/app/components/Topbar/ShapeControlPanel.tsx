@@ -4,21 +4,28 @@ import { ColorResult } from "react-color";
 import Toolbar from "@/components/Toolbar";
 import { ControlPanelProps } from "./types";
 import { useControlStore, useShapeStore } from "@/app/store/canvas";
-import { RxTransparencyGrid } from "react-icons/rx";
 import { useCanvasContext } from "@/app/context/canvas";
 import MoveBackwardIcon from "@/components/assets/MoveBackwardIcon";
 import MoveForwardIcon from "@/components/assets/MoveForwardIcon";
 import StrokeWidthIcon from "@/components/assets/StrokeWidthIcon";
+import { Blend, Square, SquareRoundCorner } from "lucide-react";
 
 const ShapeControlPanel = (props: ControlPanelProps) => {
-  const { updateSelectedShapeAttributes } = props;
+  const { updateSelectedShapeAttributes, actionType } = props;
   const { getAttributes } = useSyncControl();
   const { selectedNodes, selectNodesByIdList } = useCanvasContext();
   const { moveToForward, moveToBackward } = useShapeStore();
 
   const setShapeFill = useControlStore((state) => state.shape.setFill);
+  const hasStroke = useControlStore((state) => state.shape.hasStroke);
+  const setShapeHasStroke = useControlStore(
+    (state) => state.shape.setHasStroke
+  );
   const setShapeStroke = useControlStore((state) => state.shape.setStroke);
   const setShapeOpacity = useControlStore((state) => state.shape.setOpacity);
+  const setShapeCornerRadius = useControlStore(
+    (state) => state.shape.setCornerRadius
+  );
   const setShapeStrokeWidth = useControlStore(
     (state) => state.shape.setStrokeWidth
   );
@@ -26,6 +33,12 @@ const ShapeControlPanel = (props: ControlPanelProps) => {
   const onFillChange = (value: ColorResult) => {
     setShapeFill(value.hex);
     updateSelectedShapeAttributes({ fill: value.hex });
+  };
+
+  const onHasStrokeChange = () => {
+    const newHasStroke = !hasStroke;
+    setShapeHasStroke(newHasStroke);
+    updateSelectedShapeAttributes({ hasStroke: newHasStroke });
   };
 
   const onStrokeChange = (value: ColorResult) => {
@@ -36,6 +49,12 @@ const ShapeControlPanel = (props: ControlPanelProps) => {
   const onStrokeWidthChange = (value: number[]) => {
     setShapeStrokeWidth(value[0]);
     updateSelectedShapeAttributes({ strokeWidth: value[0] });
+  };
+
+  const onRadiusChange = (value: number[]) => {
+    console.log(value[0]);
+    setShapeCornerRadius(value[0]);
+    updateSelectedShapeAttributes({ cornerRadius: value[0] });
   };
 
   const onOpacityChange = (value: number[]) => {
@@ -73,10 +92,10 @@ const ShapeControlPanel = (props: ControlPanelProps) => {
       <Toolbar.Dropdown
         label="불투명도"
         title={
-          <RxTransparencyGrid
-            width="24"
-            height="24"
-            style={{ background: `rgba(0,0,0,${getAttributes.shapeOpacity})` }}
+          <Blend
+            width="20"
+            height="20"
+            color={`rgba(0,0,0,${Math.max(getAttributes.shapeOpacity, 0.3)})`}
           />
         }
       >
@@ -98,16 +117,28 @@ const ShapeControlPanel = (props: ControlPanelProps) => {
           />
         </Slider.Root>
       </Toolbar.Dropdown>
+      <Toolbar.Tooltip label="테두리">
+        <Toolbar.Button onClick={onHasStrokeChange}>
+          <Square
+            width="20"
+            height="20"
+            color={hasStroke ? "black" : "#959595"}
+          />
+        </Toolbar.Button>
+      </Toolbar.Tooltip>
       <Toolbar.Dropdown
         label="선 굵기"
+        disabled={!hasStroke}
         title={
           <span className="flex flex-row gap-0.5 items-center min-w-10">
             <StrokeWidthIcon
               width="24"
               height="24"
-              className="group-hover:fill-red-600"
+              className={hasStroke ? "text-black" : "text-[#959595]"}
             />
-            <span>{getAttributes.shapeStrokeWidth}</span>
+            <span className={hasStroke ? "text-black" : "text-[#959595]"}>
+              {getAttributes.shapeStrokeWidth}
+            </span>
           </span>
         }
       >
@@ -115,7 +146,7 @@ const ShapeControlPanel = (props: ControlPanelProps) => {
         <Slider.Root
           className="relative flex items-center select-none touch-none w-[200px] h-4"
           max={100}
-          min={0}
+          min={1}
           value={[getAttributes.shapeStrokeWidth]}
           onValueChange={onStrokeWidthChange}
           step={1}
@@ -129,6 +160,30 @@ const ShapeControlPanel = (props: ControlPanelProps) => {
           />
         </Slider.Root>
       </Toolbar.Dropdown>
+      {actionType === "rectangle" && (
+        <Toolbar.Dropdown
+          label="모서리"
+          title={<SquareRoundCorner width="20" height="20" />}
+        >
+          <p>Corner Radius</p>
+          <Slider.Root
+            className="relative flex items-center select-none touch-none w-[200px] h-4"
+            max={100}
+            min={1}
+            value={[getAttributes.shapeCornerRadius]}
+            onValueChange={onRadiusChange}
+            step={1}
+          >
+            <Slider.Track className="bg-black relative grow-1 h-1">
+              <Slider.Range className="absolute bg-blue-500 h-full" />
+            </Slider.Track>
+            <Slider.Thumb
+              className="block w-4 h-4 bg-red-500 rounded-full"
+              aria-label="opacity"
+            />
+          </Slider.Root>
+        </Toolbar.Dropdown>
+      )}
       <Toolbar.Tooltip label="맨 앞으로 이동">
         <Toolbar.Button onClick={onMoveToForward}>
           <MoveForwardIcon width="20" height="20" />

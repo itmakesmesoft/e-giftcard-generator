@@ -8,12 +8,15 @@ const useSyncControl = () => {
   // shape 관련  개별 속성
   const shape = useControlStore((state) => state.shape);
   const shapeFill = useControlStore((state) => state.shape.fill);
+  const shapeHasStroke = useControlStore((state) => state.shape.hasStroke);
   const shapeStroke = useControlStore((state) => state.shape.stroke);
   const shapeStrokeWidth = useControlStore((state) => state.shape.strokeWidth);
   const shapeOpacity = useControlStore((state) => state.shape.opacity);
   const shapeLineJoin = useControlStore((state) => state.shape.lineJoin);
   const shapeLineCap = useControlStore((state) => state.shape.lineCap);
-  const shapeRadius = useControlStore((state) => state.shape.radius);
+  const shapeCornerRadius = useControlStore(
+    (state) => state.shape.cornerRadius
+  );
 
   // font 관련  개별 속성
   const font = useControlStore((state) => state.font);
@@ -40,13 +43,18 @@ const useSyncControl = () => {
   // shape 관련 setter 함수들
   const setShapeFill = useControlStore((state) => state.shape.setFill);
   const setShapeOpacity = useControlStore((state) => state.shape.setOpacity);
+  const setShapeHasStroke = useControlStore(
+    (state) => state.shape.setHasStroke
+  );
   const setShapeStroke = useControlStore((state) => state.shape.setStroke);
   const setShapeStrokeWidth = useControlStore(
     (state) => state.shape.setStrokeWidth
   );
   const setShapeLineJoin = useControlStore((state) => state.shape.setLineJoin);
   const setShapeLineCap = useControlStore((state) => state.shape.setLineCap);
-  const setShapeRadius = useControlStore((state) => state.shape.setRadius);
+  const setShapeCornerRadius = useControlStore(
+    (state) => state.shape.setCornerRadius
+  );
 
   // font 관련 setter 함수들
   const setFontFill = useControlStore((state) => state.font.setFill);
@@ -70,6 +78,7 @@ const useSyncControl = () => {
   const setBrushLineCap = useControlStore((state) => state.brush.setLineCap);
   const setBrushRadius = useControlStore((state) => state.brush.setRadius);
 
+  const action = useControlStore((state) => state.action);
   const canvasOption = useShapeStore((state) => state.canvasOption);
   // const setCanvasOption = useShapeStore((state) => state.setCanvasOption);
 
@@ -82,26 +91,39 @@ const useSyncControl = () => {
     if (
       selectedNodes.length === 1 &&
       types?.isSubsetOf(
-        new Set(["rectangle", "circle", "arrow", "triangle", "ellipse", "star"])
+        new Set([
+          "rectangle",
+          "circle",
+          "arrow",
+          "line",
+          "triangle",
+          "ellipse",
+          "star",
+        ])
       )
     ) {
       const attrs = selectedNodes[0].attrs;
 
       setShapeFill(attrs.barColor ?? attrs.fill ?? defaultValues.shape.fill);
+      setShapeHasStroke(attrs.hasStroke ?? defaultValues.shape.hasStroke);
       setShapeStroke(attrs.stroke ?? defaultValues.shape.stroke);
       setShapeStrokeWidth(attrs.strokeWidth ?? defaultValues.shape.strokeWidth);
       setShapeOpacity(attrs.opacity ?? defaultValues.shape.opacity);
       setShapeLineJoin(attrs.lineJoin ?? defaultValues.shape.lineJoin);
       setShapeLineCap(attrs.lineCap ?? defaultValues.shape.lineCap);
-      setShapeRadius(attrs.radius ?? defaultValues.shape.radius);
+      setShapeCornerRadius(
+        attrs.cornerRadius ?? defaultValues.shape.cornerRadius
+      );
     }
   }, [
+    action,
     selectedNodes,
     setShapeFill,
     setShapeLineCap,
     setShapeLineJoin,
     setShapeOpacity,
-    setShapeRadius,
+    setShapeCornerRadius,
+    setShapeHasStroke,
     setShapeStroke,
     setShapeStrokeWidth,
     types,
@@ -176,12 +198,13 @@ const useSyncControl = () => {
       brush,
       // shape 속성
       shapeFill,
+      shapeHasStroke,
       shapeStroke,
       shapeStrokeWidth,
       shapeOpacity,
       shapeLineJoin,
       shapeLineCap,
-      shapeRadius,
+      shapeCornerRadius,
       // font 속성
       fontFill,
       fontStroke,
@@ -207,12 +230,13 @@ const useSyncControl = () => {
       font,
       brush,
       shapeFill,
+      shapeHasStroke,
       shapeStroke,
       shapeStrokeWidth,
       shapeOpacity,
       shapeLineJoin,
       shapeLineCap,
-      shapeRadius,
+      shapeCornerRadius,
       fontFill,
       fontStroke,
       fontSize,

@@ -124,6 +124,7 @@ const BarcodeModal = ({ trigger, onSubmit }: BarcodeModalProps) => {
                       className="w-full border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                       options={options}
                       onValueChange={handleFormatChange}
+                      placeholder="타입을 입력해주세요."
                     />
                   </div>
                   <Input

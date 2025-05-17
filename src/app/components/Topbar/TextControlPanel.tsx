@@ -1,17 +1,6 @@
 import MoveBackwardIcon from "@/components/assets/MoveBackwardIcon";
 import MoveForwardIcon from "@/components/assets/MoveForwardIcon";
 import Toolbar from "@/components/Toolbar";
-import {
-  CheckIcon,
-  ChevronDownIcon,
-  FontBoldIcon,
-  FontItalicIcon,
-  TextAlignCenterIcon,
-  TextAlignLeftIcon,
-  TextAlignRightIcon,
-  TextIcon,
-} from "@radix-ui/react-icons";
-import { Select } from "radix-ui";
 import { ChangeEvent } from "react";
 import { ColorResult } from "react-color";
 import { ControlPanelProps } from "./types";
@@ -19,37 +8,14 @@ import { useSyncControl, useFonts } from "@/app/hooks";
 import { useCanvasContext } from "@/app/context/canvas";
 import { useControlStore, useShapeStore } from "@/app/store/canvas";
 import { TextAlign } from "@/app/store/types";
-
-const fontStyleOptions = [
-  {
-    label: "font weight bold",
-    value: "900",
-    icon: <FontBoldIcon width="24" height="24" />,
-  },
-  {
-    label: "font style italic",
-    value: "italic",
-    icon: <FontItalicIcon width="24" height="24" />,
-  },
-];
-
-const textAlignOptions = [
-  {
-    label: "left",
-    value: "left",
-    icon: <TextAlignLeftIcon width="24" height="24" />,
-  },
-  {
-    label: "center",
-    value: "center",
-    icon: <TextAlignCenterIcon width="24" height="24" />,
-  },
-  {
-    label: "right",
-    value: "right",
-    icon: <TextAlignRightIcon width="24" height="24" />,
-  },
-];
+import {
+  AlignCenter,
+  AlignLeft,
+  AlignRight,
+  Bold,
+  Italic,
+  Type,
+} from "lucide-react";
 
 const TextControlPanel = (props: ControlPanelProps) => {
   const { updateSelectedShapeAttributes } = props;
@@ -121,49 +87,85 @@ const TextControlPanel = (props: ControlPanelProps) => {
     <>
       <Toolbar.ToggleGroup
         type="multiple"
-        items={fontStyleOptions}
         value={[getAttributes.fontStyle, String(getAttributes.fontWeight)]}
         onValueChange={onFontStylesChange}
-      />
+      >
+        <Toolbar.ToggleGroupItem
+          value="italic"
+          icon={
+            <Italic
+              width="20"
+              height="20"
+              color={getAttributes.fontStyle === "italic" ? "black" : "#959595"}
+            />
+          }
+        />
+        <Toolbar.ToggleGroupItem
+          value="900"
+          icon={
+            <Bold
+              width="20"
+              height="20"
+              color={getAttributes.fontWeight === "900" ? "black" : "#959595"}
+            />
+          }
+        />
+      </Toolbar.ToggleGroup>
       <Toolbar.ToggleGroup
         type="single"
-        items={textAlignOptions}
         value={getAttributes.fontTextAlign}
         onValueChange={onTextAlignChange}
-      />
+      >
+        <Toolbar.ToggleGroupItem
+          value="left"
+          icon={
+            <AlignLeft
+              width="20"
+              height="20"
+              color={
+                getAttributes.fontTextAlign === "left" ? "black" : "#959595"
+              }
+            />
+          }
+        />
+        <Toolbar.ToggleGroupItem
+          value="center"
+          icon={
+            <AlignCenter
+              width="20"
+              height="20"
+              color={
+                getAttributes.fontTextAlign === "center" ? "black" : "#959595"
+              }
+            />
+          }
+        />
+        <Toolbar.ToggleGroupItem
+          value="right"
+          icon={
+            <AlignRight
+              width="20"
+              height="20"
+              color={
+                getAttributes.fontTextAlign === "right" ? "black" : "#959595"
+              }
+            />
+          }
+        />
+      </Toolbar.ToggleGroup>
       <Toolbar.Separator />
       <Toolbar.Select
-        defaultValue={getAttributes.fontFamily}
         onValueChange={onFontFamilyChange}
-        className="w-[150px] overflow-hidden"
-        label="폰트 선택"
-        title={
-          <>
-            <Select.Value placeholder="Select a font" asChild>
-              <span className="overflow-hidden text-ellipsis text-nowrap">
-                {getAttributes.fontFamily}
-              </span>
-            </Select.Value>
-            <Select.Icon>
-              <ChevronDownIcon />
-            </Select.Icon>
-          </>
+        defaultValue={fontList[0]?.family}
+        className="w-[200px]"
+        placeholder="폰트"
+        options={
+          fontList.map((item) => ({
+            value: item.family,
+            label: item.family,
+          })) ?? []
         }
-      >
-        {fontList?.map((item, index) => (
-          <Toolbar.SelectItem
-            icon={getAttributes.fontFamily === item.family && <CheckIcon />}
-            className={
-              getAttributes.fontFamily === item.family
-                ? "text-gray-700! font-semibold"
-                : ""
-            }
-            key={index}
-            value={item.family}
-            label={item.family}
-          />
-        ))}
-      </Toolbar.Select>
+      />
       <Toolbar.Input
         value={String(getAttributes.fontSize)}
         onChange={onFontSizeChange}
@@ -175,7 +177,7 @@ const TextControlPanel = (props: ControlPanelProps) => {
         variant="custom"
         customTitle={(currentColor) => (
           <span className="flex flex-col justify-between items-center w-[24px] h-[24px]">
-            <TextIcon width="19" height="19" />
+            <Type width="19" height="19" />
             <span
               className="w-full h-1 inline-block rounded-xs"
               style={{ background: currentColor }}

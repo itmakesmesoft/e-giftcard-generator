@@ -1,9 +1,9 @@
-import QrIcon from "@/components/assets/QrIcon";
 import Menubar from "@/components/Menubar";
 import NextImage from "next/image";
 import BarcodeModal from "./BarcodeModal";
 import { ChangeEvent } from "react";
 import { ReaderFormatType, readCodeByImage } from "@/utils";
+import { QrCode } from "lucide-react";
 
 interface BarcodeMenuGroupProps {
   onAddBarcode: (data: { format: ReaderFormatType; value: string }) => void;
@@ -29,7 +29,7 @@ const BarcodeMenuGroup = ({ onAddBarcode }: BarcodeMenuGroupProps) => {
       label="QR/바코드 추가"
       trigger={
         <div className="group p-2 pt-4 hover:bg-blue-500 cursor-pointer">
-          <QrIcon width="30" height="30" className="group-hover:fill-white" />
+          <QrCode width="30" height="30" className="group-hover:text-white" />
         </div>
       }
     >

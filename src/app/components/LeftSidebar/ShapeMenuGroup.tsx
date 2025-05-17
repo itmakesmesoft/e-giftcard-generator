@@ -1,32 +1,35 @@
-import {
-  MixIcon,
-  SquareIcon,
-  CircleIcon,
-  ArrowTopLeftIcon,
-  StarIcon,
-} from "@radix-ui/react-icons";
 import Menubar from "@/components/Menubar";
-import { ShapeAction } from "./types";
 import TriangleIcon from "@/components/assets/TriangleIcon";
+import { ShapeConfig, ShapeMenuGroupProps } from "./types";
+import { ShapeType } from "../konva/Canvas";
+import {
+  Circle,
+  MoveDownRight,
+  Shapes,
+  Slash,
+  Square,
+  Star,
+} from "lucide-react";
 
-interface ShapeMenuGroupProps {
-  onToolChange: (action: ShapeAction) => void;
-}
-
-const SHAPE_CONFIGS = {
+const SHAPE_CONFIGS: Record<ShapeType, ShapeConfig> = {
   rectangle: {
     action: "rectangle" as const,
-    icon: <SquareIcon width="16" height="16" />,
+    icon: <Square width="16" height="16" />,
     label: "사각형",
   },
   circle: {
     action: "circle" as const,
-    icon: <CircleIcon width="16" height="16" />,
+    icon: <Circle width="16" height="16" />,
     label: "원",
+  },
+  line: {
+    action: "line" as const,
+    icon: <Slash width="16" height="16" />,
+    label: "선",
   },
   arrow: {
     action: "arrow" as const,
-    icon: <ArrowTopLeftIcon width="16" height="16" />,
+    icon: <MoveDownRight width="16" height="16" />,
     label: "화살표",
   },
   triangle: {
@@ -36,12 +39,12 @@ const SHAPE_CONFIGS = {
   },
   ellipse: {
     action: "ellipse" as const,
-    icon: <CircleIcon width="16" height="16" />,
+    icon: <Circle width="16" height="12" />,
     label: "타원",
   },
   star: {
     action: "star" as const,
-    icon: <StarIcon width="16" height="16" />,
+    icon: <Star width="16" height="16" />,
     label: "별",
   },
 };
@@ -53,13 +56,13 @@ const ShapeMenuGroup = ({ onToolChange }: ShapeMenuGroupProps) => {
       className="text-black"
       onClick={() => onToolChange("rectangle")}
       trigger={
-        <Menubar.MenuGroupTrigger icon={<MixIcon width="18" height="18" />} />
+        <Menubar.MenuGroupTrigger icon={<Shapes width="18" height="18" />} />
       }
     >
       {Object.entries(SHAPE_CONFIGS).map(([shapeAction, config]) => (
         <Menubar.MenuGroupItem
           key={shapeAction}
-          onClick={() => onToolChange(shapeAction as ShapeAction)}
+          onClick={() => onToolChange(shapeAction as ShapeType)}
           icon={config.icon}
         >
           {config.label}

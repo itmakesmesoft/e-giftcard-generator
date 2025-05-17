@@ -1,12 +1,12 @@
 import Toolbar from "@/components/Toolbar";
 import BrushRadiusControl from "./BrushRadiusControl";
 import { Slider } from "radix-ui";
-import { RxTransparencyGrid } from "react-icons/rx";
 import { useSyncControl } from "@/app/hooks";
 import { ColorResult } from "react-color";
 import { ControlPanelProps } from "./types";
 import React from "react";
 import { useControlStore } from "@/app/store/canvas";
+import { Blend } from "lucide-react";
 
 const BrushControlPanel = React.memo((props: ControlPanelProps) => {
   const { updateSelectedShapeAttributes } = props;
@@ -43,10 +43,10 @@ const BrushControlPanel = React.memo((props: ControlPanelProps) => {
       <Toolbar.Dropdown
         label="불투명도"
         title={
-          <RxTransparencyGrid
-            width="24"
-            height="24"
-            style={{ background: `rgba(0,0,0,${getAttributes.brushOpacity})` }}
+          <Blend
+            width="20"
+            height="20"
+            color={`rgba(0,0,0,${Math.max(getAttributes.shapeOpacity, 0.3)})`}
           />
         }
       >

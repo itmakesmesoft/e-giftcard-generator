@@ -1,13 +1,11 @@
 import { useCanvasData } from "../hooks";
 import { useHotkeys } from "react-hotkeys-hook";
-import { DownloadIcon } from "@radix-ui/react-icons";
 import { useCanvasContext } from "@/app/context/canvas";
 import { loadFromLocalStorage, saveToLocalStorage } from "@/utils";
 import Toast from "../../components/Toast";
 import Menubar from "../../components/Menubar";
-import SaveIcon from "../../components/assets/SaveIcon";
-import LoadIcon from "../../components/assets/LoadIcon";
 import { useShapeStore } from "../store/canvas";
+import { Download, FolderOpen, Save } from "lucide-react";
 
 const FloatingButtonGroup = ({ className }: { className?: string }) => {
   const { stageRef, canvasPos } = useCanvasContext();
@@ -50,14 +48,14 @@ const FloatingButtonGroup = ({ className }: { className?: string }) => {
       className={`flex flex-col items-center rounded-xl bg-white overflow-hidden ${className}`}
     >
       <Menubar.MenuItem label="다운로드" onClick={handleExportAsImage}>
-        <DownloadIcon width="24" height="24" />
+        <Download width="24" height="24" />
       </Menubar.MenuItem>
       <Menubar.Separator className="my-1" />
       <Menubar.MenuItem label="임시 저장" onClick={handleSaveCanvas}>
-        <SaveIcon width="24" height="24" className="text-black" />
+        <Save width="24" height="24" className="text-black" />
       </Menubar.MenuItem>
       <Menubar.MenuItem label="불러오기" onClick={handleLoadCanvas}>
-        <LoadIcon width="24" height="24" className="text-black" />
+        <FolderOpen width="24" height="24" className="text-black" />
       </Menubar.MenuItem>
       <Toast />
     </Menubar>

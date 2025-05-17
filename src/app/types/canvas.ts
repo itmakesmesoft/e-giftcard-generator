@@ -2,12 +2,13 @@ import Konva from "konva";
 
 export type ActionType =
   | "select"
-  | "rectangle"
-  | "circle"
+  | "text"
   | "pencil"
   | "eraser"
+  | "line"
+  | "rectangle"
+  | "circle"
   | "arrow"
-  | "text"
   | "triangle"
   | "ellipse"
   | "star";

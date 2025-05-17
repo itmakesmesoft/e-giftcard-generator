@@ -28,12 +28,13 @@ export const defaultValues: ControlState = {
   },
   shape: {
     fill: "#000000",
+    hasStroke: true,
     stroke: "#000000",
     strokeWidth: 0,
     opacity: 1,
     lineJoin: "round",
     lineCap: "round",
-    radius: 0,
+    cornerRadius: 0,
   }
 };
 
@@ -83,6 +84,9 @@ const useControlStore = create<ControlState & ControlAction>((set) => ({
     setFill: (fill) => set((state) => ({
       shape: { ...state.shape, fill }
     })),
+    setHasStroke: (hasStroke) => set((state) => ({
+      shape: { ...state.shape, hasStroke }
+    })),
     setStroke: (stroke) => set((state) => ({
       shape: { ...state.shape, stroke }
     })),
@@ -98,8 +102,8 @@ const useControlStore = create<ControlState & ControlAction>((set) => ({
     setLineCap: (lineCap) => set((state) => ({
       shape: { ...state.shape, lineCap }
     })),
-    setRadius: (radius) => set((state) => ({
-      shape: { ...state.shape, radius }
+    setCornerRadius: (cornerRadius) => set((state) => ({
+      shape: { ...state.shape, cornerRadius }
     })),
   },
     brush: {

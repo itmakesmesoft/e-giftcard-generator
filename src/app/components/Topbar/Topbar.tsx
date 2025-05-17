@@ -12,6 +12,7 @@ import { useCanvasContext } from "@/app/context/canvas";
 import { useControlStore, useShapeStore } from "@/app/store/canvas";
 import { PanelType } from "./types";
 import { useSelect, useSyncControl } from "@/app/hooks";
+import { ActionType } from "@/app/types/canvas";
 
 const Topbar = ({ className }: { className: string }) => {
   const clipboardRef = useRef<Konva.Node[]>(null);
@@ -25,6 +26,8 @@ const Topbar = ({ className }: { className: string }) => {
   const { clearSelectNodes } = useSelect();
   const { selectedNodes, selectNodesByIdList, getAllSelectedNodes } =
     useCanvasContext();
+  const actionType: ActionType | null =
+    selectedNodes.length === 1 ? selectedNodes[0].attrs.type : null;
 
   useEffect(() => {
     if (selectedNodes.length > 0) {
@@ -48,6 +51,7 @@ const Topbar = ({ className }: { className: string }) => {
         case "rectangle":
         case "circle":
         case "arrow":
+        case "line":
           if (panelType !== "shape") setPanelType("shape");
           break;
         default:
@@ -131,16 +135,19 @@ const Topbar = ({ className }: { className: string }) => {
         {panelType === "shape" && (
           <ShapeControlPanel
             updateSelectedShapeAttributes={updateSelectedShapeAttributes}
+            actionType={actionType}
           />
         )}
         {panelType === "text" && (
           <TextControlPanel
             updateSelectedShapeAttributes={updateSelectedShapeAttributes}
+            actionType={actionType}
           />
         )}
         {panelType === "brush" && (
           <BrushControlPanel
             updateSelectedShapeAttributes={updateSelectedShapeAttributes}
+            actionType={actionType}
           />
         )}
         <Toolbar.Separator />

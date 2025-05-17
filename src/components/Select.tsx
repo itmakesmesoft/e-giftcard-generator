@@ -1,17 +1,22 @@
-import {
-  CheckIcon,
-  ChevronUpIcon,
-  ChevronDownIcon,
-} from "@radix-ui/react-icons";
+import { Check, ChevronDown, ChevronUp } from "lucide-react";
 import { Select as RadixSelect } from "radix-ui";
 
-interface SelectProps extends RadixSelect.SelectProps {
+export interface SelectProps extends RadixSelect.SelectProps {
   options: { value: string; label: string }[];
+  label?: string;
   className?: string;
+  placeholder?: string;
 }
 
 const Select = (props: SelectProps) => {
-  const { options, className, onValueChange, value, ...restProps } = props;
+  const {
+    options,
+    className,
+    onValueChange,
+    placeholder,
+    value,
+    ...restProps
+  } = props;
   return (
     <RadixSelect.Root
       onValueChange={onValueChange}
@@ -19,10 +24,10 @@ const Select = (props: SelectProps) => {
       {...restProps}
     >
       <RadixSelect.Trigger
-        className={`inline-flex items-center justify-between w-full px-3 py-2 ${className}`}
+        className={`inline-flex items-center justify-between px-3 py-2 ${className}`}
       >
-        <RadixSelect.Value placeholder="타입을 선택해주세요." />
-        <RadixSelect.Icon />
+        <RadixSelect.Value placeholder={placeholder} />
+        <ChevronDown width="16" />
       </RadixSelect.Trigger>
       <RadixSelect.Portal>
         <RadixSelect.Content
@@ -40,7 +45,7 @@ const Select = (props: SelectProps) => {
               >
                 <RadixSelect.ItemText>{option.label}</RadixSelect.ItemText>
                 <RadixSelect.ItemIndicator className="absolute left-1">
-                  <CheckIcon />
+                  <Check width="12" />
                 </RadixSelect.ItemIndicator>
               </RadixSelect.Item>
             ))}
@@ -59,7 +64,7 @@ interface ScrollButtonProps {
 }
 
 const ScrollButton = ({ direction }: ScrollButtonProps) => {
-  const Icon = direction === "up" ? ChevronUpIcon : ChevronDownIcon;
+  const Icon = direction === "up" ? ChevronUp : ChevronDown;
   const Button =
     direction === "up"
       ? RadixSelect.ScrollUpButton

@@ -6,7 +6,7 @@ const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_FONT_API;
 const BASE_URL = `https://www.googleapis.com/webfonts/v1/webfonts?key=${API_KEY}&capability=WOFF2`;
 
 const useFonts = () => {
-  const [fontList, setFontList] = useState<any[] | undefined>(undefined);
+  const [fontList, setFontList] = useState<any[]>([]);
   const [fontDict, setFontDict] = useState<any>();
 
   useEffect(() => {
@@ -14,7 +14,7 @@ const useFonts = () => {
       const data = await getFontList();
       const converted = convertToMap(data);
 
-      setFontList(data.length > 30 ? data.slice(0, 30) : data);
+      setFontList(data.length > 200 ? data.slice(0, 200) : data);
       setFontDict(converted ?? {});
     };
 
@@ -42,13 +42,14 @@ const useFonts = () => {
     const key = "fontList";
     const data = loadFromLocalStorage(key);
     if (data) return data;
-
     return await fetch(BASE_URL)
-      .then((res) => res.json())
+      .then(async (res) => await res.json())
       .then((data) => {
+        if (!data) return;
         saveToLocalStorage(key, data.items);
         return data.items;
-      });
+      })
+      .catch((err) => console.error(err));
   };
 
   const convertToMap = (datas: any[]) => {

@@ -3,22 +3,23 @@ import { useControlStore, useShapeStore } from "@/app/store/canvas";
 import { convertBarcodeFormat, ReaderFormatType } from "@/utils";
 import { ChangeEvent } from "react";
 import { generateShapeConfig } from "@/utils/canvas";
-import {
-  CursorArrowIcon,
-  EraserIcon,
-  ImageIcon,
-  Pencil1Icon,
-  ResetIcon,
-  TextIcon,
-  ZoomInIcon,
-  ZoomOutIcon,
-} from "@radix-ui/react-icons";
 import { useSyncControl, useSelect } from "@/app/hooks";
 import NumberStepper from "../../../components/NumberStepper";
 import FrameSize from "./FrameSize";
 import ShapeMenuGroup from "./ShapeMenuGroup";
 import BarcodeMenuGroup from "./BarcodeMenuGroup";
 import { ToolAction, ActionType } from "./types";
+import {
+  Eraser,
+  ImagePlus,
+  MousePointer2,
+  Pencil,
+  Redo2,
+  TypeIcon,
+  Undo2,
+  ZoomIn,
+  ZoomOut,
+} from "lucide-react";
 
 interface ToolConfig {
   action: ToolAction;
@@ -29,22 +30,22 @@ interface ToolConfig {
 const TOOL_CONFIGS: Record<ToolAction, ToolConfig> = {
   select: {
     action: "select",
-    icon: <CursorArrowIcon width="18" height="18" />,
+    icon: <MousePointer2 width="18" height="18" />,
     label: "커서",
   },
   pencil: {
     action: "pencil",
-    icon: <Pencil1Icon width="18" height="18" />,
+    icon: <Pencil width="18" height="18" />,
     label: "펜",
   },
   eraser: {
     action: "eraser",
-    icon: <EraserIcon width="18" height="18" />,
+    icon: <Eraser width="18" height="18" />,
     label: "지우개",
   },
   text: {
     action: "text",
-    icon: <TextIcon width="18" height="18" />,
+    icon: <TypeIcon width="18" height="18" />,
     label: "글자",
   },
 };
@@ -53,8 +54,8 @@ const LeftSidebar = ({ className }: { className: string }) => {
   const { clearSelectNodes } = useSelect();
   const { getAttributes } = useSyncControl();
   const action = useControlStore((state) => state.action);
-  const setAction = useControlStore((state) => state.setAction);
   const stageScale = useControlStore((state) => state.stageScale);
+  const setAction = useControlStore((state) => state.setAction);
   const setStageScale = useControlStore((state) => state.setStageScale);
 
   const redo = useShapeStore((state) => state.redo);
@@ -132,7 +133,7 @@ const LeftSidebar = ({ className }: { className: string }) => {
         onChange={handleAddImage}
         label="이미지 추가"
       >
-        <ImageIcon />
+        <ImagePlus width="18" height="18" />
       </Menubar.MenuInputFileItem>
 
       <FrameSize />
@@ -142,7 +143,7 @@ const LeftSidebar = ({ className }: { className: string }) => {
         onClick={undo}
         label="뒤로"
         icon={
-          <ResetIcon
+          <Undo2
             width="18"
             height="18"
             color={isFirstHistory ? "#a1a1a1" : "#000"}
@@ -154,7 +155,7 @@ const LeftSidebar = ({ className }: { className: string }) => {
         onClick={redo}
         label="앞으로"
         icon={
-          <ResetIcon
+          <Redo2
             className="rotate-180"
             width="18"
             height="18"
@@ -175,12 +176,12 @@ const LeftSidebar = ({ className }: { className: string }) => {
         min={50}
         slotStart={
           <NumberStepper.IncreaseButton className="cursor-pointer py-2">
-            <ZoomInIcon width="20" height="20" />
+            <ZoomIn width="18" height="18" />
           </NumberStepper.IncreaseButton>
         }
         slotEnd={
           <NumberStepper.DecreaseButton className="cursor-pointer py-2">
-            <ZoomOutIcon width="20" height="20" />
+            <ZoomOut width="18" height="18" />
           </NumberStepper.DecreaseButton>
         }
       />

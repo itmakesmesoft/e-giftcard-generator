@@ -8,6 +8,15 @@ import { KonvaEventObject, NodeConfig, Node } from "konva/lib/Node";
 import { useCanvasContext } from "@/app/context/canvas";
 import React, { useCallback } from "react";
 
+export type ShapeType =
+  | "rectangle"
+  | "circle"
+  | "arrow"
+  | "line"
+  | "triangle"
+  | "ellipse"
+  | "star";
+
 const Canvas = () => {
   const { canvasPos } = useCanvasContext();
   const canvasOption = useShapeStore((state) => state.canvasOption);
@@ -80,6 +89,7 @@ const ShapesRenderer = React.memo(() => {
   return (
     <>
       {shapes.map((node, index) => {
+        const strokeWidth = node.hasStroke ? node.strokeWidth : 0;
         switch (node.type) {
           case "rectangle":
             return (
@@ -88,6 +98,7 @@ const ShapesRenderer = React.memo(() => {
                 strokeScaleEnabled={false}
                 perfectDrawEnabled={false}
                 {...node}
+                strokeWidth={strokeWidth}
                 draggable={isDraggable}
                 onDragEnd={onDragEnd}
               />
@@ -99,6 +110,7 @@ const ShapesRenderer = React.memo(() => {
                 strokeScaleEnabled={false}
                 perfectDrawEnabled={false}
                 {...node}
+                strokeWidth={strokeWidth}
                 draggable={isDraggable}
                 onDragEnd={onDragEnd}
               />
@@ -110,6 +122,7 @@ const ShapesRenderer = React.memo(() => {
                 strokeScaleEnabled={false}
                 perfectDrawEnabled={false}
                 {...node}
+                strokeWidth={strokeWidth}
                 points={node.points}
                 draggable={isDraggable}
                 onDragEnd={onDragEnd}
@@ -124,6 +137,19 @@ const ShapesRenderer = React.memo(() => {
                 closed={true}
                 points={node.points ?? [0, 0, 100, 100, 0, 100]}
                 {...node}
+                strokeWidth={strokeWidth}
+                draggable={isDraggable}
+                onDragEnd={onDragEnd}
+              />
+            );
+          case "line":
+            return (
+              <Line
+                key={index}
+                strokeScaleEnabled={false}
+                perfectDrawEnabled={false}
+                points={node.points}
+                {...node}
                 draggable={isDraggable}
                 onDragEnd={onDragEnd}
               />
@@ -137,6 +163,7 @@ const ShapesRenderer = React.memo(() => {
                 radiusX={node.radiusX ?? 0}
                 radiusY={node.radiusY ?? 0}
                 {...node}
+                strokeWidth={strokeWidth}
                 draggable={isDraggable}
                 onDragEnd={onDragEnd}
               />
@@ -151,6 +178,7 @@ const ShapesRenderer = React.memo(() => {
                 innerRadius={node.innerRadius}
                 outerRadius={node.outerRadius}
                 {...node}
+                strokeWidth={strokeWidth}
                 draggable={isDraggable}
                 onDragEnd={onDragEnd}
               />

@@ -29,12 +29,13 @@ export type FontState = {
 
 export type ShapeState = {
   fill: string;
+  hasStroke: boolean;
   stroke: string;
   strokeWidth: number;
   opacity: number;
   lineJoin: LineJoin;
   lineCap: LineCap;
-  radius: number;
+  cornerRadius: number // 또는 number[];
 }
 
 export type BrushState = {
@@ -69,12 +70,13 @@ export type FontControlActions = {
 
 export type ShapeControlActions = {
   setFill: (fill: ShapeState["fill"]) => void;
+  setHasStroke: (hasStroke: ShapeState["hasStroke"]) => void;
   setStroke: (stroke: ShapeState["stroke"]) => void;
   setStrokeWidth: (strokeWidth: ShapeState["strokeWidth"]) => void;
   setOpacity: (opacity: ShapeState["opacity"]) => void;
   setLineJoin: (lineJoin: ShapeState["lineJoin"]) => void;
   setLineCap: (lineCap: ShapeState["lineCap"]) => void;
-  setRadius: (radius: ShapeState["radius"]) => void;
+  setCornerRadius: (cornerRadius: ShapeState["cornerRadius"]) => void;
 };
 
 export type BrushControlActions = {

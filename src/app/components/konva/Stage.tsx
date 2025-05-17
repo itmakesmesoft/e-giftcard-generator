@@ -128,7 +128,7 @@ const Stage = ({ children }: { children: ReactNode }) => {
     const { x, y } = getPointerPosition() as Vector2d;
 
     isPointerDown.current = true;
-    const hasPoints = ["pencil", "eraser", "arrow"].includes(action);
+    const hasPoints = ["pencil", "eraser", "arrow", "line"].includes(action);
     const isFont = action === "text";
     const isBrush = action === "pencil" || action === "eraser";
     const isShape = !isFont && !isBrush;
@@ -213,6 +213,7 @@ const Stage = ({ children }: { children: ReactNode }) => {
           };
         });
         break;
+      case "line":
       case "arrow":
         updateShapeCreation((shape) => {
           const initialPoints = shape.points.slice(0, 2) ?? [x, y];
