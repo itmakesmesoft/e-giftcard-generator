@@ -105,9 +105,13 @@ const useSyncControl = () => {
       const attrs = selectedNodes[0].attrs;
 
       setShapeFill(attrs.barColor ?? attrs.fill ?? defaultValues.shape.fill);
-      setShapeHasStroke(attrs.hasStroke ?? defaultValues.shape.hasStroke);
+      setShapeHasStroke(
+        (attrs.strokeWidth && attrs.hasStroke) ?? defaultValues.shape.hasStroke
+      );
       setShapeStroke(attrs.stroke ?? defaultValues.shape.stroke);
-      setShapeStrokeWidth(attrs.strokeWidth ?? defaultValues.shape.strokeWidth);
+      setShapeStrokeWidth(
+        Math.max(1, attrs.strokeWidth ?? defaultValues.shape.strokeWidth)
+      );
       setShapeOpacity(attrs.opacity ?? defaultValues.shape.opacity);
       setShapeLineJoin(attrs.lineJoin ?? defaultValues.shape.lineJoin);
       setShapeLineCap(attrs.lineCap ?? defaultValues.shape.lineCap);

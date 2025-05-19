@@ -44,16 +44,17 @@ const useControlStore = create<ControlState & ControlAction>((set) => ({
   stageScale: defaultValues.stageScale,
 
 
-  // 기본 액션 (변경 없음)
+  // 기본 액션
   setAction: (action) => set((state) => {
-    if (action === 'line') {
+    const isLineOrArrow = action === 'line' || action === 'arrow'
+    if (isLineOrArrow) {
       prevShapeHasStroke = state.shape.hasStroke
     }
     return {
       action,
       shape: {
         ...state.shape,
-        hasStroke: action ==='line' ? true: prevShapeHasStroke
+        hasStroke: isLineOrArrow ? true: prevShapeHasStroke
     }}}),
   setBgColor: (bgColor) => set(() => ({ bgColor })),
   setStageScale: (stageScale) => set(() => ({ stageScale })),

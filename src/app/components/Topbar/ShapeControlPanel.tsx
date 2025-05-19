@@ -116,7 +116,7 @@ const ShapeControlPanel = (props: ControlPanelProps) => {
           />
         </Slider.Root>
       </Toolbar.Dropdown>
-      {actionType !== "line" && (
+      {actionType !== "line" && actionType !== "arrow" && (
         <Toolbar.Tooltip label="테두리">
           <Toolbar.Button onClick={onHasStrokeChange}>
             {hasStroke ? (
