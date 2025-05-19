@@ -14,7 +14,7 @@ const useFonts = () => {
       const data = await getFontList();
       const converted = convertToMap(data);
 
-      setFontList(data.length > 200 ? data.slice(0, 200) : data);
+      setFontList(data);
       setFontDict(converted ?? {});
     };
 

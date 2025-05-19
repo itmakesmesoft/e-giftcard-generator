@@ -156,7 +156,7 @@ const TextControlPanel = (props: ControlPanelProps) => {
       <Toolbar.Separator />
       <Toolbar.Select
         onValueChange={onFontFamilyChange}
-        defaultValue={fontList[0]?.family}
+        value={fontList[0]?.family}
         className="w-[200px]"
         placeholder="폰트"
         options={
