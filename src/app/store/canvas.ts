@@ -21,7 +21,7 @@ export const defaultValues: ControlState = {
     opacity: 1,
     fontSize: 16,
     fontWeight: 500,
-    fontFamily: "Arial",
+    fontFamily: "42dot Sans",
     typeFace: "sans-serif",
     fontStyle: "normal",
     textAlign: "center",

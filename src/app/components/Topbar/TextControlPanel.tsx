@@ -43,6 +43,7 @@ const TextControlPanel = (props: ControlPanelProps) => {
   };
 
   const onTextAlignChange = (textAlign: string) => {
+    if (!textAlign) return;
     setFontTextAlign(textAlign as TextAlign);
     updateSelectedShapeAttributes({ textAlign });
   };
@@ -156,7 +157,7 @@ const TextControlPanel = (props: ControlPanelProps) => {
       <Toolbar.Separator />
       <Toolbar.Select
         onValueChange={onFontFamilyChange}
-        value={fontList[0]?.family}
+        defaultValue={getAttributes.font.fontFamily}
         className="w-[200px]"
         placeholder="폰트"
         options={
