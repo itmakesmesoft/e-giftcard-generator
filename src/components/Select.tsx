@@ -22,25 +22,24 @@ const Select = (props: SelectProps) => {
     onValueChange,
     placeholder,
     value,
-    defaultValue,
     ...restProps
   } = props;
   const mappedOptions = useMemo(() => {
     return new Map(options.map((v) => [v.value, v.label]));
   }, [options]);
 
-  const [internalValue, setInternalValue] = useState(
-    value || defaultValue || ""
-  );
+  const [internalValue, setInternalValue] = useState(value || "");
   const [scrollParent, setScrollParent] = useState<HTMLDivElement>();
+
+  const handleOnValueChange = (value: string) => {
+    setInternalValue(value);
+    onValueChange?.(value);
+  };
 
   return (
     <RadixSelect.Root
       value={internalValue}
-      onValueChange={(v) => {
-        setInternalValue(v);
-        onValueChange?.(v);
-      }}
+      onValueChange={handleOnValueChange}
       {...restProps}
     >
       <RadixSelect.Trigger
