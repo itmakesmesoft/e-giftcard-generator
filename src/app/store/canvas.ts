@@ -21,7 +21,7 @@ export const defaultValues: ControlState = {
     opacity: 1,
     fontSize: 16,
     fontWeight: 500,
-    fontFamily: "42dot Sans",
+    fontFamily: "ABeeZee",
     typeFace: "sans-serif",
     fontStyle: "normal",
     textAlign: "center",
@@ -35,7 +35,7 @@ export const defaultValues: ControlState = {
     lineJoin: "round",
     lineCap: "round",
     cornerRadius: 0,
-  }
+  },
 };
 let prevShapeHasStroke: boolean;
 const useControlStore = create<ControlState & ControlAction>((set) => ({
@@ -43,107 +43,132 @@ const useControlStore = create<ControlState & ControlAction>((set) => ({
   bgColor: defaultValues.bgColor,
   stageScale: defaultValues.stageScale,
 
-
   // 기본 액션
-  setAction: (action) => set((state) => {
-    const isLineOrArrow = action === 'line' || action === 'arrow'
-    if (isLineOrArrow) {
-      prevShapeHasStroke = state.shape.hasStroke
-    }
-    return {
-      action,
-      shape: {
-        ...state.shape,
-        hasStroke: isLineOrArrow ? true: prevShapeHasStroke
-    }}}),
+  setAction: (action) =>
+    set((state) => {
+      const isLineOrArrow = action === "line" || action === "arrow";
+      if (isLineOrArrow) {
+        prevShapeHasStroke = state.shape.hasStroke;
+      }
+      return {
+        action,
+        shape: {
+          ...state.shape,
+          hasStroke: isLineOrArrow ? true : prevShapeHasStroke,
+        },
+      };
+    }),
   setBgColor: (bgColor) => set(() => ({ bgColor })),
   setStageScale: (stageScale) => set(() => ({ stageScale })),
 
   font: {
     ...defaultValues.font,
-    setFontSize: (fontSize) => set((state) => ({
-      font: { ...state.font, fontSize }
-    })),
-    setFontWeight: (fontWeight) => set((state) => ({
-      font: { ...state.font, fontWeight }
-    })),
-    setFontFamily: (fontFamily) => set((state) => ({
-      font: { ...state.font, fontFamily }
-    })),
-    setTypeFace: (typeFace) => set((state) => ({
-      font: { ...state.font, typeFace }
-    })),
-    setFontStyle: (fontStyle) => set((state) => ({
-      font: { ...state.font, fontStyle }
-    })),
-    setTextAlign: (textAlign) => set((state) => ({
-      font: { ...state.font, textAlign }
-    })),
-    setFill: (fill) => set((state) => ({
-      font: { ...state.font, fill }
-    })),
-    setStroke: (stroke) => set((state) => ({
-      font: { ...state.font, stroke }
-    })),
-    setOpacity: (opacity) => set((state) => ({
-      font: { ...state.font, opacity }
-    })),
+    setFontSize: (fontSize) =>
+      set((state) => ({
+        font: { ...state.font, fontSize },
+      })),
+    setFontWeight: (fontWeight) =>
+      set((state) => ({
+        font: { ...state.font, fontWeight },
+      })),
+    setFontFamily: (fontFamily) =>
+      set((state) => ({
+        font: { ...state.font, fontFamily },
+      })),
+    setTypeFace: (typeFace) =>
+      set((state) => ({
+        font: { ...state.font, typeFace },
+      })),
+    setFontStyle: (fontStyle) =>
+      set((state) => ({
+        font: { ...state.font, fontStyle },
+      })),
+    setTextAlign: (textAlign) =>
+      set((state) => ({
+        font: { ...state.font, textAlign },
+      })),
+    setFill: (fill) =>
+      set((state) => ({
+        font: { ...state.font, fill },
+      })),
+    setStroke: (stroke) =>
+      set((state) => ({
+        font: { ...state.font, stroke },
+      })),
+    setOpacity: (opacity) =>
+      set((state) => ({
+        font: { ...state.font, opacity },
+      })),
   },
   shape: {
     ...defaultValues.shape,
-    setFill: (fill) => set((state) => ({
-      shape: { ...state.shape, fill }
-    })),
-    setHasStroke: (hasStroke) => set((state) => ({
-      shape: { ...state.shape, hasStroke }
-    })),
-    setStroke: (stroke) => set((state) => ({
-      shape: { ...state.shape, stroke }
-    })),
-    setStrokeWidth: (strokeWidth) => set((state) => ({
-      shape: { ...state.shape, strokeWidth }
-    })),
-    setOpacity: (opacity) => set((state) => ({
-      shape: { ...state.shape, opacity }
-    })),
-    setLineJoin: (lineJoin) => set((state) => ({
-      shape: { ...state.shape, lineJoin }
-    })),
-    setLineCap: (lineCap) => set((state) => ({
-      shape: { ...state.shape, lineCap }
-    })),
-    setCornerRadius: (cornerRadius) => set((state) => ({
-      shape: { ...state.shape, cornerRadius }
-    })),
+    setFill: (fill) =>
+      set((state) => ({
+        shape: { ...state.shape, fill },
+      })),
+    setHasStroke: (hasStroke) =>
+      set((state) => ({
+        shape: { ...state.shape, hasStroke },
+      })),
+    setStroke: (stroke) =>
+      set((state) => ({
+        shape: { ...state.shape, stroke },
+      })),
+    setStrokeWidth: (strokeWidth) =>
+      set((state) => ({
+        shape: { ...state.shape, strokeWidth },
+      })),
+    setOpacity: (opacity) =>
+      set((state) => ({
+        shape: { ...state.shape, opacity },
+      })),
+    setLineJoin: (lineJoin) =>
+      set((state) => ({
+        shape: { ...state.shape, lineJoin },
+      })),
+    setLineCap: (lineCap) =>
+      set((state) => ({
+        shape: { ...state.shape, lineCap },
+      })),
+    setCornerRadius: (cornerRadius) =>
+      set((state) => ({
+        shape: { ...state.shape, cornerRadius },
+      })),
   },
-    brush: {
+  brush: {
     ...defaultValues.brush,
-    setFill: (fill) => set((state) => ({
-      brush: { ...state.brush, fill }
-    })),
-    setStroke: (stroke) => set((state) => ({
-      brush: { ...state.brush, stroke }
-    })),
-    setStrokeWidth: (strokeWidth) => set((state) => ({
-      brush: { ...state.brush, strokeWidth }
-    })),
-    setOpacity: (opacity) => set((state) => ({
-      brush: { ...state.brush, opacity }
-    })),
-    setLineJoin: (lineJoin) => set((state) => ({
-      brush: { ...state.brush, lineJoin }
-    })),
-    setLineCap: (lineCap) => set((state) => ({
-      brush: { ...state.brush, lineCap }
-    })),
-    setRadius: (radius) => set((state) => ({
-      brush: { ...state.brush, radius }
-    })),
-  }
+    setFill: (fill) =>
+      set((state) => ({
+        brush: { ...state.brush, fill },
+      })),
+    setStroke: (stroke) =>
+      set((state) => ({
+        brush: { ...state.brush, stroke },
+      })),
+    setStrokeWidth: (strokeWidth) =>
+      set((state) => ({
+        brush: { ...state.brush, strokeWidth },
+      })),
+    setOpacity: (opacity) =>
+      set((state) => ({
+        brush: { ...state.brush, opacity },
+      })),
+    setLineJoin: (lineJoin) =>
+      set((state) => ({
+        brush: { ...state.brush, lineJoin },
+      })),
+    setLineCap: (lineCap) =>
+      set((state) => ({
+        brush: { ...state.brush, lineCap },
+      })),
+    setRadius: (radius) =>
+      set((state) => ({
+        brush: { ...state.brush, radius },
+      })),
+  },
 }));
 // Canvas Store 타입 정의
 type StateConfig = ShapeConfig[];
-
 
 type CanvasOption = {
   canvasSize: NodeSize;
@@ -167,11 +192,11 @@ type CanvasStoreState = {
 type CanvasStoreActions = {
   setShapes: (
     shapes: FunctionableState<StateConfig>,
-    logHistory?: boolean
+    logHistory?: boolean,
   ) => void;
   setCanvasOption: (
     option: FunctionableState<CanvasOption>,
-    logHistory?: boolean
+    logHistory?: boolean,
   ) => void;
   redo: () => void;
   undo: () => void;
@@ -188,7 +213,7 @@ const updateState = <T>(prevState: T, newState: FunctionableState<T>): T =>
 
 const updateHistory = (
   state: CanvasStoreState,
-  newState: { shapes: StateConfig; canvasOption: CanvasOption }
+  newState: { shapes: StateConfig; canvasOption: CanvasOption },
 ) => {
   const updatedHistory = [
     ...state.history.slice(0, state.historyIndex + 1),
@@ -245,7 +270,7 @@ const useShapeStore = create<CanvasStoreState & CanvasStoreActions>((set) => ({
     set((state) => {
       const nextIndex = Math.min(
         state.historyIndex + 1,
-        state.history.length - 1
+        state.history.length - 1,
       );
       const nextHistoryItem = state.history[nextIndex];
       return {
