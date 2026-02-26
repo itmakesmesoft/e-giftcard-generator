@@ -94,7 +94,7 @@ const ShapesRenderer = React.memo(
     const dragNodesRef = useRef<Node<NodeConfig>[]>([]);
 
     const onDragStart = useCallback(
-      (e: KonvaEventObject<DragEvent, Node<NodeConfig>>) => {
+      () => {
         cancelPendingDeselect();
         const selectedNodes = getAllSelectedNodes();
         dragNodesRef.current = selectedNodes;
