@@ -5,6 +5,7 @@ import { useCallback } from "react";
 import { convertPosition, omitKeysFromObject } from "@/utils/canvas";
 import { useShapeStore } from "../store/canvas";
 import { useSyncControl } from ".";
+import { CommandManager } from "../lib/command";
 
 export interface CanvasData {
   canvas: {
@@ -55,14 +56,12 @@ const useCanvasData = () => {
       ...omitKeysFromObject(attrs, ["ref"]),
       ...convertToAbsolutePosition(attrs), // 절대 좌표로 변환
     })) as ShapeConfig[];
-    setCanvasOption(
-      {
-        canvasSize: { width, height },
-        bgColor,
-      },
-      false
-    );
-    setShapes(children, false);
+    setCanvasOption({
+      canvasSize: { width, height },
+      bgColor,
+    });
+    setShapes(children);
+    CommandManager.getInstance().clear();
   };
 
   const exportCanvasAsJSON = () => {

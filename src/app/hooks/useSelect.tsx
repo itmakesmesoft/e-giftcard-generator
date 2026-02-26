@@ -16,6 +16,7 @@ const useSelect = () => {
     getSingleSelectedNode,
     selectNodeById,
     getPointerPosition,
+    commitPendingDeselect,
   } = useCanvasContext();
 
   const clearSelectNodes = () => {
@@ -44,7 +45,7 @@ const useSelect = () => {
     selectBox.setAttrs(position);
     selectBoxPositionRef.current = position;
     isSelectingRef.current = true;
-    selectNodeById(e.target.attrs.id);
+    selectNodeById(e.target.attrs.id, e.evt.shiftKey);
   };
 
   const updateSelectionBox = () => {
@@ -76,7 +77,10 @@ const useSelect = () => {
       return;
 
     const selectBox = selectionRef.current;
-    if (!selectBox.visible()) return;
+    if (!selectBox.visible()) {
+      commitPendingDeselect();
+      return;
+    }
 
     const selectedNodes = stageRef.current
       .find(".shape")

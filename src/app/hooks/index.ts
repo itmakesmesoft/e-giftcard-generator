@@ -5,6 +5,7 @@ import useFonts from "./useFonts";
 import useDebounce from "./useDebounce";
 import useDebounceValue from "./useDebounceValue";
 import useCanvasData from "./useCanvasData";
+import useCommandManager from "./useCommandManager";
 
 export {
   useSelect,
@@ -14,4 +15,5 @@ export {
   useSyncControl,
   useDebounceValue,
   useCanvasData,
+  useCommandManager,
 };

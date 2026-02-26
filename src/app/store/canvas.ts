@@ -170,38 +170,14 @@ const useControlStore = create<ControlState & ControlAction>((set) => ({
 // Canvas Store 타입 정의
 type StateConfig = ShapeConfig[];
 
-type CanvasOption = {
+export type CanvasOption = {
   canvasSize: NodeSize;
   bgColor: string;
 };
 
-type CanvasState = {
-  shapes: StateConfig;
-  canvasOption: CanvasOption;
-};
-
 type CanvasStoreState = {
-  history: CanvasState[];
-  historyIndex: number;
-  isFirstHistory: boolean;
-  isLastHistory: boolean;
   shapes: StateConfig;
   canvasOption: CanvasOption;
-};
-
-type CanvasStoreActions = {
-  setShapes: (
-    shapes: FunctionableState<StateConfig>,
-    logHistory?: boolean,
-  ) => void;
-  setCanvasOption: (
-    option: FunctionableState<CanvasOption>,
-    logHistory?: boolean,
-  ) => void;
-  redo: () => void;
-  undo: () => void;
-  moveToForward: (id: string) => void;
-  moveToBackward: (id: string) => void;
 };
 
 type FunctionableState<T> = T | ((prevState: T) => T);
@@ -211,118 +187,25 @@ const updateState = <T>(prevState: T, newState: FunctionableState<T>): T =>
     ? (newState as (prevState: T) => T)(prevState)
     : newState;
 
-const updateHistory = (
-  state: CanvasStoreState,
-  newState: { shapes: StateConfig; canvasOption: CanvasOption },
-) => {
-  const updatedHistory = [
-    ...state.history.slice(0, state.historyIndex + 1),
-    newState,
-  ];
-  return {
-    history: updatedHistory,
-    historyIndex: updatedHistory.length - 1,
-    isFirstHistory: false,
-    isLastHistory: true,
-  };
+type CanvasStoreActions = {
+  setShapes: (shapes: FunctionableState<StateConfig>) => void;
+  setCanvasOption: (option: FunctionableState<CanvasOption>) => void;
 };
 
 const useShapeStore = create<CanvasStoreState & CanvasStoreActions>((set) => ({
   shapes: [],
-  history: [],
-  historyIndex: -1,
-  isFirstHistory: true,
-  isLastHistory: true,
   canvasOption: {
     canvasSize: { width: 400, height: 600 },
     bgColor: "#ffffff",
   },
-  setCanvasOption: (option, logHistory = true) =>
-    set((state) => {
-      const newCanvasOption = updateState(state.canvasOption, option);
-
-      if (logHistory) {
-        return {
-          canvasOption: newCanvasOption,
-          ...updateHistory(state, {
-            shapes: state.shapes,
-            canvasOption: newCanvasOption,
-          }),
-        };
-      }
-      return { canvasOption: newCanvasOption };
-    }),
-  setShapes: (shapes, logHistory = true) =>
-    set((state) => {
-      const newShapes = updateState(state.shapes, shapes);
-      if (logHistory) {
-        return {
-          shapes: newShapes,
-          ...updateHistory(state, {
-            shapes: newShapes,
-            canvasOption: state.canvasOption,
-          }),
-        };
-      }
-      return { shapes: newShapes };
-    }),
-  redo: () =>
-    set((state) => {
-      const nextIndex = Math.min(
-        state.historyIndex + 1,
-        state.history.length - 1,
-      );
-      const nextHistoryItem = state.history[nextIndex];
-      return {
-        historyIndex: nextIndex,
-        isFirstHistory: nextIndex === -1,
-        isLastHistory: nextIndex === state.history.length - 1,
-        shapes: nextIndex !== -1 ? nextHistoryItem.shapes : [],
-        canvasOption:
-          nextIndex !== -1 ? nextHistoryItem.canvasOption : state.canvasOption,
-      };
-    }),
-  undo: () =>
-    set((state) => {
-      const prevIndex = Math.max(state.historyIndex - 1, -1);
-      const prevHistoryItem = state.history[prevIndex];
-      return {
-        shapes: prevIndex !== -1 ? prevHistoryItem.shapes : [],
-        canvasOption:
-          prevIndex !== -1 ? prevHistoryItem.canvasOption : state.canvasOption,
-        historyIndex: prevIndex,
-        isFirstHistory: prevIndex === -1,
-        isLastHistory: prevIndex === state.history.length - 1,
-      };
-    }),
-  moveToForward: (id: string) =>
-    set((state) => {
-      const shape = state.shapes.find((s) => s.id === id);
-      if (!shape) return state;
-      const newShapes = state.shapes.filter((s) => s.id !== id);
-      newShapes.push(shape);
-      return {
-        shapes: newShapes,
-        ...updateHistory(state, {
-          shapes: newShapes,
-          canvasOption: state.canvasOption,
-        }),
-      };
-    }),
-  moveToBackward: (id: string) =>
-    set((state) => {
-      const shape = state.shapes.find((s) => s.id === id);
-      if (!shape) return state;
-      const newShapes = state.shapes.filter((s) => s.id !== id);
-      newShapes.unshift(shape);
-      return {
-        shapes: newShapes,
-        ...updateHistory(state, {
-          shapes: newShapes,
-          canvasOption: state.canvasOption,
-        }),
-      };
-    }),
+  setCanvasOption: (option) =>
+    set((state) => ({
+      canvasOption: updateState(state.canvasOption, option),
+    })),
+  setShapes: (shapes) =>
+    set((state) => ({
+      shapes: updateState(state.shapes, shapes),
+    })),
 }));
 
 export { useControlStore, useShapeStore };

@@ -4,26 +4,42 @@ import { useCallback, useEffect, useRef } from "react";
 import { useShapeStore } from "../store/canvas";
 import { ShapeConfig } from "@/app/types/canvas";
 import { generateShapeConfig, omitKeysFromObject } from "@/utils/canvas";
+import useCommandManager from "./useCommandManager";
+import {
+  AddShapeCommand,
+  UpdateShapeCommand,
+  CreateShapeCommand,
+} from "../lib/command";
 
 const useShapes = () => {
   const currentShapeRef = useRef<ShapeConfig>(null);
+  const prevShapesRef = useRef<ShapeConfig[]>([]);
   const { transformerRef } = useCanvasContext();
   const setShapes = useShapeStore((state) => state.setShapes);
+  const { execute } = useCommandManager();
 
-  // Transformer 컴포넌트에 의해 스케일이 변경되는 경우, 변경사항을 shapes에 반영해주기 위함.
+  const getShapes = () => useShapeStore.getState().shapes;
+  const rawSetShapes = (shapes: ShapeConfig[]) =>
+    useShapeStore.getState().setShapes(shapes);
+
   const onTransform = useCallback(() => {
-    const target = transformerRef.current?.getNode();
-    if (!target) return;
+    const nodes = transformerRef.current?.getNodes();
+    if (!nodes || nodes.length === 0) return;
 
-    // NOTE! target.attrs에 ref가 존재함
-    // 이를 shapes에 주입 시 useRef가 null이 되는 문제 발생 => 구조 분해로 'ref' 제거
-    const attrs = omitKeysFromObject(target.attrs, ["ref"]);
-    setShapes((shapes) =>
-      shapes.map((shape: Konva.ShapeConfig) =>
-        shape.id === target.attrs.id ? { ...shape, ...attrs } : shape
-      )
+    const updatedAttrs = new Map(
+      nodes.map((node) => [
+        node.attrs.id,
+        omitKeysFromObject(node.attrs, ["ref"]),
+      ])
     );
-  }, [setShapes, transformerRef]);
+
+    const newShapes = getShapes().map((shape: Konva.ShapeConfig) => {
+      const attrs = updatedAttrs.get(shape.id);
+      return attrs ? { ...shape, ...attrs } : shape;
+    });
+
+    execute(new UpdateShapeCommand(newShapes, getShapes, rawSetShapes));
+  }, [execute, transformerRef]);
 
   useEffect(() => {
     if (!transformerRef.current) return;
@@ -34,10 +50,10 @@ const useShapes = () => {
   const createShape = useCallback(
     <T extends ShapeConfig>(shapeConfig: T) => {
       const shape = generateShapeConfig(shapeConfig);
-      setShapes((shapes) => [...shapes, shape]);
+      execute(new AddShapeCommand(shape, getShapes, rawSetShapes));
       return shape;
     },
-    [setShapes]
+    [execute]
   );
 
   const updateShape = useCallback(
@@ -50,7 +66,8 @@ const useShapes = () => {
   const startShapeCreation = useCallback(
     <T extends Konva.ShapeConfig>(shapeConfig: T) => {
       const shape = generateShapeConfig(shapeConfig);
-      setShapes((shapes) => [...shapes, shape], false);
+      prevShapesRef.current = getShapes();
+      setShapes((shapes) => [...shapes, shape]);
       currentShapeRef.current = shape;
       return shape;
     },
@@ -65,23 +82,21 @@ const useShapes = () => {
       const updated = callback(currentShapeRef.current);
       const newShape = { ...updated, isDrawing: true };
       currentShapeRef.current = newShape;
-      setShapes(
-        (shapes) =>
-          shapes.map((shape) => (shape.id === currentId ? newShape : shape)),
-        false
+      setShapes((shapes) =>
+        shapes.map((shape) => (shape.id === currentId ? newShape : shape))
       );
     },
     [setShapes]
   );
 
   const completeShapeCreation = useCallback(() => {
-    setShapes((shapes) =>
-      shapes.map((shape) => ({ ...shape, isDrawing: false }))
+    execute(
+      new CreateShapeCommand(prevShapesRef.current, getShapes, rawSetShapes)
     );
     const id = currentShapeRef.current?.id as string;
     currentShapeRef.current = null;
     return id;
-  }, [setShapes]);
+  }, [execute]);
 
   return {
     createShape,

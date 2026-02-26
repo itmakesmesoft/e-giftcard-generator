@@ -23,9 +23,11 @@ interface CanvasContextValueProps {
   setSelectedNodes: (node: Konva.Node[]) => void;
   getAllSelectedNodes: () => Konva.Node[];
   getSingleSelectedNode: () => Konva.Node | undefined;
-  selectNodeById: (id: string) => void;
+  selectNodeById: (id: string, additive?: boolean) => void;
   selectNodesByIdList: (idList: string[]) => void;
   getPointerPosition: () => Vector2d;
+  cancelPendingDeselect: () => void;
+  commitPendingDeselect: () => void;
 }
 
 const defaultValue: CanvasContextValueProps = {
@@ -42,6 +44,8 @@ const defaultValue: CanvasContextValueProps = {
   selectNodeById: () => {},
   selectNodesByIdList: () => {},
   getPointerPosition: () => ({ x: 0, y: 0 }),
+  cancelPendingDeselect: () => {},
+  commitPendingDeselect: () => {},
 };
 
 const CanvasContext = createContext<CanvasContextValueProps>(defaultValue);
@@ -56,6 +60,21 @@ export const CanvasProvider = ({ children }: { children: ReactNode }) => {
   const [canvasPos, setCanvasPos] = useState<Vector2d>(cPos);
   // const [stageScale, setStageScale] = useState<number>(defaultValue.stageScale);
   const [selectedNodes, setSelectedNodes] = useState<Konva.Node[]>([]);
+  const pendingDeselectIdRef = useRef<string | null>(null);
+
+  const cancelPendingDeselect = useCallback(() => {
+    pendingDeselectIdRef.current = null;
+  }, []);
+
+  const commitPendingDeselect = useCallback(() => {
+    const id = pendingDeselectIdRef.current;
+    pendingDeselectIdRef.current = null;
+    if (!id || !stageRef.current) return;
+    const node = stageRef.current
+      .find(".shape")
+      .find(({ attrs }) => attrs.id === id);
+    if (node) setSelectedNodes([node]);
+  }, []);
 
   const getPointerPosition = useCallback((): Vector2d => {
     if (!stageRef.current) return { x: 0, y: 0 };
@@ -69,13 +88,27 @@ export const CanvasProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
-  const selectNodeById = (id: string) => {
+  const selectNodeById = (id: string, additive = false) => {
     if (!transformerRef.current || !stageRef.current) return;
 
-    const selectedNodes = getAllSelectedNodes();
     const stage = stageRef.current;
     const node = stage.find(".shape").find(({ attrs }) => attrs.id === id);
-    if (node && !selectedNodes.includes(node)) {
+    if (!node) return;
+
+    if (additive) {
+      const current = getAllSelectedNodes();
+      if (current.includes(node)) {
+        const filtered = current.filter((n) => n !== node);
+        setSelectedNodes(filtered);
+      } else {
+        setSelectedNodes([...current, node]);
+      }
+    } else {
+      const current = getAllSelectedNodes();
+      if (current.length > 1 && current.some((n) => n.attrs.id === id)) {
+        pendingDeselectIdRef.current = id;
+        return;
+      }
       setSelectedNodes([node]);
     }
   };
@@ -113,6 +146,8 @@ export const CanvasProvider = ({ children }: { children: ReactNode }) => {
         selectNodeById,
         selectNodesByIdList,
         getPointerPosition,
+        cancelPendingDeselect,
+        commitPendingDeselect,
       }}
     >
       {children}
