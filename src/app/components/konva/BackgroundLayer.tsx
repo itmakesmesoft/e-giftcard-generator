@@ -4,6 +4,7 @@ import { Layer, Rect } from "react-konva";
 
 const BackgroundLayer = (props: {
   onPointerDown?: (e: Konva.KonvaEventObject<PointerEvent>) => void;
+  bgRef?: (node: Konva.Rect | null) => void;
 
   viewPortWidth: number;
   viewPortHeight: number;
@@ -11,8 +12,15 @@ const BackgroundLayer = (props: {
   y: number;
   [key: string]: unknown;
 }) => {
-  const { onPointerDown, viewPortWidth, viewPortHeight, x, y, ...restProps } =
-    props;
+  const {
+    onPointerDown,
+    bgRef,
+    viewPortWidth,
+    viewPortHeight,
+    x,
+    y,
+    ...restProps
+  } = props;
 
   const bgColor = useShapeStore((state) => state.canvasOption.bgColor);
   const canvasSize = useShapeStore((state) => state.canvasOption.canvasSize);
@@ -20,6 +28,9 @@ const BackgroundLayer = (props: {
   return (
     <Layer {...restProps}>
       <Rect
+        ref={(node) => {
+          bgRef?.(node);
+        }}
         id="bg"
         fill={bgColor}
         width={canvasSize.width}

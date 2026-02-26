@@ -10,6 +10,9 @@ import React, {
 } from "react";
 import { useCanvasContext } from "@/app/context/canvas";
 import { ShapeHelper, ShapeHelperConfig } from "./ShapeHelper";
+import useCommandManager from "@/app/hooks/useCommandManager";
+import { UpdateShapeCommand } from "@/app/lib/command";
+import { useShapeStore } from "@/app/store/canvas";
 
 const EditableText = (props: Konva.TextConfig) => {
   const {
@@ -26,6 +29,11 @@ const EditableText = (props: Konva.TextConfig) => {
     ...restProps
   } = props;
   const { selectedNodes } = useCanvasContext();
+  const { execute } = useCommandManager();
+
+  const getShapes = () => useShapeStore.getState().shapes;
+  const rawSetShapes = (shapes: ReturnType<typeof getShapes>) =>
+    useShapeStore.getState().setShapes(shapes);
 
   const textRef = useRef<Konva.Text>(null);
   const [value, setValue] = useState<string>(text);
@@ -46,6 +54,25 @@ const EditableText = (props: Konva.TextConfig) => {
 
     setIsEditing(false);
   }, [selectedNodes]);
+
+  // 편집 종료 시 텍스트가 변경되었으면 UpdateShapeCommand 실행
+  const prevIsEditingRef = useRef(false);
+  useEffect(() => {
+    if (prevIsEditingRef.current && !isEditing && value !== text) {
+      const newShapes = getShapes().map((shape) =>
+        shape.id === id ? { ...shape, text: value } : shape
+      );
+      execute(new UpdateShapeCommand(newShapes, getShapes, rawSetShapes));
+    }
+    prevIsEditingRef.current = isEditing;
+  }, [isEditing]);
+
+  // Undo/Redo 시 스토어의 text prop 변경을 로컬 value에 동기화
+  useEffect(() => {
+    if (!isEditing) {
+      setValue(text);
+    }
+  }, [text]);
 
   const handleTransform = () => {
     const text = textRef.current as Konva.Text | null;
