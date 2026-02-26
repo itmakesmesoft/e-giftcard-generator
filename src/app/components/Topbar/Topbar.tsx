@@ -11,16 +11,29 @@ import DeleteIcon from "@/components/assets/DeleteIcon";
 import { useCanvasContext } from "@/app/context/canvas";
 import { useControlStore, useShapeStore } from "@/app/store/canvas";
 import { PanelType } from "./types";
-import { useSelect, useSyncControl } from "@/app/hooks";
+import { useSelect, useSyncControl, useCommandManager } from "@/app/hooks";
 import { ActionType } from "@/app/types/canvas";
+import {
+  AddShapeCommand,
+  RemoveShapeCommand,
+  UpdateShapeCommand,
+  UpdateCanvasOptionCommand,
+  CombineCommand,
+} from "@/app/lib/command";
 
 const Topbar = ({ className }: { className: string }) => {
   const clipboardRef = useRef<Konva.Node[]>(null);
   const [panelType, setPanelType] = useState<PanelType>(null);
 
   const action = useControlStore((state) => state.action);
-  const setShapes = useShapeStore((state) => state.setShapes);
-  const setCanvasOption = useShapeStore((state) => state.setCanvasOption);
+  const { execute } = useCommandManager();
+
+  const getShapes = () => useShapeStore.getState().shapes;
+  const rawSetShapes = (shapes: ReturnType<typeof getShapes>) =>
+    useShapeStore.getState().setShapes(shapes);
+  const getCanvasOption = () => useShapeStore.getState().canvasOption;
+  const rawSetCanvasOption = (option: ReturnType<typeof getCanvasOption>) =>
+    useShapeStore.getState().setCanvasOption(option);
 
   const { getAttributes } = useSyncControl();
   const { clearSelectNodes } = useSelect();
@@ -77,7 +90,6 @@ const Topbar = ({ className }: { className: string }) => {
       const id = nanoid();
       ids.push(id);
 
-      // 이전 참조값을 제거하기 위해 ref는 구조분해 후 제거
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { ref: _, ...restAttrs } = attrs;
       return {
@@ -87,7 +99,10 @@ const Topbar = ({ className }: { className: string }) => {
         y: attrs.y + 10,
       };
     });
-    setShapes((shapes) => [...shapes, ...copied]);
+    const commands = copied.map(
+      (shape) => new AddShapeCommand(shape, getShapes, rawSetShapes)
+    );
+    execute(new CombineCommand(...commands));
     selectNodesByIdList(ids);
   };
 
@@ -95,22 +110,20 @@ const Topbar = ({ className }: { className: string }) => {
     const ids = selectedNodes.map((node) => node.attrs.id);
     if (ids.length === 0) return;
 
-    setShapes((shapes) =>
-      shapes.map((shape) => {
-        const shapeId = shape.id;
-        return shapeId && ids.includes(shapeId)
-          ? { ...shape, ...newAttrs }
-          : shape;
-      })
-    );
+    const newShapes = getShapes().map((shape) => {
+      const shapeId = shape.id;
+      return shapeId && ids.includes(shapeId)
+        ? { ...shape, ...newAttrs }
+        : shape;
+    });
+    execute(new UpdateShapeCommand(newShapes, getShapes, rawSetShapes));
   };
+
   const removeShapeOnCanvas = () => {
     const nodes = getAllSelectedNodes();
     const ids = nodes.map((node) => node.attrs.id) as string[];
     if (ids.length === 0) return;
-    setShapes((shapes) =>
-      shapes.filter((shape) => shape.id && !ids.includes(shape.id))
-    );
+    execute(new RemoveShapeCommand(ids, getShapes, rawSetShapes));
     clearSelectNodes();
   };
 
@@ -123,8 +136,10 @@ const Topbar = ({ className }: { className: string }) => {
   useHotkeys("ctrl+v", pasteCopiedShape, [selectedNodes]);
 
   const onBgColorChange = (value: ColorResult) => {
-    setCanvasOption((prev) => ({ ...prev, bgColor: value.hex }));
-    // updateSelectedShapeAttributes({ bgColor: value.hex });
+    const newOption = { ...getCanvasOption(), bgColor: value.hex };
+    execute(
+      new UpdateCanvasOptionCommand(newOption, getCanvasOption, rawSetCanvasOption)
+    );
   };
 
   return (

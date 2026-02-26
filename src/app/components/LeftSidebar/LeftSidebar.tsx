@@ -3,12 +3,13 @@ import { useControlStore, useShapeStore } from "@/app/store/canvas";
 import { convertBarcodeFormat, ReaderFormatType } from "@/utils";
 import { ChangeEvent } from "react";
 import { generateShapeConfig } from "@/utils/canvas";
-import { useSyncControl, useSelect } from "@/app/hooks";
+import { useSyncControl, useSelect, useCommandManager } from "@/app/hooks";
 import NumberStepper from "../../../components/NumberStepper";
 import FrameSize from "./FrameSize";
 import ShapeMenuGroup from "./ShapeMenuGroup";
 import BarcodeMenuGroup from "./BarcodeMenuGroup";
 import { ToolAction, ActionType } from "./types";
+import { AddShapeCommand } from "@/app/lib/command";
 import {
   Eraser,
   ImagePlus,
@@ -58,11 +59,11 @@ const LeftSidebar = ({ className }: { className: string }) => {
   const setAction = useControlStore((state) => state.setAction);
   const setStageScale = useControlStore((state) => state.setStageScale);
 
-  const redo = useShapeStore((state) => state.redo);
-  const undo = useShapeStore((state) => state.undo);
-  const setShapes = useShapeStore((state) => state.setShapes);
-  const isFirstHistory = useShapeStore((state) => state.isFirstHistory);
-  const isLastHistory = useShapeStore((state) => state.isLastHistory);
+  const { execute, undo, redo, canUndo, canRedo } = useCommandManager();
+
+  const getShapes = () => useShapeStore.getState().shapes;
+  const rawSetShapes = (shapes: ReturnType<typeof getShapes>) =>
+    useShapeStore.getState().setShapes(shapes);
 
   const handleToolChange = (newAction: ActionType) => {
     setAction(newAction);
@@ -89,7 +90,7 @@ const LeftSidebar = ({ className }: { className: string }) => {
         dataURL: reader.result as string,
         isDrawing: false,
       });
-      setShapes((shapes) => [...shapes, newShape]);
+      execute(new AddShapeCommand(newShape, getShapes, rawSetShapes));
       setAction("select");
     };
   };
@@ -107,7 +108,7 @@ const LeftSidebar = ({ className }: { className: string }) => {
       fill: getAttributes.shape.fill,
       stroke: getAttributes.shape.stroke,
     });
-    setShapes((shapes) => [...shapes, newShape]);
+    execute(new AddShapeCommand(newShape, getShapes, rawSetShapes));
     setAction("select");
   };
 
@@ -146,10 +147,10 @@ const LeftSidebar = ({ className }: { className: string }) => {
           <Undo2
             width="18"
             height="18"
-            color={isFirstHistory ? "#a1a1a1" : "#000"}
+            color={!canUndo ? "#a1a1a1" : "#000"}
           />
         }
-        disabled={isFirstHistory}
+        disabled={!canUndo}
       />
       <Menubar.MenuItem
         onClick={redo}
@@ -159,10 +160,10 @@ const LeftSidebar = ({ className }: { className: string }) => {
             className="rotate-180"
             width="18"
             height="18"
-            color={isLastHistory ? "#a1a1a1" : "#000"}
+            color={!canRedo ? "#a1a1a1" : "#000"}
           />
         }
-        disabled={isLastHistory}
+        disabled={!canRedo}
         className="pb-3"
       />
 

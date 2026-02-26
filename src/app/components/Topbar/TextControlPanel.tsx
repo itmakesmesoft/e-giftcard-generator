@@ -4,10 +4,11 @@ import Toolbar from "@/components/Toolbar";
 import { ChangeEvent } from "react";
 import { ColorResult } from "react-color";
 import { ControlPanelProps } from "./types";
-import { useSyncControl, useFonts } from "@/app/hooks";
+import { useSyncControl, useFonts, useCommandManager } from "@/app/hooks";
 import { useCanvasContext } from "@/app/context/canvas";
 import { useControlStore, useShapeStore } from "@/app/store/canvas";
 import { TextAlign } from "@/app/store/types";
+import { ReorderShapeCommand } from "@/app/lib/command";
 import {
   AlignCenter,
   AlignLeft,
@@ -22,8 +23,11 @@ const TextControlPanel = (props: ControlPanelProps) => {
   const { getAttributes } = useSyncControl();
   const { fontList, loadFontFamily, fontDict } = useFonts();
   const { selectedNodes, selectNodesByIdList } = useCanvasContext();
+  const { execute } = useCommandManager();
 
-  const { moveToForward, moveToBackward } = useShapeStore();
+  const getShapes = () => useShapeStore.getState().shapes;
+  const rawSetShapes = (shapes: ReturnType<typeof getShapes>) =>
+    useShapeStore.getState().setShapes(shapes);
 
   const setFontStyle = useControlStore((state) => state.font.setFontStyle);
   const setFontWeight = useControlStore((state) => state.font.setFontWeight);
@@ -73,14 +77,26 @@ const TextControlPanel = (props: ControlPanelProps) => {
   const onMoveToForward = () => {
     if (selectedNodes.length === 0) return;
     const selectedIds = selectedNodes.map((node) => node.attrs.id);
-    for (const id of selectedIds) moveToForward(id);
+    let shapes = getShapes();
+    for (const id of selectedIds) {
+      const shape = shapes.find((s) => s.id === id);
+      if (!shape) continue;
+      shapes = [...shapes.filter((s) => s.id !== id), shape];
+    }
+    execute(new ReorderShapeCommand(shapes, getShapes, rawSetShapes));
     selectNodesByIdList(selectedIds);
   };
 
   const onMoveToBackward = () => {
     if (selectedNodes.length === 0) return;
     const selectedIds = selectedNodes.map((node) => node.attrs.id);
-    for (const id of selectedIds) moveToBackward(id);
+    let shapes = getShapes();
+    for (const id of selectedIds) {
+      const shape = shapes.find((s) => s.id === id);
+      if (!shape) continue;
+      shapes = [shape, ...shapes.filter((s) => s.id !== id)];
+    }
+    execute(new ReorderShapeCommand(shapes, getShapes, rawSetShapes));
     selectNodesByIdList(selectedIds);
   };
 
@@ -161,7 +177,7 @@ const TextControlPanel = (props: ControlPanelProps) => {
         className="w-[200px]"
         placeholder="폰트"
         options={
-          fontList.map((item) => ({
+          fontList?.map((item) => ({
             value: item.family,
             label: item.family,
           })) ?? []

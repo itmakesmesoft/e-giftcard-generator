@@ -1,15 +1,20 @@
 import Input from "@/components/Input";
-import { useSyncControl, useDebounce } from "@/app/hooks";
+import { useSyncControl, useDebounce, useCommandManager } from "@/app/hooks";
 import { useEffect, useState } from "react";
 import Menubar from "@/components/Menubar";
 import { useShapeStore } from "@/app/store/canvas";
 import { NodeSize } from "@/app/types/canvas";
 import { Frame, Link2, Unlink2 } from "lucide-react";
+import { UpdateCanvasOptionCommand } from "@/app/lib/command";
 
 const FrameSizeWrapper = () => {
   const { getAttributes } = useSyncControl();
   const canvasOption = getAttributes.canvasOption;
-  const setCanvasOption = useShapeStore((state) => state.setCanvasOption);
+  const { execute } = useCommandManager();
+
+  const getCanvasOption = () => useShapeStore.getState().canvasOption;
+  const rawSetCanvasOption = (option: ReturnType<typeof getCanvasOption>) =>
+    useShapeStore.getState().setCanvasOption(option);
 
   return (
     <Menubar.MenuGroup
@@ -22,9 +27,16 @@ const FrameSizeWrapper = () => {
       <p className="text-sm font-semibold">프레임 크기 조절</p>
       <FrameSize
         canvasSize={canvasOption.canvasSize}
-        onValueChange={(value) =>
-          setCanvasOption((prev) => ({ ...prev, canvasSize: value }))
-        }
+        onValueChange={(value) => {
+          const newOption = { ...getCanvasOption(), canvasSize: value };
+          execute(
+            new UpdateCanvasOptionCommand(
+              newOption,
+              getCanvasOption,
+              rawSetCanvasOption
+            )
+          );
+        }}
       />
     </Menubar.MenuGroup>
   );

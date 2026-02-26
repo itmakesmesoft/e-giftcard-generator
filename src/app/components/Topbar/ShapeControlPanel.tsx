@@ -1,5 +1,5 @@
 import { Slider } from "radix-ui";
-import { useSyncControl } from "@/app/hooks";
+import { useSyncControl, useCommandManager } from "@/app/hooks";
 import { ColorResult } from "react-color";
 import Toolbar from "@/components/Toolbar";
 import { ControlPanelProps } from "./types";
@@ -9,12 +9,17 @@ import MoveBackwardIcon from "@/components/assets/MoveBackwardIcon";
 import MoveForwardIcon from "@/components/assets/MoveForwardIcon";
 import StrokeWidthIcon from "@/components/assets/StrokeWidthIcon";
 import { Blend, Square, SquareDashed, SquareRoundCorner } from "lucide-react";
+import { ReorderShapeCommand } from "@/app/lib/command";
 
 const ShapeControlPanel = (props: ControlPanelProps) => {
   const { updateSelectedShapeAttributes, actionType } = props;
   const { getAttributes } = useSyncControl();
   const { selectedNodes, selectNodesByIdList } = useCanvasContext();
-  const { moveToForward, moveToBackward } = useShapeStore();
+  const { execute } = useCommandManager();
+
+  const getShapes = () => useShapeStore.getState().shapes;
+  const rawSetShapes = (shapes: ReturnType<typeof getShapes>) =>
+    useShapeStore.getState().setShapes(shapes);
 
   const setShapeFill = useControlStore((state) => state.shape.setFill);
   const hasStroke = useControlStore((state) => state.shape.hasStroke);
@@ -64,14 +69,26 @@ const ShapeControlPanel = (props: ControlPanelProps) => {
   const onMoveToForward = () => {
     if (selectedNodes.length === 0) return;
     const selectedIds = selectedNodes.map((node) => node.attrs.id);
-    for (const id of selectedIds) moveToForward(id);
+    let shapes = getShapes();
+    for (const id of selectedIds) {
+      const shape = shapes.find((s) => s.id === id);
+      if (!shape) continue;
+      shapes = [...shapes.filter((s) => s.id !== id), shape];
+    }
+    execute(new ReorderShapeCommand(shapes, getShapes, rawSetShapes));
     selectNodesByIdList(selectedIds);
   };
 
   const onMoveToBackward = () => {
     if (selectedNodes.length === 0) return;
     const selectedIds = selectedNodes.map((node) => node.attrs.id);
-    for (const id of selectedIds) moveToBackward(id);
+    let shapes = getShapes();
+    for (const id of selectedIds) {
+      const shape = shapes.find((s) => s.id === id);
+      if (!shape) continue;
+      shapes = [shape, ...shapes.filter((s) => s.id !== id)];
+    }
+    execute(new ReorderShapeCommand(shapes, getShapes, rawSetShapes));
     selectNodesByIdList(selectedIds);
   };
 
